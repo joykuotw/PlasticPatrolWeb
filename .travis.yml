@@ -24,7 +24,7 @@ jobs:
     - yes | sdkmanager tools > /dev/null
     - yes | sdkmanager --licenses > /dev/null
     - echo {} > cordova-app/build.json
-    - if [ "$TRAVIS_PULL_REQUEST" == false ]; then openssl aes-256-cbc -K $encrypted_24a643539195_key
+    - if [ "$TRAVIS_PULL_REQUEST" == false ]; then openssl enc -nosalt -aes-256-cbc -d -K $encrypted_24a643539195_key
       -iv $encrypted_24a643539195_iv -in cordova-app/secrets.tar.enc -out cordova-app/secrets.tar
       -d && cd cordova-app && tar xvf secrets.tar && cd ..; fi
     install:
@@ -131,7 +131,7 @@ jobs:
     before_install:
     - nvm install 13
     - echo {} > cordova-app/build.json
-    - if [ "$TRAVIS_PULL_REQUEST" == false ]; then openssl aes-256-cbc -K $encrypted_24a643539195_key
+    - if [ "$TRAVIS_PULL_REQUEST" == false ]; then openssl enc -nosalt -aes-256-cbc -d -K $encrypted_24a643539195_key
       -iv $encrypted_24a643539195_iv -in cordova-app/secrets.tar.enc -out cordova-app/secrets.tar
       -d && cd cordova-app && tar xvf secrets.tar && cd ..; fi
     - if [ "$TRAVIS_PULL_REQUEST" == false ]; then ./scripts/add-key.sh; fi
