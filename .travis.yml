@@ -117,7 +117,7 @@ jobs:
     # (we need to decrypt the required keys)
   - name: ios:prod
     os: osx
-    if: type != pull_request AND tag IS blank
+    if: tag IS blank
     branches:
       only:
       - master
