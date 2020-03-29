@@ -111,7 +111,7 @@ export default {
   // MAP_SOURCE: "https://s3-eu-west-1.amazonaws.com/tiles.os.uk/styles/open-zoomstack-outdoor/style.json",
   // MAP_ATTRIBUTION: "Contains OS data &copy; Crown copyright and database rights 2018",
   MAPBOX_TOKEN:
-    "pk.eyJ1IjoibmVpbGZ1bHdpbGVyIiwiYSI6ImNrOGN1dWV2bzBxaHIzZnRxaDhtOWJ0ODYifQ.D56TN1nXxU0vGfmYb21T2w",
+    "pk.eyJ1Ijoic2ViYXN0aWFub3ZpZGVnZW92YXRpb251ayIsImEiOiJjanBqZzRmNHgwNXljM2tydHlkM29id3FwIn0.-1V8Ue9P6eQr8FGghaTYiw",
   GA_TRACKING_ID: "UA-126516084-1",
   GA_PROPERTY_ID: "189010506",
   PHOTO_ZOOMED_FIELDS: {
