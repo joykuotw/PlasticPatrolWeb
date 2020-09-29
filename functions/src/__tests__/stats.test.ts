@@ -1,11 +1,12 @@
 import { it } from "mocha";
 import { strict as assert } from "assert";
-import { computeStats, updateStatsWithPieces } from "./stats";
 import { QuerySnapshot } from "@google-cloud/firestore";
 import { stubInterface } from "ts-sinon";
-import { User, Photo, Group, BaseStats } from "./types";
 import admin from "firebase-admin";
 import _ from "lodash";
+
+import { User, Photo, Group, BaseStats } from "../types";
+import { computeStats, updateStatsWithPieces } from "../stats";
 
 function makeQuerySnapshot<T>(id: string, data: T): QuerySnapshot {
   const snapshot = stubInterface<QuerySnapshot>();
