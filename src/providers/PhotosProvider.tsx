@@ -140,6 +140,7 @@ export const usePhotos = (): [PhotosContainer, () => void] => {
     // set up realtime subscription to our own photos
 
     // use the local one if we have them: faster boot.
+    /*
     try {
       const cached = await localforage.getItem("cachedGeoJson");
       if (cached) {
@@ -152,6 +153,15 @@ export const usePhotos = (): [PhotosContainer, () => void] => {
           merge(current, photosToPhotosContainer(photosList))
         );
       }
+    } catch (e) {
+      console.error(e);
+    }
+    */
+    try {
+      const photosList = await dbFirebase.fetchPhotos();
+      setPhotos((current) =>
+        merge(current, photosToPhotosContainer(photosList))
+      );
     } catch (e) {
       console.error(e);
     }
