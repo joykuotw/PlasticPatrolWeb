@@ -21,11 +21,10 @@ const LoginFirebase = (props) => {
   const uiConfig = {
     signInSuccessUrl: "/",
     credentialHelper: firebaseui.auth.CredentialHelper.NONE,
-    signInOptions:
-      [
-        firebase.auth.FacebookAuthProvider.PROVIDER_ID,
-        firebase.auth.EmailAuthProvider.PROVIDER_ID
-      ] + [devicePlatform === "Android" ? [] : "apple.com"],
+    signInOptions: [
+      firebase.auth.FacebookAuthProvider.PROVIDER_ID,
+      firebase.auth.EmailAuthProvider.PROVIDER_ID
+    ].concat(devicePlatform === "Android" ? [] : ["apple.com"]),
     callbacks: {
       // Avoid redirects after sign-in.
       signInSuccessWithAuthResult: (result) => {
