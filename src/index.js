@@ -42,13 +42,6 @@ if (isIphoneAndCordova) {
   window.StatusBar.styleDefault();
 }
 
-const isPendingRedirect = () => {
-  const app =
-    firebaseui.auth.AuthUI.getInstance() ||
-    new firebaseui.auth.AuthUI(firebase.auth());
-  return app.isPendingRedirect();
-};
-
 if (
   process.env.NODE_ENV !== "development" &&
   localStorage.getItem("debug") !== "true"

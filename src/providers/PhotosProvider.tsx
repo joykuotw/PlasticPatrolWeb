@@ -1,4 +1,4 @@
-import Geojson from "types/Geojson";
+import Geojson, { isCachedGeojson } from "types/Geojson";
 import * as localforage from "localforage";
 import * as Rx from "rxjs";
 import { bufferTime, filter } from "rxjs/operators";
@@ -14,6 +14,8 @@ import { RealtimeUpdate } from "features/firebase/dbFirebase";
 import _ from "lodash";
 import useAsyncEffect from "hooks/useAsyncEffect";
 import { useUser } from "./UserProvider";
+
+const CACHE_KEY = "cachedGeoJson";
 
 const photoToFeature = (photo: Photo): Feature => ({
   feature: "Feature",
@@ -135,33 +137,45 @@ const applyUpdates = (
 
 export const usePhotos = (): [PhotosContainer, () => void] => {
   const [photos, setPhotos] = useState<PhotosContainer>(EMPTY);
+
+  const setPhotosAndWriteToCache = (
+    updateHandler: (photos: PhotosContainer) => PhotosContainer
+  ) => {
+    setPhotos((current) => {
+      const updated = updateHandler(current);
+      localforage
+        .setItem(CACHE_KEY, {
+          timestamp: new Date().getTime(),
+          geojson: updated.geojson
+        })
+        .catch((e) => {
+          console.log("Failed to cache geojson");
+        });
+      return updated;
+    });
+  };
+
   const user = useUser();
   useAsyncEffect(async () => {
     // set up realtime subscription to our own photos
 
     // use the local one if we have them: faster boot.
-    /*
     try {
-      const cached = await localforage.getItem("cachedGeoJson");
-      if (cached) {
+      const cached = await localforage.getItem(CACHE_KEY);
+      if (
+        isCachedGeojson(cached) &&
+        // if the cache is from < 30 days ago, use it
+        new Date().getTime() - cached.timestamp < 30 * 86400 * 1000
+      ) {
         setPhotos((current) =>
-          merge(current, geojsonToPhotosContainer(cached as Geojson))
+          merge(current, geojsonToPhotosContainer(cached.geojson))
         );
       } else {
         const photosList = await dbFirebase.fetchPhotos();
-        setPhotos((current) =>
+        setPhotosAndWriteToCache((current) =>
           merge(current, photosToPhotosContainer(photosList))
         );
       }
-    } catch (e) {
-      console.error(e);
-    }
-    */
-    try {
-      const photosList = await dbFirebase.fetchPhotos();
-      setPhotos((current) =>
-        merge(current, photosToPhotosContainer(photosList))
-      );
     } catch (e) {
       console.error(e);
     }
@@ -177,25 +191,27 @@ export const usePhotos = (): [PhotosContainer, () => void] => {
       updates.next(update)
     );
 
-    // buffer updates to collapse 500ms of realtime updates so that we don't
+    // buffer updates to collapse 1000ms of realtime updates so that we don't
     // repeatedly refresh the photos list (its very large)
     updates
       .pipe(
-        bufferTime(500),
+        bufferTime(1000),
         filter((x) => x.length > 0)
       )
       .subscribe((updates) => {
-        setPhotos((current) => applyUpdates(current, updates));
+        setPhotosAndWriteToCache((current) => applyUpdates(current, updates));
       });
 
     return unsubscribe;
-  }, [user, setPhotos]);
+  }, [user]);
 
   const reload = useCallback(async () => {
     setPhotos(EMPTY);
     const photosList = await dbFirebase.fetchPhotos();
-    setPhotos((current) => merge(current, photosToPhotosContainer(photosList)));
-  }, [setPhotos]);
+    setPhotosAndWriteToCache((current) =>
+      merge(current, photosToPhotosContainer(photosList))
+    );
+  }, []);
 
   return [photos, reload];
 };
