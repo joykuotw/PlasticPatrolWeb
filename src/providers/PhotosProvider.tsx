@@ -1,3 +1,4 @@
+import firebase from "firebase/app";
 import Geojson, { isCachedGeojson } from "types/Geojson";
 import * as localforage from "localforage";
 import * as Rx from "rxjs";
@@ -30,9 +31,20 @@ const toFeaturesDict = (photos: Photo[]): Map<string, Feature> => {
   return Map(photos.map((photo) => [photo.id, photoToFeature(photo)]));
 };
 
-const geojsonToPhotosContainer = (geojson: Geojson): PhotosContainer => {
+const cachedGeojsonToPhotosContainer = (geojson: Geojson): PhotosContainer => {
   return {
-    featuresDict: toFeaturesDict(geojson.features.map((f) => f.properties)),
+    featuresDict: toFeaturesDict(
+      geojson.features.map((f) => {
+        const serializedProperties = f.properties;
+        return {
+          ...serializedProperties,
+          location: new firebase.firestore.GeoPoint(
+            f.geometry.coordinates[1],
+            f.geometry.coordinates[0]
+          )
+        };
+      })
+    ),
     geojson
   };
 };
@@ -168,7 +180,7 @@ export const usePhotos = (): [PhotosContainer, () => void] => {
         new Date().getTime() - cached.timestamp < 30 * 86400 * 1000
       ) {
         setPhotos((current) =>
-          merge(current, geojsonToPhotosContainer(cached.geojson))
+          merge(current, cachedGeojsonToPhotosContainer(cached.geojson))
         );
       } else {
         const photosList = await dbFirebase.fetchPhotos();
