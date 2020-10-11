@@ -42,7 +42,7 @@ interface Props {
 }
 
 export function isProductInfo(result: BarcodeResult): result is ProductInfo {
-  return (result as ProductInfo).brand !== undefined;
+  return result !== undefined && (result as ProductInfo).brand !== undefined;
 }
 
 function scan(): Promise<number> {

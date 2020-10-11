@@ -142,10 +142,14 @@ export interface ProductInfo {
   barcode: number;
 }
 
-async function getBarcodeInfo(id: number): Promise<ProductInfo> {
+async function getBarcodeInfo(id: number): Promise<ProductInfo | undefined> {
   const barcodeLookup = firebase.functions().httpsCallable("barcodeLookup");
   const { data } = await barcodeLookup({ id });
-  return { ...data, barcode: id };
+  if (data === null) {
+    return undefined;
+  } else {
+    return { ...data, barcode: id };
+  }
 }
 
 async function fetchPhotos(): Promise<Photo[]> {
