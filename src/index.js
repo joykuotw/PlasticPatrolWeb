@@ -26,7 +26,7 @@ import { useOnline } from "./providers/OnlineProvider";
 import UserProvider, { useUser } from "./providers/UserProvider";
 import StatsProvider from "./providers/StatsProvider";
 import { dbFirebase } from "features/firebase";
-import {useChallenges} from "./providers/ChallengesProvider";
+import { useChallenges } from "./providers/ChallengesProvider";
 
 serviceWorker.register();
 

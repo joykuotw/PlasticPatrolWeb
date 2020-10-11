@@ -1,20 +1,25 @@
-import {StatsUser} from "./Stats";
+import { ImageMetadata } from "./Photo";
 
-export type Challenge = {
-    id: number,
+export type ChallengeId = string;
+
+export type ChallengeConfigurableData = {
     name: string;
     description: string;
-    picture: string;
+    isPrivate: boolean;
+    coverPhoto: ImageMetadata | undefined;
     startTime: number;
     endTime: number;
-    currentPieces: number;
     targetPieces: number;
-    users: ChallengeUserData[];
 }
 
-type ChallengeUserData = {
-    uid: string;
-    displayName: string
-    pieces: number;
-    isModerator: boolean;
+export type Challenge = ChallengeConfigurableData & {
+    id: ChallengeId,
+    ownerUserId: string;
+    totalPieces: number;
+    totalUserPieces: {uid: string, pieces: number}[]
+    pendingUserIds: string[]
+}
+
+export const isChallengeFinished = (challenge: Challenge): boolean => {
+  return challenge.endTime > Date.now();
 }

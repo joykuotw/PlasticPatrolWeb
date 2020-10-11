@@ -38,7 +38,7 @@ export const gtagInit = () => {
   });
 };
 
-export const gtagPageView = pathname => {
+export const gtagPageView = (pathname) => {
   analytics.setCurrentScreen("/#" + pathname);
 };
 
@@ -55,6 +55,6 @@ export const gtagEvent = (
   });
 };
 
-export const gtagSetId = id => {
+export const gtagSetId = (id) => {
   analytics.setUserId(String(id));
 };

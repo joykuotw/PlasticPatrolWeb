@@ -3,6 +3,7 @@ import { Map } from "immutable";
 import Geojson from "./Geojson";
 import Feature from "./Feature";
 import { Category } from "./Category";
+import { ChallengeId } from "./Challenges";
 
 type Photo = {
   id: any;
@@ -15,6 +16,7 @@ type Photo = {
   location: firebase.firestore.GeoPoint;
   published: boolean;
   categories: Category[];
+  challenges: ChallengeId[];
 };
 
 export type PhotosContainer = {

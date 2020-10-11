@@ -41,7 +41,8 @@ const user: User = {
   photoURL: "",
   description: "some thing",
   location: undefined,
-  profileURL: ""
+  profileURL: "",
+  challenges: []
 };
 
 const makeFeature = (ownerId: string, pictureId: string): Feature => {
@@ -61,7 +62,8 @@ const makeFeature = (ownerId: string, pictureId: string): Feature => {
       pieces: 10,
       location: new firebase.firestore.GeoPoint(0, 0),
       published: true,
-      categories: []
+      categories: [],
+      challenges: []
     }
   };
   return feature;

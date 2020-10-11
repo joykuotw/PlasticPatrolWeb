@@ -1,5 +1,3 @@
-import {linkToPhotoPage} from "../photo/links";
-
 export function linkToChallengesPage() {
   return "/challenges";
 }
@@ -20,6 +18,6 @@ export function linkToChallenge(challengeId: string = ":challengeId") {
   return `${linkToChallengesPage()}/${challengeId}`;
 }
 
-export function linkToApproveChallengers(challengeId: string = ":challengeId") {
-  return `${linkToChallenge(challengeId)}/approve`;
+export function linkToApproveNewChallengerMembers(challengeId: string = ":challengeId") {
+  return `${linkToChallengesPage()}/approve/${challengeId}`;
 }

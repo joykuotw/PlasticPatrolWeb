@@ -21,6 +21,7 @@ import {
 } from "@material-ui/core";
 import IconButton from "@material-ui/core/IconButton";
 import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
+import { MoreHoriz } from "@material-ui/icons";
 
 declare global {
   interface Window {
@@ -82,14 +83,15 @@ const useStyles = makeStyles((theme) => ({
 
 type CloseNavigationHandler = { handleClose: () => void };
 type BackNavigationHandler = { handleBack: () => void; confirm?: boolean };
-
 type NavigationHandler = CloseNavigationHandler | BackNavigationHandler;
+
+type AddAction = () => void
 
 interface Props {
   label: string;
-  navigationHandler: NavigationHandler;
   className?: string;
-  addAction?: () => void;
+  navigationHandler: NavigationHandler;
+  addAction?: AddAction;
 }
 
 interface PhotoPageProps {
@@ -278,9 +280,9 @@ const PageWrapper: FunctionComponent<Props> = ({
           <Typography className={classes.grow} variant="h6" color="inherit">
             {label}
           </Typography>
-          {addAction !== undefined && (
-              <AddIcon onClick={addAction} />
-          )}
+          {(addAction !== undefined) &&
+            <AddIcon onClick={addAction} />
+          }
         </Toolbar>
       </AppBar>
       <div className={classnames(classes.main, className)}>{children}</div>

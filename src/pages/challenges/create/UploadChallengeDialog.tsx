@@ -1,20 +1,13 @@
 import React from "react";
 import {ImageMetadata} from "../../../types/Photo";
+import { ChallengeConfigurableData } from "../../../types/Challenges";
 
 interface Props {
-    name: string;
-    description: string;
-    picture: ImageMetadata | undefined;
-    startDate: Date | null;
-    endDate: Date | null;
-    targetPieces: number;
+    challengeCreateData: ChallengeConfigurableData;
     onCancelUpload: () => void;
 }
 
-export default function UploadChallengeDialog({
-                                                  name, description, picture, startDate, endDate,
-                                                  targetPieces, onCancelUpload
-                                              }: Props) {
+export default function UploadChallengeDialog({challengeCreateData, onCancelUpload }: Props) {
     // Upload challenge dialog
     // ...
 

@@ -28,7 +28,8 @@ const dataProps = {
         label: "Plastic Bottle",
         error: false
       }
-    ]
+    ],
+    challenges: []
   }
 };
 

@@ -1,10 +1,10 @@
 import { useEffect, useRef, useCallback } from "react";
 
-const useOnOutsideClick = onOutsideClick => {
+const useOnOutsideClick = (onOutsideClick) => {
   const componentRef = useRef(null);
 
   const handleClick = useCallback(
-    e => {
+    (e) => {
       if (componentRef.current && componentRef.current.contains(e.target)) {
         return;
       }
