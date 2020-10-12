@@ -50,6 +50,7 @@
         <icon src="res/icon/ios/icon_76pt@2x.png" width="152"/>
         <icon src="res/icon/ios/icon_83.5@2x.png" width="167"/>
         <icon src="res/icon/ios/Icon.png" width="1024"/>
+        <icon src="res/icon/ios/Icon.png"/>
         <splash src="res/screen/ios/Default@2x~universal~anyany.png"/>
         <resource-file src="GoogleService-Info.plist"/>
         <preference name="DisallowOverscroll" value="true"/>
