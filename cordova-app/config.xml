@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget android-versionCode="20200000" id="uk.co.plasticpatrol" ios-CFBundleIdentifier="com.lewismakesapps.Plastic-Patrol" ios-CFBundleVersion="2.20.0" version="2.20.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<widget android-versionCode="20210000" id="uk.co.plasticpatrol" ios-CFBundleIdentifier="com.lewismakesapps.Plastic-Patrol" ios-CFBundleVersion="2.21.0" version="2.21.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>Planet Patrol</name>
     <description>
         Fighting Pollution in the UK Waterways.
@@ -19,20 +19,24 @@
     <preference name="Orientation" value="portrait"/>
     <platform name="android">
         <allow-intent href="market:*"/>
-        <icon density="ldpi" src="res/icon/android/icon-36-ldpi.png"/>
+        <icon density="ldpi" src="res/icon/android/ldpi.png"/>
         <icon density="mdpi" src="res/icon/android/mdpi.png"/>
         <icon density="hdpi" src="res/icon/android/hdpi.png"/>
         <icon density="xhdpi" src="res/icon/android/xhdpi.png"/>
         <icon density="xxhdpi" src="res/icon/android/xxhdpi.png"/>
         <icon density="xxxhdpi" src="res/icon/android/xxxhdpi.png"/>
-        <splash density="land-hdpi" src="res/screen/android/landscape-hdpi.png"/>
-        <splash density="land-ldpi" src="res/screen/android/landscape-ldpi.png"/>
-        <splash density="land-mdpi" src="res/screen/android/landscape-mdpi.png"/>
-        <splash density="land-xhdpi" src="res/screen/android/landscape-xhdpi.png"/>
-        <splash density="port-hdpi" src="res/screen/android/portrait-hdpi.png"/>
-        <splash density="port-ldpi" src="res/screen/android/portrait-ldpi.png"/>
-        <splash density="port-mdpi" src="res/screen/android/portrait-mdpi.png"/>
-        <splash density="port-xhdpi" src="res/screen/android/portrait-xhdpi.png"/>
+        <splash density="land-hdpi" src="res/screen/android/Android-HDPI-landscape.png"/>
+        <splash density="land-ldpi" src="res/screen/android/Android-LDPI-landscape.png"/>
+        <splash density="land-mdpi" src="res/screen/android/Android-MDPI-landscape.png"/>
+        <splash density="land-xhdpi" src="res/screen/android/Android-XHDPi-landscape.png"/>
+        <splash density="land-xxhdpi" src="res/screen/android/Android-XXHDPi-landscape.png"/>
+        <splash density="land-xxxhdpi" src="res/screen/android/Android-XXXHDPi-landscape.png"/>
+        <splash density="port-hdpi" src="res/screen/android/Android-HDPI-landscape.png"/>
+        <splash density="port-ldpi" src="res/screen/android/Android-LDPI-landscape.png"/>
+        <splash density="port-mdpi" src="res/screen/android/Android-MDPI-landscape.png"/>
+        <splash density="port-xhdpi" src="res/screen/android/Android-XHDPi-landscape.png"/>
+        <splash density="port-xxhdpi" src="res/screen/android/Android-XXHDPi-landscape.png"/>
+        <splash density="port-xxxhdpi" src="res/screen/android/Android-XXXHDPi-landscape.png"/>
         <resource-file src="google-services.json" target="app/google-services.json"/>
         <preference name="android-minSdkVersion" value="19"/>
     </platform>
