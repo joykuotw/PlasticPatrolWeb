@@ -5,11 +5,10 @@ import PageWrapper from "components/PageWrapper";
 import "react-circular-progressbar/dist/styles.css";
 import { useHistory } from "react-router";
 import Button from "@material-ui/core/Button";
-import { Route } from "react-router-dom";
-import { linkToSubmitChallengeDialog } from "../../../routes/challenges/links";
-import UploadChallengeDialog from "./UploadChallengeDialog";
 import ChallengeForm from "../common/ChallengeForm";
-import { ChallengeConfigurableData } from "../../../types/Challenges";
+import { ChallengeConfigurableData, EmptyChallengeData, isChallengeReady } from "../../../types/Challenges";
+import { createChallenge } from "../../../providers/ChallengesProvider";
+import User from "../../../types/User";
 
 const useStyles = makeStyles((theme) => ({
   wrapper: {
@@ -20,40 +19,41 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-type Props = {};
+type Props = {
+  user: User;
+};
 
-export default function CreateChallenge({}: Props) {
-
+export default function CreateChallenge({user}: Props) {
   const styles = useStyles();
   const history = useHistory();
   const handleBack = { handleBack: () => history.goBack(), confirm: true };
 
-  const [challengeFormData, setChallengeFormData] = useState<ChallengeConfigurableData | undefined>(undefined);
-  const challengeReady = challengeFormData !== undefined;
+  const [challengeFormData, setChallengeFormData] = useState<ChallengeConfigurableData>(EmptyChallengeData);
+  const challengeReady = isChallengeReady(challengeFormData);
 
   return (
     <PageWrapper label={"Create a challenge"}
                  navigationHandler={handleBack}
                  className={styles.wrapper}>
       <ChallengeForm initialData={undefined}
-                     updateChallengeReady={setChallengeFormData}/>
-
+                     refreshCounter={0}
+                     onChallengeDataUpdated={setChallengeFormData}/>
       <Button className={styles.submitButton}
-              onClick={() => history.push(linkToSubmitChallengeDialog())}
+              // onClick={() => history.push(linkToSubmitChallengeDialog())}
+              onClick={() => createChallenge(user.id, challengeFormData)}
               color="primary"
               variant="contained"
               disabled={!challengeReady}>
         Create challenge
       </Button>
-
-      {challengeFormData && (
-        <Route path={linkToSubmitChallengeDialog()}>
-          <UploadChallengeDialog
-            challengeCreateData={challengeFormData}
-            onCancelUpload={() => {
-            }}/>
-        </Route>
-      )}
+      {/*{challengeFormData && (*/}
+      {/*  <Route path={linkToSubmitChallengeDialog()}>*/}
+      {/*    <UploadChallengeDialog*/}
+      {/*      challengeCreateData={challengeFormData}*/}
+      {/*      onCancelUpload={() => {*/}
+      {/*      }}/>*/}
+      {/*  </Route>*/}
+      {/*)}*/}
 
     </PageWrapper>
   );

@@ -98,7 +98,7 @@ interface MuiVirtualizedTableProps extends WithStyles<typeof styles> {
   userId?: string;
 }
 
-interface UserLeaderboardData {
+export interface UserLeaderboardData {
     displayName: string;
     pieces: number;
     largeCollectionPieces?: number;

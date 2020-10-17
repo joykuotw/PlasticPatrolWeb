@@ -1,12 +1,12 @@
 import Button from "@material-ui/core/Button";
-import { linkToAddChallengeCoverPhotoDialog, linkToSubmitChallengeDialog } from "../../../routes/challenges/links";
+import { linkToAddChallengeCoverPhotoDialog } from "../../../routes/challenges/links";
 import { DesktopPhotoFallback } from "../../../components/common/DesktopPhotoFallback";
 import { Route } from "react-router-dom";
 import AddPhotoDialog from "../../photo/components/AddPhotoDialog/AddPhotoDialog";
 import React, { createRef, useEffect, useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import styles from "../../../standard.scss";
-import { Challenge, ChallengeConfigurableData } from "../../../types/Challenges";
+import { Challenge, ChallengeConfigurableData, isSameDay } from "../../../types/Challenges";
 import { CordovaCameraImage, ImageMetadata, isCordovaCameraImage } from "../../../types/Photo";
 import { useGPSLocation } from "../../../providers/LocationProvider";
 import loadPhoto from "../../photo/pages/CategorisePhotoPage/utils";
@@ -102,6 +102,8 @@ const useStyles = makeStyles((theme) => ({
 
   endDate: {
     flex: 1,
+    marginLeft: 5,
+    marginRight: 5,
   },
 
   dateLabel: {
@@ -154,28 +156,13 @@ function validateNumberInput(input: string, limit: number, setter: (newValue: nu
   setter(parseInt(input));
 }
 
-export function isChallengeReady(name: string, description: string, targetPieces: number,
-                          coverPhoto: ImageMetadata | undefined, startDate: Date | null,
-                          endDate: Date | null) {
-  // Check challenge has a name and description
-  return name !== "" && description !== ""
-    // Has a valid number of pieces to collect
-    && targetPieces > 0
-    // Has selected a cover photo
-    && coverPhoto !== undefined
-    // Has a start date set from today onwards
-    && startDate !== null && startDate > new Date()
-    // Has an end date set after the start date
-    && endDate !== null && endDate > startDate;
-}
-
 type Props = {
   initialData?: ChallengeConfigurableData;
-  updateChallengeReady: (challenge?: ChallengeConfigurableData) => void;
+  refreshCounter: number;
+  onChallengeDataUpdated: (challenge: ChallengeConfigurableData) => void;
 }
 
-export default function ChallengeForm({initialData, updateChallengeReady}: Props) {
-
+export default function ChallengeForm({initialData, refreshCounter, onChallengeDataUpdated}: Props) {
   const classes = useStyles();
   const history = useHistory();
   const gpsLocation = useGPSLocation();
@@ -195,17 +182,18 @@ export default function ChallengeForm({initialData, updateChallengeReady}: Props
   };
 
   const today = new Date();
+  today.setHours(0,0,0,0);
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [targetPieces, setTargetPieces] = useState( 0);
   const [isPrivate, setIsPrivate] = useState(false);
-  const [startDate, setStartDate] = useState<Date | null>(null);
-  const [endDate, setEndDate] = useState<Date | null>(null);
+  const [startDate, setStartDate] = useState<Date>(new Date());
+  const [endDate, setEndDate] = useState<Date>(new Date());
   const [coverPhoto, setCoverPhoto] = useState<ImageMetadata | undefined>();
 
-  // If we're editing an existing challenge, the parent component passes in data.
-  // We should allow users to discard changes, easy way to do this is have this form
+  // If we're editing an existing challenge, the parent component passes an initialChallenge
+  // prop. We should allow users to discard changes, easy way to do this is have this form
   // component reset itself to this initial data just by us pushing a state change.
   useEffect(() => {
     if (initialData !== undefined) {
@@ -222,16 +210,11 @@ export default function ChallengeForm({initialData, updateChallengeReady}: Props
       setEndDate(initialEndDate);
       setCoverPhoto(initialData.coverPhoto);
     }
-  }, [initialData]);
+  }, [initialData, refreshCounter]);
 
   // Keep parent updated on whether the current data in form makes up a valid challenge.
   useEffect(() => {
-    const challengeReady = isChallengeReady(name, description, targetPieces, coverPhoto, startDate, endDate);
-    if (challengeReady && startDate && endDate) {
-      updateChallengeReady({ name, description, targetPieces, coverPhoto, startTime: startDate.getTime(), endTime: endDate.getTime(), isPrivate });
-    } else {
-      updateChallengeReady(undefined);
-    }
+    onChallengeDataUpdated({ name, description, targetPieces, coverPhoto, startTime: startDate.getTime(), endTime: endDate.getTime(), isPrivate });
   }, [name, description, targetPieces, coverPhoto, startDate, endDate, isPrivate])
 
   return (
@@ -288,31 +271,33 @@ export default function ChallengeForm({initialData, updateChallengeReady}: Props
           <div className={classes.dateLabel}>Start date</div>
           <input className={classes.dateInput}
                  type="date"
+                 value={startDate.toISOString().split('T')[0]}
                  onChange={(e) => setStartDate(new Date(e.currentTarget.value))}/>
         </div>
         <div className={classes.endDate}>
           <div className={classes.dateLabel}>End date</div>
           <input className={classes.dateInput}
                  type="date"
+                 value={endDate.toISOString().split('T')[0]}
                  onChange={(e) => setEndDate(new Date(e.currentTarget.value))}/>
         </div>
       </div>
 
-      {(startDate !== null && startDate < today) &&
+      {!isSameDay(startDate, today) && startDate < today &&
       <div className={classes.inputWarning}>
         Start date cannot be in the past
       </div>
       }
 
-      {(startDate !== null && endDate !== null && endDate < startDate) &&
+      {!isSameDay(startDate, today) && endDate < startDate &&
       <div className={classes.inputWarning}>
         End date cannot be before start date
       </div>
       }
 
-      {(startDate !== null && endDate !== null && today <= startDate && startDate < endDate) &&
+      {startDate <= endDate &&
       <div className={classes.dateSummary}>
-        Challenge will run for {(endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)} days
+        Challenge will run for {Math.floor((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1} days
       </div>
       }
 

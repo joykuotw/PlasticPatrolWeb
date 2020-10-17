@@ -1,6 +1,7 @@
-import { Challenge } from "../types/Challenges";
+import { Challenge, ChallengeConfigurableData, ChallengeId } from "../types/Challenges";
 import exampleImage from "assets/images/example.jpeg";
 import { ImageMetadata } from "../types/Photo";
+import User from "../types/User";
 
 export const FakeChallenge: Challenge = {
     id: "123",
@@ -12,21 +13,21 @@ export const FakeChallenge: Challenge = {
         imgLocation: "not online",
         imgIptc: undefined
     } as ImageMetadata,
-    startTime: 1,
-    endTime: 4,
+    startTime: 1602958418439,
+    endTime: 1607936359830,
     targetPieces: 10,
     isPrivate: false,
 
     ownerUserId: "123",
     totalPieces: 4,
     totalUserPieces: [
-        {uid: "123", pieces: 3},
-        {uid: "456", pieces: 45}
+        {displayName: "ally", uid: "123", pieces: 3},
+        {displayName: "liz", uid: "456", pieces: 45}
     ],
     pendingUserIds: [
-        "adsfasdf",
-        "awe",
-        "gr",
+        {displayName: "neil", uid: "789"},
+        {displayName: "tom", uid: "abc"},
+        {displayName: "joe", uid: "def"}
     ],
 };
 
@@ -37,3 +38,30 @@ export const useChallenges = (): Challenge[] => {
     // );
     return [FakeChallenge, FakeChallenge, FakeChallenge, FakeChallenge, FakeChallenge, FakeChallenge];
 };
+
+// Creates the challenge
+// Updates the user with challengeId
+export const createChallenge = (creatorUid: string, challenge: ChallengeConfigurableData) => {};
+
+// Edit challenge with pending user
+export const joinChallenge = (uid: string, challengeId: ChallengeId) => {};
+
+// Edit challenge configurable data
+export const editChallenge = (challengeId: ChallengeId, challenge: ChallengeConfigurableData) => {};
+
+// Edit user to remove challengeId
+export const leaveChallenge = (uid: string, challengeId: ChallengeId) => {};
+
+// Edit challenge to remove user from pending users and add user count (if not present).
+// Edit user to add challengeId.
+export const approveNewMember = (uid: string, challengeId: ChallengeId) => {};
+
+// Edit challenge to remove user from pending users.
+export const rejectNewMember = (uid: string, challengeId: ChallengeId) => {};
+
+// Delete challenge (maybe just mark as hidden to avoid accidents).
+export const deleteChallenge = (challengeId: ChallengeId) => {};
+
+// Upload photo as before, with additional challengeId.
+// Edit challenge to increase denormalized total count / per use count.
+export const addUploadToChallenge = () => {};

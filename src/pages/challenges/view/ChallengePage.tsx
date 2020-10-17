@@ -9,7 +9,10 @@ import { Route, Switch, useHistory, useParams } from "react-router-dom";
 import Button from "@material-ui/core/Button";
 import {UserPieceRankTable} from "../../../components/Leaderboard";
 import {Line} from 'rc-progress';
-import { linkToApproveNewChallengerMembers } from "../../../routes/challenges/links";
+import { likeToManagePendingMembers, linkToEditChallenge } from "../../../routes/challenges/links";
+import { UserLeaderboardData } from "../../../components/Leaderboard/UserPieceRankTable";
+import User from "../../../types/User";
+import { joinChallenge } from "../../../providers/ChallengesProvider";
 
 const useStyles = makeStyles((theme) => ({
     wrapper: {
@@ -52,7 +55,8 @@ const useStyles = makeStyles((theme) => ({
     },
 
     buttonsWrapper: {
-        width: "100%",
+        marginLeft: `${theme.spacing(1)}px`,
+        marginRight: `${theme.spacing(1)}px`,
         paddingBottom: `${theme.spacing(2)}px`,
         display: "flex",
         flexDirection: "row",
@@ -60,7 +64,8 @@ const useStyles = makeStyles((theme) => ({
     },
 
     challengeButton: {
-        margin: "0 10px",
+        margin: "0 3px",
+        flex: 0,
     },
 
     tableWrapper: {
@@ -69,7 +74,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 type Props = {
-    user: { id?: string };
+    user: User;
     challenges: Challenge[];
 };
 
@@ -88,12 +93,14 @@ export default function ChallengePage({user, challenges}: Props) {
 
     const challengeProgress = (challenge.totalPieces / challenge.targetPieces) * 100;
 
-    const userLoggedIn = user && user.id;
+    const userLoggedIn = user && user.id !== undefined;
     const userChallengeData = challenge.totalUserPieces.find(challengeUser => challengeUser.uid == user?.id);
-    //const userInChallenge: boolean = userChallengeData !== undefined;
-    const userInChallenge: boolean = true;
-    //const userIsModerator: boolean = userInChallenge && (userChallengeData?.isModerator || false);
-    const userIsModerator: boolean = true;
+    const userInChallenge: boolean = userLoggedIn && /* userLoggedIn && (userChallengeData !== undefined) */ true;
+    const userIsModerator: boolean = /* userLoggedIn && user.isModerator */ true;
+    const userIsChallengeOwner: boolean = userInChallenge && (user.id == challenge.ownerUserId);
+    const userCanManageChallenge: boolean = userIsChallengeOwner || userIsModerator;
+
+    const usersLeaderboard: UserLeaderboardData[] = challenge.totalUserPieces;
 
     return (
         <PageWrapper label={challenge.name}
@@ -116,8 +123,7 @@ export default function ChallengePage({user, challenges}: Props) {
                 <div className={classes.buttonsWrapper}>
                     {userLoggedIn && !userInChallenge && (
                       <div className={classes.challengeButton}>
-                          <Button onClick={() => {
-                          }}
+                          <Button onClick={() => joinChallenge(user.id, challenge.id)}
                                   color="primary"
                                   variant="contained">
                               Join challenge
@@ -134,28 +140,28 @@ export default function ChallengePage({user, challenges}: Props) {
                           </Button>
                       </div>
                     )}
-                    {userLoggedIn && userIsModerator && challenge.pendingUserIds.length > 0 && (
+                    {userLoggedIn && userCanManageChallenge && challenge.pendingUserIds.length > 0 && (
                       <div className={classes.challengeButton}>
-                          <Button onClick={() => {history.push(linkToApproveNewChallengerMembers(challenge.id.toString()))}}
+                          <Button onClick={() => {history.push(likeToManagePendingMembers(challengeId))}}
                                   color="primary"
                                   variant="contained">
-                              Approve new members
+                              Manage members
                           </Button>
                       </div>
                     )}
-                    {/*{userLoggedIn && userIsModerator && (*/}
-                    {/*  <div className={classes.challengeButton}>*/}
-                    {/*      <Button onClick={() => {}}*/}
-                    {/*              color="primary"*/}
-                    {/*              variant="contained">*/}
-                    {/*          Edit challenge*/}
-                    {/*      </Button>*/}
-                    {/*  </div>*/}
-                    {/*)}*/}
+                    {userCanManageChallenge && (
+                      <div className={classes.challengeButton}>
+                          <Button onClick={() => {history.push(linkToEditChallenge(challengeId))}}
+                                  color="primary"
+                                  variant="contained">
+                              Edit challenge
+                          </Button>
+                      </div>
+                    )}
                 </div>
             </div>
             <div className={classes.tableWrapper}>
-                <UserPieceRankTable usersLeaderboard={challenge.totalUserPieces.map(u => {displayName: u.uid, ...u})}
+                <UserPieceRankTable usersLeaderboard={usersLeaderboard}
                                     user={user}/>
             </div>
         </PageWrapper>
