@@ -20,6 +20,8 @@ import config from "./config.json";
 import { updateStats, computeStatsAdHoc } from "./stats";
 import { barcodeLookup } from "./barcodeLookup";
 
+import * as challenges from "./challenges";
+
 const cors = corsModule({ origin: true });
 const gm = gmModule.subClass({ imageMagick: true });
 
@@ -364,5 +366,6 @@ module.exports = {
   generateThumbnail,
   updateStats: functions.pubsub.topic(STATS_TOPIC).onPublish(updateStats),
   computeStats: functions.https.onRequest(wrap(computeStatsAdHoc)),
-  barcodeLookup: functions.https.onCall(barcodeLookup)
+  barcodeLookup: functions.https.onCall(barcodeLookup),
+  createChallenge: challenges.create
 };
