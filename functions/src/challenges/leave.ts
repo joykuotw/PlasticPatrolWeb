@@ -4,7 +4,7 @@ import admin from "firebase-admin";
 
 import { firestore } from "../firestore";
 import getChallengeIfExists from "./utils/getChallengeIfExists";
-import verifyChallengeIsOngoing from "./utils/verifyChallengeIsOnGoing";
+import verifyChallengeIsOngoing from "./utils/verifyChallengeIsOngoing";
 
 type RequestData = { challengeId: string };
 
@@ -50,6 +50,8 @@ export default functions.https.onCall(
       .update({
         totalUserPieces: admin.firestore.FieldValue.arrayRemove(user)
       });
+
+    // TODO: remove challengeId from user (Gravatar)
 
     return {};
   }

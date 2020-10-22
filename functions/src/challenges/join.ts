@@ -4,7 +4,7 @@ import admin from "firebase-admin";
 
 import { firestore } from "../firestore";
 import getChallengeIfExists from "./utils/getChallengeIfExists";
-import verifyChallengeIsOngoing from "./utils/verifyChallengeIsOnGoing";
+import verifyChallengeIsOngoing from "./utils/verifyChallengeIsOngoing";
 
 type RequestData = { challengeId: string };
 
@@ -34,13 +34,22 @@ export default functions.https.onCall(
       );
     }
 
-    await firestore
-      .collection("challenges")
-      .doc(challengeId)
-      .update({
-        pendingUsers: admin.firestore.FieldValue.arrayUnion(currentUserId)
-      });
+    const { isPrivate } = challenge;
 
+    const updates = isPrivate
+      ? {
+          pendingUsers: admin.firestore.FieldValue.arrayUnion(currentUserId)
+        }
+      : {
+          totalUserPieces: admin.firestore.FieldValue.arrayUnion({
+            uid: currentUserId,
+            pieces: 0
+          })
+        };
+
+    await firestore.collection("challenges").doc(challengeId).update(updates);
+
+    // not sure what to return here
     return {};
   }
 );

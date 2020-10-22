@@ -4,7 +4,7 @@ import admin from "firebase-admin";
 
 import { firestore } from "../firestore";
 import getChallengeIfExists from "./utils/getChallengeIfExists";
-import verifyChallengeIsOngoing from "./utils/verifyChallengeIsOnGoing";
+import verifyChallengeIsOngoing from "./utils/verifyChallengeIsOngoing";
 
 type RequestData = { challengeId: string; userIdBeingApproved: string };
 
@@ -66,6 +66,8 @@ export default functions.https.onCall(
           pieces: 0
         })
       });
+
+    // TODO: add challengeId to user (Gravatar)
 
     return {};
   }

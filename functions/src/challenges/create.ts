@@ -32,14 +32,13 @@ export default functions.https.onCall(
       .collection("challenges")
       .add(challengeToPersist);
 
-    console.log(rest);
-
-    firestore
-      .collection("users")
-      .doc(ownerUserId)
-      .update({
-        challengeIds: admin.firestore.FieldValue.arrayUnion(id)
-      });
+    // NOTE: this doesn't work - not all users have a record in Firebase, need to check why we have Gravatar
+    // firestore
+    //   .collection("users")
+    //   .doc(ownerUserId)
+    //   .update({
+    //     challengeIds: admin.firestore.FieldValue.arrayUnion(id)
+    //   });
 
     return { id, ...challengeToPersist };
   }

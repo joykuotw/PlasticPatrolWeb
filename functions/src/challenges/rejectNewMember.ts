@@ -4,7 +4,7 @@ import admin from "firebase-admin";
 
 import { firestore } from "../firestore";
 import getChallengeIfExists from "./utils/getChallengeIfExists";
-import verifyChallengeIsOngoing from "./utils/verifyChallengeIsOnGoing";
+import verifyChallengeIsOngoing from "./utils/verifyChallengeIsOngoing";
 
 type RequestData = { challengeId: string; userIdBeingRejected: string };
 
