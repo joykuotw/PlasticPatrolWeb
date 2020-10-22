@@ -367,5 +367,9 @@ module.exports = {
   updateStats: functions.pubsub.topic(STATS_TOPIC).onPublish(updateStats),
   computeStats: functions.https.onRequest(wrap(computeStatsAdHoc)),
   barcodeLookup: functions.https.onCall(barcodeLookup),
-  createChallenge: challenges.create
+  createChallenge: challenges.create,
+  joinChallenge: challenges.join,
+  leaveChallenge: challenges.leave,
+  rejectNewMemberChallenge: challenges.rejectNewMember,
+  approveNewMemberChallenge: challenges.approveNewMember
 };
