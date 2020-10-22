@@ -12,6 +12,8 @@ export type ChallengeFromServer = {
   pendingUsers: Array<string>;
 };
 
+export type Challenge = Omit<ChallengeFromServer, "id">;
+
 export type ConfigurableChallengeData = {
   name: string;
   description: string;
