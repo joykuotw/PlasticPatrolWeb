@@ -13,7 +13,7 @@ import Photo from "types/Photo";
 import Config from "types/Config";
 
 const firestore = firebase.firestore();
-const storageRef = firebase.storage().ref();
+export const storageRef = firebase.storage().ref();
 const MAX_NUMBER_OF_FEEDBACKS_TO_FETCH = 50;
 
 // TODO: add caching
