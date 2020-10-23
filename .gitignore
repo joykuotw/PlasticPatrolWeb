@@ -94,6 +94,7 @@ adminCreds.*.json
 #cypress
 cypress/videos
 cypress/screenshots
+cypress/integration/*.js
 
 .runtimeconfig.json
 .vscode
