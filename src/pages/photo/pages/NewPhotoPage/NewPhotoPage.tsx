@@ -5,6 +5,8 @@ import { Button, makeStyles } from "@material-ui/core";
 import AddAPhotoIcon from "@material-ui/icons/AddAPhoto";
 
 import styles from "standard.scss";
+import { usePhotoPageDispatch, resetState } from "pages/photo/state";
+import useEffectOnMount from "hooks/useEffectOnMount";
 
 const useStyles = makeStyles((theme) => ({
   wrapper: {
@@ -40,6 +42,10 @@ export default function NewPhotoPage({
   linkToTutorialPage
 }: Props) {
   const styles = useStyles();
+  const dispatch = usePhotoPageDispatch();
+  useEffectOnMount(() => {
+    dispatch(resetState());
+  });
 
   return (
     <>

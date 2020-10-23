@@ -5,8 +5,8 @@ import {
 } from "../types/Challenges";
 import exampleImage from "assets/images/example.jpeg";
 import { ImageMetadata } from "../types/Photo";
-
-export { createChallenge } from "features/firebase/challenges";
+import User from "../types/User";
+import { LatLong } from "../types/GPSLocation";
 
 export const FakeChallenge: Challenge = {
   id: "123",
@@ -15,7 +15,10 @@ export const FakeChallenge: Challenge = {
   coverPhoto: {
     imgSrc: exampleImage,
     imgExif: undefined,
-    imgLocation: "not online",
+    imgLocation: {
+      latitude: 51.504896,
+      longitude: -0.172558
+    },
     imgIptc: undefined
   } as ImageMetadata,
   startTime: 1602958418439,
@@ -50,6 +53,13 @@ export const useChallenges = (): Challenge[] => {
     FakeChallenge
   ];
 };
+
+// Creates the challenge
+// Updates the user with challengeId
+export const createChallenge = (
+  creatorUid: string,
+  challenge: ChallengeConfigurableData
+) => {};
 
 // Edit challenge with pending user
 export const joinChallenge = (uid: string, challengeId: ChallengeId) => {};

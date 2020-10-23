@@ -10,7 +10,7 @@ import Dialog from "@material-ui/core/Dialog";
 import CameraIcon from "@material-ui/icons/PhotoCamera";
 import PhotoLibraryIcon from "@material-ui/icons/PhotoLibrary";
 import CancelIcon from "@material-ui/icons/Close";
-import { CordovaCameraImage } from "types/Photo";
+import { CordovaCameraImage } from "../../state/types";
 
 type Props = {
   onClose: () => void;

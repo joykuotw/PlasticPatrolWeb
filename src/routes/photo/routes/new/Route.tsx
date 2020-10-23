@@ -1,14 +1,15 @@
-import React, {createRef, useState} from "react";
+import React, { createRef, useState } from "react";
 import { Route, useHistory } from "react-router-dom";
 
 import { linkToTutorialPage } from "routes/tutorial/links";
-import { CordovaCameraImage } from "types/Photo";
-import AddPhotoDialog from "pages/photo/components/AddPhotoDialog";
-import { NewPhotoPage } from "pages/photo";
 
-import { linkToCategoriseWithState } from "../categorise/links";
+import AddPhotoDialog from "pages/photo/components/AddPhotoDialog";
+import { usePhotoPageDispatch, setFile, FileType } from "pages/photo/state";
+import { NewPhotoPage } from "pages/photo";
+import { DesktopPhotoFallback } from "components/common/DesktopPhotoFallback";
+
+import { linkToCategorise } from "../categorise/links";
 import { linkToAddDialog, linkToNewPhoto } from "./links";
-import { DesktopPhotoFallback } from "../../../../components/common/DesktopPhotoFallback";
 
 const linkToTutorialWithRedirect = () => ({
   pathname: linkToTutorialPage(),
@@ -19,11 +20,12 @@ const linkToTutorialWithRedirect = () => ({
 
 export default function NewPhotoRoute() {
   const history = useHistory();
-  const handlePhotoSelect = (
-    file: File | CordovaCameraImage,
-    fromCamera: boolean
-  ) => history.push(linkToCategoriseWithState(file, fromCamera));
 
+  const dispatch = usePhotoPageDispatch();
+  const handlePhotoSelect = (file: FileType, fromCamera: boolean) => {
+    dispatch(setFile(file, fromCamera));
+    history.push(linkToCategorise());
+  };
   const desktopPhotoRef = createRef<HTMLInputElement>();
 
   // @ts-ignore
@@ -39,8 +41,10 @@ export default function NewPhotoRoute() {
         }}
         linkToTutorialPage={linkToTutorialWithRedirect}
       />
-      <DesktopPhotoFallback ref={desktopPhotoRef}
-                            handlePhotoSelect={handlePhotoSelect}/>
+      <DesktopPhotoFallback
+        ref={desktopPhotoRef}
+        handlePhotoSelect={handlePhotoSelect}
+      />
       <Route path={linkToAddDialog()} exact>
         <AddPhotoDialog
           onClose={() => history.goBack()}

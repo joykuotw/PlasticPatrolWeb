@@ -3,15 +3,47 @@ const yargs = require("yargs");
 admin.initializeApp();
 const auth = admin.auth();
 
-const argv = yargs
-  .option("id", {
-    description: "UID of the user to inspect",
-    type: "string"
-  })
+async function fetchUsers() {
+  // get all the users
+  let users = [];
+  let pageToken = undefined;
+  do {
+    /* eslint-disable no-await-in-loop */
+    const listUsersResult = await auth.listUsers(1000, pageToken);
+    pageToken = listUsersResult.pageToken;
+    if (listUsersResult.users) {
+      users = users.concat(listUsersResult.users);
+    }
+  } while (pageToken);
+  return users;
+}
+
+yargs
+  .command(
+    "user",
+    "get information about a user",
+    (yargs) => {
+      yargs
+        .option("id", {
+          description: "UID of the user to inspect",
+          type: "string"
+        })
+        .demandOption(["id"]);
+    },
+    async (argv) => {
+      const user = await auth.getUser(argv.id);
+      console.log(JSON.stringify(user));
+    }
+  )
+  .command(
+    "list",
+    "get all users",
+    (yargs) => {},
+    async (argv) => {
+      const users = await fetchUsers();
+      console.log(JSON.stringify(users));
+    }
+  )
+  .demandCommand()
   .help()
   .alias("help", "h").argv;
-
-(async function () {
-  const user = await auth.getUser(argv.id);
-  console.log(JSON.stringify(user));
-})();

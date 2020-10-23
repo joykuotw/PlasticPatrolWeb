@@ -187,7 +187,6 @@ app.get("/stats", async (req, res) => {
       data.serverTime = new Date();
       res.json(data);
       await pubIfNecessary(doc);
-      console.info(data);
       return true;
     } else {
       throw new Error("/sys/stats doesn't exist");

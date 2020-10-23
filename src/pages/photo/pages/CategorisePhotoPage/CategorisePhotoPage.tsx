@@ -1,28 +1,35 @@
-import React, { useState } from "react";
-import { Route, useHistory, useParams } from "react-router";
+import React, { useState, useEffect } from "react";
+import { Route, useHistory } from "react-router";
 
 import { makeStyles } from "@material-ui/core/styles";
 import { Button } from "@material-ui/core";
-import Dialog from "@material-ui/core/Dialog";
-import DialogActions from "@material-ui/core/DialogActions";
-import Link from "@material-ui/core/Link";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogContentText from "@material-ui/core/DialogContentText";
+
+import { linkToUploadPhotoDialog } from "routes/photo/routes/categorise/links";
+import { linkToNewPhoto } from "routes/photo/routes/new/links";
+import { linkToGeotag } from "routes/photo/routes/geotag/links";
+
+import { useGPSLocation } from "providers/LocationProvider";
+
+import UploadPhotoDialog from "pages/photo/components/UploadPhotoDialog";
+import {
+  usePhotoPageState,
+  usePhotoPageDispatch,
+  setMetaData
+} from "pages/photo/state";
+import {
+  isBrowserImageState,
+  isImageMetaState,
+  isCordovaImageState
+} from "pages/photo/state/types";
+
+import useEffectOnMount from "hooks/useEffectOnMount";
 
 import { Item } from "../../types";
 import AddNewItem from "../../components/AddNewItem/AddNewItem";
 import ItemOverviewList from "../../components/ItemOverviewList/ItemOverviewList";
-import { ImageMetadata, isCordovaFileState } from "types/Photo";
 
-import {
-  useGetLocationFileState,
-  linkToUploadPhotoDialog
-} from "routes/photo/routes/categorise/links";
 import loadPhoto from "./utils";
-import UploadPhotoDialog from "pages/photo/components/UploadPhotoDialog";
-import { linkToNewPhoto } from "routes/photo/routes/new/links";
-import { useGPSLocation } from "providers/LocationProvider";
-import useEffectOnMount from "hooks/useEffectOnMount";
+
 import BarcodeScanner, {
   isProductInfo
 } from "pages/photo/components/BarcodeScanner";
@@ -65,44 +72,49 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default function CategoriseLitterPage() {
-  const fileState = useGetLocationFileState();
-  const { fileName } = useParams();
+  const state = usePhotoPageState();
+  const dispatch = usePhotoPageDispatch();
+
   const history = useHistory();
   const gpsLocation = useGPSLocation();
 
-  const [photo, setPhoto] = useState<ImageMetadata | undefined>();
   useEffectOnMount(() => {
-    if (fileState === undefined) {
-      history.push(linkToNewPhoto());
-    } else {
+    if (isImageMetaState(state)) {
+      // do nothing - this should only be set when coming back from the geotag page
+    } else if (isCordovaImageState(state)) {
+      const { file, fromCamera } = state;
       loadPhoto({
-        fileState,
-        fromCamera: fileState.fromCamera,
+        fileOrFileName: file.filename,
+        fromCamera,
         gpsLocation,
-        callback: (metadata) => {
-          setPhoto(metadata);
-        }
+        cordovaMetadata: JSON.parse(file.json_metadata),
+        callback: (metadata) => dispatch(setMetaData(metadata))
       });
+    } else if (isBrowserImageState(state)) {
+      const { file, fromCamera } = state;
+      loadPhoto({
+        fileOrFileName: file,
+        fromCamera,
+        gpsLocation,
+        callback: (metadata) => dispatch(setMetaData(metadata))
+      });
+    } else {
+      history.push(linkToNewPhoto());
     }
   });
 
-  return (
-    <CategoriseLitterPageWithFileInfo
-      fileName={fileName as string}
-      photo={photo}
-    />
-  );
+  return <CategoriseLitterPageWithFileInfo />;
 }
 
-export function CategoriseLitterPageWithFileInfo({
-  fileName,
-  photo
-}: {
-  fileName: string;
-  photo?: ImageMetadata;
-}) {
-  const classes = useStyles();
+export function CategoriseLitterPageWithFileInfo() {
   const history = useHistory();
+  const state = usePhotoPageState();
+
+  useEffect(() => {
+    if (isImageMetaState(state) && !state.imgLocation) {
+      history.replace(linkToGeotag());
+    }
+  }, [state, history]);
 
   const styles = useStyles();
   const [addingNewItem, setAddingNewItem] = useState(false);
@@ -146,7 +158,7 @@ export function CategoriseLitterPageWithFileInfo({
     <>
       <div className={styles.wrapper}>
         <img
-          src={photo && photo.imgSrc}
+          src={isImageMetaState(state) ? state.imgSrc : ""}
           className={styles.img}
           onClick={() => setAddingNewItem(true)}
           alt=""
@@ -207,64 +219,13 @@ export function CategoriseLitterPageWithFileInfo({
           </Button>
         )}
       </div>
-      <Dialog
-        open={!!(photo && photo.imgLocation === "not online")}
-        onClose={() => history.push(linkToNewPhoto())}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-      >
-        <DialogContent>
-          <DialogContentText id="alert-dialog-description">
-            <span style={{ fontWeight: 500 }}>
-              We couldn't find your location so you won't be able to upload an
-              image right now. Enable GPS on your phone and retake the photo to
-              upload it.
-            </span>
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={() => history.push(linkToNewPhoto())}
-            color="primary"
-          >
-            Ok
-          </Button>
-        </DialogActions>
-      </Dialog>
-      <Dialog
-        open={!!(photo && photo.imgLocation === "unable to extract from file")}
-        onClose={() => history.push(linkToNewPhoto())}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-      >
-        <DialogContent>
-          <DialogContentText id="alert-dialog-description">
-            <span style={{ fontWeight: 500 }}>
-              Your photo isn't geo-tagged so it can't be uploaded. To fix this
-              manually, you can geo-tag it online with a tool like&nbsp;
-              <Link href={"https://tool.geoimgr.com/"} className={classes.link}>
-                Geoimgr
-              </Link>
-              . In the future, make sure GPS is enabled and your camera has
-              access to it.
-            </span>
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={() => history.push(linkToNewPhoto())}
-            color="primary"
-          >
-            Ok
-          </Button>
-        </DialogActions>
-      </Dialog>
+
       <Route path={linkToUploadPhotoDialog()}>
         <UploadPhotoDialog
-          imgSrc={photo && photo.imgSrc}
+          imgSrc={isImageMetaState(state) ? state.imgSrc : ""}
           online
           items={items}
-          imgLocation={photo && photo.imgLocation}
+          imgLocation={isImageMetaState(state) ? state.imgLocation : null}
           onCancelUpload={() =>
             history.push(history.location.pathname, history.location.state)
           }

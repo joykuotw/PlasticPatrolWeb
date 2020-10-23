@@ -1,9 +1,9 @@
 import React from "react";
-import { useHistory } from "react-router";
+import { useHistory, useLocation } from "react-router";
 
 import PageWrapper from "components/PageWrapper";
+import PhotoPageStateProvider from "pages/photo/state";
 import PhotoPageSubRouter from "./routes/SubRouter";
-import { useLocation } from "react-router-dom";
 import { linkToNewPhoto } from "./routes/new/links";
 
 export default function PhotoRoute() {
@@ -16,11 +16,13 @@ export default function PhotoRoute() {
       : { handleBack: () => history.goBack(), confirm: true };
 
   return (
-    <PageWrapper
-      label={"Record your litter"}
-      navigationHandler={navigationHandler}
-    >
-      <PhotoPageSubRouter />
-    </PageWrapper>
+    <PhotoPageStateProvider>
+      <PageWrapper
+        label={"Record your litter"}
+        navigationHandler={navigationHandler}
+      >
+        <PhotoPageSubRouter />
+      </PageWrapper>
+    </PhotoPageStateProvider>
   );
 }
