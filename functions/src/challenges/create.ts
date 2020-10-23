@@ -4,6 +4,7 @@ import admin from "firebase-admin";
 
 import { firestore } from "../firestore";
 import { ChallengeFromServer, ConfigurableChallengeData } from "./models";
+import { getDisplayName } from "stats";
 
 type ChallengeToPersist = Omit<ChallengeFromServer, "id">;
 
@@ -19,12 +20,14 @@ export default functions.https.onCall(
         "User must be authenticated"
       );
     }
+    const user = await admin.auth().getUser(ownerUserId);
+    const displayName = getDisplayName(user);
 
     const challengeToPersist: ChallengeToPersist = {
       ...restOfChallenge,
       ownerUserId,
       totalPieces: 0,
-      totalUserPieces: [{ uid: ownerUserId, pieces: 0 }],
+      totalUserPieces: [{ uid: ownerUserId, pieces: 0, displayName }],
       pendingUsers: []
     };
 

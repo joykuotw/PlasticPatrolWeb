@@ -53,6 +53,6 @@ export default functions.https.onCall(
 
     // TODO: remove challengeId from user (Gravatar)
 
-    return {};
+    return;
   }
 );

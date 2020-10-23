@@ -25,7 +25,7 @@ export const updateStatsWithPieces = (
  * Use the display name on the user record itself if present,
  * otherwise just use the UID
  */
-const getDisplayName = (user: admin.auth.UserRecord): string => {
+export const getDisplayName = (user: admin.auth.UserRecord): string => {
   if (user.displayName) {
     return user.displayName;
   } else {

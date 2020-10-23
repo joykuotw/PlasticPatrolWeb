@@ -8,8 +8,8 @@ export type ChallengeFromServer = {
   endTime: number;
   targetPieces: number;
   totalPieces: number;
-  totalUserPieces: Array<{ uid: string; pieces: number }>;
-  pendingUsers: Array<string>;
+  totalUserPieces: Array<{ uid: string; pieces: number; displayName: string }>;
+  pendingUsers: Array<{ uid: string; displayName: string }>;
 };
 
 export type Challenge = Omit<ChallengeFromServer, "id">;

@@ -6,11 +6,11 @@ import { firestore } from "../firestore";
 import getChallengeIfExists from "./utils/getChallengeIfExists";
 import verifyChallengeIsOngoing from "./utils/verifyChallengeIsOngoing";
 
-type RequestData = { challengeId: string; userIdBeingRejected: string };
+type RequestData = { challengeId: string; userId: string };
 
 export default functions.https.onCall(
   async (
-    { challengeId, userIdBeingRejected }: RequestData,
+    { challengeId, userId: userIdBeingRejected }: RequestData,
     callableContext
   ) => {
     if (!challengeId) {
@@ -29,7 +29,18 @@ export default functions.https.onCall(
 
     const challenge = await getChallengeIfExists(challengeId);
 
-    const { ownerUserId } = challenge;
+    const { ownerUserId, pendingUsers } = challenge;
+
+    const pendingUser = pendingUsers.find(
+      ({ uid }) => uid === userIdBeingRejected
+    );
+
+    if (!pendingUser) {
+      throw new functions.https.HttpsError(
+        "not-found",
+        "pending user not found"
+      );
+    }
 
     if (ownerUserId !== currentUserId) {
       const userDoc = await firestore
@@ -58,11 +69,9 @@ export default functions.https.onCall(
       .collection("challenges")
       .doc(challengeId)
       .update({
-        pendingUsers: admin.firestore.FieldValue.arrayRemove(
-          userIdBeingRejected
-        )
+        pendingUsers: admin.firestore.FieldValue.arrayRemove(pendingUser)
       });
 
-    return {};
+    return;
   }
 );

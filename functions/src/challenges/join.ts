@@ -3,6 +3,9 @@ import * as functions from "firebase-functions";
 import admin from "firebase-admin";
 
 import { firestore } from "../firestore";
+
+import { getDisplayName } from "../stats";
+
 import getChallengeIfExists from "./utils/getChallengeIfExists";
 import verifyChallengeIsOngoing from "./utils/verifyChallengeIsOngoing";
 
@@ -35,14 +38,20 @@ export default functions.https.onCall(
     }
 
     const { isPrivate } = challenge;
+    const user = await admin.auth().getUser(currentUserId);
+    const displayName = getDisplayName(user);
 
     const updates = isPrivate
       ? {
-          pendingUsers: admin.firestore.FieldValue.arrayUnion(currentUserId)
+          pendingUsers: admin.firestore.FieldValue.arrayUnion({
+            uid: currentUserId,
+            displayName
+          })
         }
       : {
           totalUserPieces: admin.firestore.FieldValue.arrayUnion({
             uid: currentUserId,
+            displayName,
             pieces: 0
           })
         };
@@ -50,6 +59,6 @@ export default functions.https.onCall(
     await firestore.collection("challenges").doc(challengeId).update(updates);
 
     // not sure what to return here
-    return {};
+    return;
   }
 );
