@@ -3,8 +3,8 @@ import * as functions from "firebase-functions";
 import admin from "firebase-admin";
 
 import { firestore } from "../firestore";
+import { getDisplayName } from "../stats";
 import { ChallengeFromServer, ConfigurableChallengeData } from "./models";
-import { getDisplayName } from "stats";
 
 type ChallengeToPersist = Omit<ChallengeFromServer, "id">;
 

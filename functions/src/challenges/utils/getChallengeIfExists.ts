@@ -1,7 +1,7 @@
 import * as functions from "firebase-functions";
 
 import { Challenge } from "challenges/models";
-import { firestore } from "firestore";
+import { firestore } from "../../firestore";
 
 export default async function getChallengeIfExists(
   challengeId: string
