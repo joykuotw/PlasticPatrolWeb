@@ -371,5 +371,6 @@ module.exports = {
   joinChallenge: challenges.join,
   leaveChallenge: challenges.leave,
   rejectNewMemberChallenge: challenges.rejectNewMember,
-  approveNewMemberChallenge: challenges.approveNewMember
+  approveNewMemberChallenge: challenges.approveNewMember,
+  fetchChallenge: challenges.fetch
 };

@@ -3,19 +3,21 @@ import * as functions from "firebase-functions";
 import { Challenge } from "challenges/models";
 import { firestore } from "firestore";
 
-export default async function getChallengeIfExists(challengeId: string) {
-  const challengeDoc = await firestore
+export default async function getChallengeIfExists(
+  challengeId: string
+): Promise<Challenge> {
+  const snapshot = await firestore
     .collection("challenges")
     .doc(challengeId)
     .get();
 
-  const challenge = challengeDoc.data();
-  if (!challenge) {
+  const { exists, data } = snapshot;
+  if (!exists) {
     throw new functions.https.HttpsError(
       "not-found",
       "No challenge exists for id"
     );
   }
 
-  return (challenge as unknown) as Challenge;
+  return data() as Challenge;
 }

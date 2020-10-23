@@ -1,4 +1,5 @@
 import firebase from "firebase/app";
+import { Challenge } from "types/Challenges";
 import { storageRef } from "./dbFirebase";
 
 const createChallengeFb = firebase.functions().httpsCallable("createChallenge");
@@ -20,3 +21,22 @@ export const createChallenge = async ({ photo, ...args }: any) => {
 
   return data;
 };
+
+export async function fetchAllChallenges() {
+  const snapshot = await firebase
+    .firestore()
+    .collection("challenges")
+    .where("isPrivate", "==", false)
+    .get();
+
+  if (snapshot.empty) {
+    return [];
+  }
+
+  const challenges = snapshot.docs.map(({ id, data }) => ({
+    id,
+    ...data()
+  })) as Challenge[];
+
+  return challenges;
+}
