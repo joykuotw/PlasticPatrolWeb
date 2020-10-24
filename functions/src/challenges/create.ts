@@ -27,7 +27,10 @@ export default functions.https.onCall(
       ...restOfChallenge,
       ownerUserId,
       totalPieces: 0,
-      totalUserPieces: [{ uid: ownerUserId, pieces: 0, displayName }],
+      totalUserPieces: {
+        [ownerUserId]: { uid: ownerUserId, pieces: 0, displayName }
+      },
+      pendingPieces: 0,
       pendingUsers: []
     };
 

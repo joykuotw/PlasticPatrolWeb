@@ -41,22 +41,28 @@ export default functions.https.onCall(
     const user = await admin.auth().getUser(currentUserId);
     const displayName = getDisplayName(user);
 
-    const updates = isPrivate
-      ? {
-          pendingUsers: admin.firestore.FieldValue.arrayUnion({
-            uid: currentUserId,
-            displayName
-          })
-        }
-      : {
-          totalUserPieces: admin.firestore.FieldValue.arrayUnion({
-            uid: currentUserId,
-            displayName,
-            pieces: 0
-          })
-        };
-
-    await firestore.collection("challenges").doc(challengeId).update(updates);
+    const challengeRef = firestore.collection("challenges").doc(challengeId);
+    if (isPrivate) {
+      await challengeRef.update({
+        pendingUsers: admin.firestore.FieldValue.arrayUnion({
+          uid: currentUserId,
+          displayName
+        })
+      });
+    } else {
+      await challengeRef.set(
+        {
+          totalUserPieces: {
+            [currentUserId]: {
+              uid: currentUserId,
+              displayName,
+              pieces: 0
+            }
+          }
+        },
+        { merge: true }
+      );
+    }
 
     // not sure what to return here
     return;

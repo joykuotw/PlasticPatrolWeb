@@ -371,5 +371,7 @@ module.exports = {
   leaveChallenge: challenges.leave,
   rejectNewMemberChallenge: challenges.rejectNewMember,
   approveNewMemberChallenge: challenges.approveNewMember,
-  fetchChallenge: challenges.fetch
+  fetchChallenge: challenges.fetch,
+  updateChallengeOnPhotoEdit: challenges.updateChallengeOnPhotoEdit,
+  updateChallengeOnPhotoUpload: challenges.updateChallengeOnPhotoUpload
 };

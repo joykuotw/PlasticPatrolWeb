@@ -35,20 +35,20 @@ export default functions.https.onCall(
     }
 
     const { totalUserPieces } = challenge;
-    const user = totalUserPieces.find(({ uid }) => uid === currentUserId);
+    const user = totalUserPieces[currentUserId];
 
     if (!user) {
-      throw new functions.https.HttpsError(
-        "unavailable",
-        "User is not part of challenge"
-      );
+      // don't see any point in throwing an error here
+      // if they want to leave + aren't a member may as well return
+      return;
     }
 
     await firestore
       .collection("challenges")
       .doc(challengeId)
       .update({
-        totalUserPieces: admin.firestore.FieldValue.arrayRemove(user)
+        [`totalUserPieces.${currentUserId}`]: admin.firestore.FieldValue.delete(),
+        totalPieces: admin.firestore.FieldValue.increment(-user.pieces)
       });
 
     // TODO: remove challengeId from user (Gravatar)

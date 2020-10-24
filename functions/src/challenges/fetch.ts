@@ -24,9 +24,7 @@ export default functions.https.onCall(
 
     const { isPrivate, totalUserPieces } = challenge;
 
-    const isInChallenge = !!totalUserPieces.find(
-      ({ uid }) => uid === currentUserId
-    );
+    const isInChallenge = !!totalUserPieces[currentUserId];
 
     if (isPrivate && !isInChallenge) {
       const { totalUserPieces, ...safeChallenge } = challenge;

@@ -1,3 +1,5 @@
+type User = { uid: string; pieces: number; displayName: string };
+
 export type ChallengeFromServer = {
   id: string;
   name: string;
@@ -8,7 +10,8 @@ export type ChallengeFromServer = {
   endTime: number;
   targetPieces: number;
   totalPieces: number;
-  totalUserPieces: Array<{ uid: string; pieces: number; displayName: string }>;
+  totalUserPieces: { [uid: string]: User };
+  pendingPieces: number;
   pendingUsers: Array<{ uid: string; displayName: string }>;
 };
 

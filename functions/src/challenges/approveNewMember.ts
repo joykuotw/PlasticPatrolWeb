@@ -65,16 +65,20 @@ export default functions.https.onCall(
       );
     }
 
-    await firestore
-      .collection("challenges")
-      .doc(challengeId)
-      .update({
-        pendingUsers: admin.firestore.FieldValue.arrayRemove(pendingUser),
-        totalUserPieces: admin.firestore.FieldValue.arrayUnion({
+    const updates = {
+      totalUserPieces: {
+        ...challenge.totalUserPieces,
+        [userIdBeingApproved]: {
           ...pendingUser,
           pieces: 0
-        })
-      });
+        }
+      },
+      pendingUsers: pendingUsers.filter(
+        ({ uid }) => uid !== userIdBeingApproved
+      )
+    };
+
+    await firestore.collection("challenges").doc(challengeId).update(updates);
 
     // TODO: add challengeId to user (Gravatar)
 
