@@ -1,13 +1,13 @@
 import * as functions from "firebase-functions";
 import admin from "firebase-admin";
 
-import getChallengeIfExists from "challenges/utils/getChallengeIfExists";
-import verifyChallengeIsOngoing from "challenges/utils/verifyChallengeIsOngoing";
+import getChallengeIfExists from "../../challenges/utils/getChallengeIfExists";
+import verifyChallengeIsOngoing from "../../challenges/utils/verifyChallengeIsOngoing";
 import { firestore } from "../../firestore";
 
 export default functions.firestore
   .document("photos/{photoId}")
-  .onCreate(async (snapshot, context) => {
+  .onCreate(async (snapshot) => {
     const photo = snapshot.data();
 
     if (!photo) {

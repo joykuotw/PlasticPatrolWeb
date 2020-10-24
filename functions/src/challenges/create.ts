@@ -34,7 +34,7 @@ export default functions.https.onCall(
       pendingUsers: []
     };
 
-    const { id, ...rest } = await firestore
+    const { id } = await firestore
       .collection("challenges")
       .add(challengeToPersist);
 

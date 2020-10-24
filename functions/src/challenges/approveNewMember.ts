@@ -1,7 +1,5 @@
 import * as functions from "firebase-functions";
 
-import admin from "firebase-admin";
-
 import { firestore } from "../firestore";
 import getChallengeIfExists from "./utils/getChallengeIfExists";
 import verifyChallengeIsOngoing from "./utils/verifyChallengeIsOngoing";

@@ -1,9 +1,20 @@
 import * as functions from "firebase-functions";
 import admin from "firebase-admin";
 
-import getChallengeIfExists from "challenges/utils/getChallengeIfExists";
-import verifyChallengeIsOngoing from "challenges/utils/verifyChallengeIsOngoing";
+import getChallengeIfExists from "../../challenges/utils/getChallengeIfExists";
 import { firestore } from "../../firestore";
+
+async function decrementPendingPieces(
+  challengeId: string,
+  numberToDecrement: number
+) {
+  return await firestore
+    .collection("challenges")
+    .doc(challengeId)
+    .update({
+      pendingPieces: admin.firestore.FieldValue.increment(-numberToDecrement)
+    });
+}
 
 export default functions.firestore
   .document("photos/{photoId}")
@@ -20,7 +31,7 @@ export default functions.firestore
       challenges,
       pieces,
       moderated: newModerated,
-      owner_id,
+      owner_id: ownerId,
       published
     } = newValue;
     const { moderated: prevModerated } = previousValue;
@@ -43,7 +54,7 @@ export default functions.firestore
 
           if (published) {
             //check user is still part of challenge
-            if (!challenge.totalUserPieces[owner_id]) {
+            if (!challenge.totalUserPieces[ownerId]) {
               await decrementPendingPieces(challengeId, pieces);
               return;
             }
@@ -53,7 +64,7 @@ export default functions.firestore
               .doc(challengeId)
               .update({
                 totalPieces: admin.firestore.FieldValue.increment(pieces),
-                [`totalUserPieces.${owner_id}.pieces`]: admin.firestore.FieldValue.increment(
+                [`totalUserPieces.${ownerId}.pieces`]: admin.firestore.FieldValue.increment(
                   pieces
                 )
               });
@@ -66,15 +77,3 @@ export default functions.firestore
       })
     );
   });
-
-async function decrementPendingPieces(
-  challengeId: string,
-  numberToDecrement: number
-) {
-  return await firestore
-    .collection("challenges")
-    .doc(challengeId)
-    .update({
-      pendingPieces: admin.firestore.FieldValue.increment(-numberToDecrement)
-    });
-}
