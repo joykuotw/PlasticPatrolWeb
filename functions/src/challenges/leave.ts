@@ -40,6 +40,8 @@ export default functions.https.onCall(
     if (!user) {
       // don't see any point in throwing an error here
       // if they want to leave + aren't a member may as well return
+      // TODO: try to remove challengeId from user (Gravatar)
+
       return;
     }
 
@@ -47,8 +49,7 @@ export default functions.https.onCall(
       .collection("challenges")
       .doc(challengeId)
       .update({
-        [`totalUserPieces.${currentUserId}`]: admin.firestore.FieldValue.delete(),
-        totalPieces: admin.firestore.FieldValue.increment(-user.pieces)
+        [`totalUserPieces.${currentUserId}`]: admin.firestore.FieldValue.delete()
       });
 
     // TODO: remove challengeId from user (Gravatar)

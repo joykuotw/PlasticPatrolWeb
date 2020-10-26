@@ -207,7 +207,7 @@ const config: Config = {
   PAGES,
   ENABLE_GRAVATAR_PROFILES: true, //To update user-profile from Gravatar, value: true or false.
   ENABLE_GROUPS: false,
-  ENABLE_CHALLENGES: true,
+  ENABLE_CHALLENGES: false,
   SECURITY: {
     UPLOAD_REQUIRES_LOGIN: true
   },

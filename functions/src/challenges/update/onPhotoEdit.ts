@@ -31,7 +31,7 @@ export default functions.firestore
       challenges,
       pieces,
       moderated: newModerated,
-      owner_id: ownerId,
+      owner_id: photoUploaderId,
       published
     } = newValue;
     const { moderated: prevModerated } = previousValue;
@@ -53,8 +53,9 @@ export default functions.firestore
           const challenge = await getChallengeIfExists(challengeId);
 
           if (published) {
-            //check user is still part of challenge
-            if (!challenge.totalUserPieces[ownerId]) {
+            //check user is still part of challenge, if they aren't we won't add to the challenge total
+            //but still need to decrement the pending pieces as we will have incremented it in `onPhotoUpload`
+            if (!challenge.totalUserPieces[photoUploaderId]) {
               await decrementPendingPieces(challengeId, pieces);
               return;
             }
@@ -64,7 +65,8 @@ export default functions.firestore
               .doc(challengeId)
               .update({
                 totalPieces: admin.firestore.FieldValue.increment(pieces),
-                [`totalUserPieces.${ownerId}.pieces`]: admin.firestore.FieldValue.increment(
+                pendingPieces: admin.firestore.FieldValue.increment(-pieces),
+                [`totalUserPieces.${photoUploaderId}.pieces`]: admin.firestore.FieldValue.increment(
                   pieces
                 )
               });
@@ -72,7 +74,7 @@ export default functions.firestore
             await decrementPendingPieces(challengeId, pieces);
           }
         } catch (err) {
-          console.info("Error updating challenge with pieces");
+          console.error(err);
         }
       })
     );

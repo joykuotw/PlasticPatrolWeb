@@ -11,7 +11,7 @@ export default functions.firestore
     const photo = snapshot.data();
 
     if (!photo) {
-      return;
+      throw new Error("No photo data available from snapshot");
     }
 
     const { challenges, pieces } = photo;
