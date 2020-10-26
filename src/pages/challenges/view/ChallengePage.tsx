@@ -67,9 +67,13 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: "center"
   },
 
+  notLoggedInMessage: {
+    color: `${theme.palette.primary.main}`,
+    padding: `0 ${theme.spacing(0.5)}px`
+  },
+
   challengeButton: {
-    margin: "0 3px",
-    flex: 0
+    margin: `${theme.spacing(1)}px ${theme.spacing(0.5)}px`
   },
 
   tableWrapper: {
@@ -98,16 +102,16 @@ export default function ChallengePage({ user, challenges }: Props) {
   const challengeProgress =
     (challenge.totalPieces / challenge.targetPieces) * 100;
 
-  const userLoggedIn = user && user.id !== undefined;
+  const userLoggedIn = true; //user && user.id !== undefined;
   const userChallengeData = challenge.totalUserPieces.find(
     (challengeUser) => challengeUser.uid == user?.id
   );
-  const userInChallenge: boolean =
-    userLoggedIn &&
-    /* userLoggedIn && (userChallengeData !== undefined) */ true;
-  const userIsModerator: boolean = /* userLoggedIn && user.isModerator */ true;
-  const userIsChallengeOwner: boolean =
-    userInChallenge && user.id == challenge.ownerUserId;
+  const userInChallenge: boolean = true;
+  //userLoggedIn && userChallengeData !== undefined;
+  const userIsModerator: boolean = true;
+  //userLoggedIn && user.isModerator;
+  const userIsChallengeOwner: boolean = true;
+  // userInChallenge && user.id == challenge.ownerUserId;
   const userCanManageChallenge: boolean =
     userIsChallengeOwner || userIsModerator;
 
@@ -139,6 +143,12 @@ export default function ChallengePage({ user, challenges }: Props) {
           />
         </div>
         <div className={classes.buttonsWrapper}>
+          {!userLoggedIn && (
+            <div className={classes.notLoggedInMessage}>
+              Before you can join a challenge, you’ll have to create a Planet
+              Patrol account, or login to an existing account.
+            </div>
+          )}
           {userLoggedIn && !userInChallenge && (
             <div className={classes.challengeButton}>
               <Button
@@ -159,7 +169,7 @@ export default function ChallengePage({ user, challenges }: Props) {
                 size="small"
                 variant="contained"
               >
-                Share challenge
+                Share link
               </Button>
             </div>
           )}
@@ -189,7 +199,7 @@ export default function ChallengePage({ user, challenges }: Props) {
                 size="small"
                 variant="contained"
               >
-                Edit challenge
+                Edit details
               </Button>
             </div>
           )}

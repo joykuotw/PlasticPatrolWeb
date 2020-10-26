@@ -185,7 +185,6 @@ export function CategoriseLitterPageWithFileInfo() {
                 <BarcodeScanner
                   className={styles.scanButton}
                   onResult={(result) => {
-                    console.log(result);
                     if (isProductInfo(result)) {
                       addNewItem({
                         quantity: 1,

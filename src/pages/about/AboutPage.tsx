@@ -26,7 +26,7 @@ const useStyles = makeStyles((theme) => ({
   },
   logo: {
     minHeight: "140px",
-    margin: theme.spacing(2),
+    margin: theme.spacing(2)
   }
 }));
 
@@ -44,7 +44,7 @@ export default function AboutPage({
   const classes = useStyles();
   return (
     <PageWrapper label={"About"} navigationHandler={{ handleClose }}>
-      <Logo className={classes.logo}/>
+      <Logo className={classes.logo} />
       <Typography variant={"subtitle1"} className={classes.typography}>
         The Planet Patrol app brings together people all over the world to make
         powerful and positive impacts on the planet.

@@ -33,9 +33,9 @@ export const FakeChallenge: Challenge = {
     { displayName: "liz", uid: "456", pieces: 45 }
   ],
   pendingUserIds: [
-    { displayName: "neil", uid: "789" },
-    { displayName: "tom", uid: "abc" },
-    { displayName: "joe", uid: "def" }
+    { displayName: "neil", uid: "789", email: "neil@plasticpatrol.com" },
+    { displayName: "tom", uid: "abc", email: "tom@plasticpatrol.com" },
+    { displayName: "joe", uid: "def", email: "joe@plasticpatrol.com" }
   ]
 };
 

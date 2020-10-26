@@ -47,7 +47,7 @@ const useStyles = makeStyles((theme) => ({
     alignItems: "left",
     width: "100%",
     boxSizing: "border-box",
-    padding: 20,
+    padding: 20
   },
   challengesTitle: {
     paddingBottom: 10
@@ -60,8 +60,7 @@ const useStyles = makeStyles((theme) => ({
   link: {
     color: theme.palette.primary.main
   }
-
-  }));
+}));
 
 interface Props {
   user: User;
@@ -105,7 +104,7 @@ export default function AccountPage({
 
   const numPieces = _.sumBy(myPhotos, (o) => o.properties.pieces);
 
-  const challenges: Challenge[] = [FakeChallenge, FakeChallenge, ];
+  const challenges: Challenge[] = [FakeChallenge, FakeChallenge];
 
   return (
     <PageWrapper
@@ -182,13 +181,21 @@ export default function AccountPage({
             My challenges
           </Typography>
 
-          {challenges.length === 0 ?
+          {challenges.length === 0 ? (
             <Typography className={classes.challengeJoinPrompt}>
-              You haven't joined any challenges yet!<br/>
-              Tap <Link to={linkToChallengesPage()} className={classes.link}>here</Link> to find a challenge to join.
+              You haven't joined any challenges yet!
+              <br />
+              Tap{" "}
+              <Link to={linkToChallengesPage()} className={classes.link}>
+                here
+              </Link>{" "}
+              to find a challenge to join.
             </Typography>
-            : challenges.map(challenge => <ChallengeThumbnail key={challenge.id} challenge={challenge}/>)
-          }
+          ) : (
+            challenges.map((challenge) => (
+              <ChallengeThumbnail key={challenge.id} challenge={challenge} />
+            ))
+          )}
         </div>
       )}
     </PageWrapper>

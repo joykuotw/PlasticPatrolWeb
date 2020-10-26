@@ -9,7 +9,7 @@ import Groups from "components/Groups/GroupMain";
 import GroupList from "components/Groups/GroupList";
 import GroupAdd from "components/Groups/GroupAdd";
 import ModeratorPage from "components/ModeratorPage";
-import {Leaderboard} from "components/Leaderboard";
+import { Leaderboard } from "components/Leaderboard";
 import WriteFeedbackPage from "components/WriteFeedbackPage";
 
 import DisplayPhoto from "components/MapPage/DisplayPhoto";
@@ -38,7 +38,7 @@ import { linkToTutorialPage } from "./tutorial/links";
 import AccountPageRoute from "./account/Route";
 import { linkToAccountPage } from "./account/links";
 import { useStats } from "providers/StatsProvider";
-import {linkToChallengesPage} from "./challenges/links";
+import { linkToChallengesPage } from "./challenges/links";
 import ChallengesRoute from "./challenges/Route";
 import { Challenge } from "../types/Challenges";
 
@@ -139,10 +139,9 @@ export function Routes({
         )}
       />
 
-    <Route path={linkToChallengesPage()}>
-        <ChallengesRoute challenges={challenges}
-                         user={user}/>
-    </Route>
+      <Route path={linkToChallengesPage()}>
+        <ChallengesRoute challenges={challenges} user={user} />
+      </Route>
 
       <ModeratorRoute path={config.PAGES.moderator.path} user={user}>
         <ModeratorPage

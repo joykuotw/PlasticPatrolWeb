@@ -48,6 +48,7 @@ export type Challenge = ChallengeConfigurableData & {
   }[];
   pendingUserIds: {
     uid: string;
+    email: string;
     displayName: string;
   }[];
 };

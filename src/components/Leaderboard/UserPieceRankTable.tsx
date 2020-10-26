@@ -43,7 +43,7 @@ const styles = (theme: Theme) =>
       // https://github.com/bvaughn/react-virtualized/issues/454
       "& .ReactVirtualized__Table__headerRow": {
         flip: false,
-        paddingRight: theme.direction === "rtl" ? "0px !important" : undefined,
+        paddingRight: theme.direction === "rtl" ? "0px !important" : undefined
       }
     },
     tableRow: {
@@ -99,9 +99,9 @@ interface MuiVirtualizedTableProps extends WithStyles<typeof styles> {
 }
 
 export interface UserLeaderboardData {
-    displayName: string;
-    pieces: number;
-    largeCollectionPieces?: number;
+  displayName: string;
+  pieces: number;
+  largeCollectionPieces?: number;
 }
 
 class MuiVirtualizedTable extends React.PureComponent<
@@ -227,10 +227,7 @@ type Props = {
   user: { id?: string };
 };
 
-export default function UserPieceRankTable({
-  user,
-  usersLeaderboard,
-}: Props) {
+export default function UserPieceRankTable({ user, usersLeaderboard }: Props) {
   const copy = usersLeaderboard
     .filter(({ pieces }) => pieces > 0)
     .map(({ pieces, largeCollectionPieces, ...rest }) => ({
@@ -248,29 +245,29 @@ export default function UserPieceRankTable({
   }));
   const width = window.innerWidth;
   return (
-      <VirtualizedTable
-        rowCount={withRank.length}
-        rowGetter={({ index }) => withRank[index]}
-        userId={user && user.id}
-        columns={[
-          {
-            width: width * 0.15,
-            label: "Rank",
-            dataKey: "rank"
-          },
-          {
-            width: width * 0.55,
-            label: "User",
-            dataKey: "displayName",
-            numeric: false
-          },
-          {
-            width: width * 0.3,
-            label: "Pieces",
-            dataKey: "pieces",
-            numeric: true
-          }
-        ]}
-      />
+    <VirtualizedTable
+      rowCount={withRank.length}
+      rowGetter={({ index }) => withRank[index]}
+      userId={user && user.id}
+      columns={[
+        {
+          width: width * 0.15,
+          label: "Rank",
+          dataKey: "rank"
+        },
+        {
+          width: width * 0.55,
+          label: "User",
+          dataKey: "displayName",
+          numeric: false
+        },
+        {
+          width: width * 0.3,
+          label: "Pieces",
+          dataKey: "pieces",
+          numeric: true
+        }
+      ]}
+    />
   );
 }

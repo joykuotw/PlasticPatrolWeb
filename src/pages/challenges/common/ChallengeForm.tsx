@@ -19,6 +19,11 @@ import {
 import { useGPSLocation } from "../../../providers/LocationProvider";
 import loadPhoto from "../../photo/pages/CategorisePhotoPage/utils";
 import { useHistory } from "react-router";
+import Dialog from "@material-ui/core/Dialog";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
+import LinearProgress from "@material-ui/core/LinearProgress";
+import DialogActions from "@material-ui/core/DialogActions";
 
 const CHALLENGE_NAME_LIMIT = 100;
 const CHALLENGE_DESCRIPTION_LIMIT = 300;
@@ -100,7 +105,9 @@ const useStyles = makeStyles((theme) => ({
   },
 
   addPhotoButton: {
-    margin: `${theme.spacing(0.5)}px 0px`
+    margin: `${theme.spacing(0.5)}px 0px`,
+    color: `white`,
+    backgroundColor: theme.palette.primary.main
   },
 
   date: {
@@ -137,7 +144,12 @@ const useStyles = makeStyles((theme) => ({
   },
 
   privateToggleWrapper: {
-    padding: `${theme.spacing(0.5)}px 0px`
+    padding: `${theme.spacing(1)}px 0px`
+  },
+
+  privateToggleInfo: {
+    color: `${theme.palette.primary.main}`,
+    textDecoration: `underline`
   }
 }));
 
@@ -211,6 +223,9 @@ export default function ChallengeForm({
   const [description, setDescription] = useState("");
   const [targetPieces, setTargetPieces] = useState(0);
   const [isPrivate, setIsPrivate] = useState(false);
+  const [showPrivateChallengeInfo, setShowPrivateChallengeInfo] = useState(
+    false
+  );
   const [startDate, setStartDate] = useState<Date>(new Date());
   const [endDate, setEndDate] = useState<Date>(new Date());
   const [coverPhoto, setCoverPhoto] = useState<ImageMetadata | undefined>();
@@ -381,8 +396,33 @@ export default function ChallengeForm({
           onChange={() => {}}
           onClick={() => setIsPrivate(!isPrivate)}
         />
-        Private challenge
+        Private challenge{"   "}
+        <span
+          className={classes.privateToggleInfo}
+          onClick={() => setShowPrivateChallengeInfo(true)}
+        >
+          What is this?
+        </span>
       </div>
+
+      <Dialog open={showPrivateChallengeInfo}>
+        <DialogContent className={"dialogs__contentProgress"}>
+          <DialogContentText id="loading-dialog-text">
+            You may want to make a challenge private. This means that it cannot
+            be found in the list of challenges, or searched. Only people with a
+            direct link to your challenge - which you can share - will be able
+            to view it.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => setShowPrivateChallengeInfo(false)}
+            color="primary"
+          >
+            Ok
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 }

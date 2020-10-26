@@ -13,11 +13,13 @@ import {
 } from "../../../types/Challenges";
 import { createChallenge } from "../../../providers/ChallengesProvider";
 import User from "../../../types/User";
+import Button from "@material-ui/core/Button";
 
 const useStyles = makeStyles((theme) => ({
   wrapper: {
     padding: "5%"
   },
+
   submitButton: {
     width: "100%"
   }

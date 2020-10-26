@@ -1,4 +1,10 @@
-import React, { useState, useCallback, useEffect, useRef, useMemo } from "react";
+import React, {
+  useState,
+  useCallback,
+  useEffect,
+  useRef,
+  useMemo
+} from "react";
 
 import Search from "@material-ui/icons/Search";
 import VisibilityIcon from "@material-ui/icons/Visibility";
@@ -7,7 +13,11 @@ import { makeStyles } from "@material-ui/core/styles";
 import useOnOutsideClick from "hooks/useOnOutsideClick";
 
 import { SuggestionBasedText } from "../../types";
-import { getSuggestionsMatchingInput, getLeafKey, getSortedSuggestions } from "./utils";
+import {
+  getSuggestionsMatchingInput,
+  getLeafKey,
+  getSortedSuggestions
+} from "./utils";
 
 import styles from "standard.scss";
 import {
@@ -57,7 +67,7 @@ const useStyles = makeStyles((theme) => ({
     alignItems: "center",
     background: "#4e4e4e",
     "&:hover": {
-      background: "#4e4e4e",
+      background: "#4e4e4e"
     },
     color: "white",
     textTransform: "none",
@@ -102,16 +112,30 @@ type Props = {
   initialLabel?: string;
 };
 
-export default function SuggestionBasedInput({ sourceData, inputPrompt, initialLabel, className, setType }: Props) {
+export default function SuggestionBasedInput({
+  sourceData,
+  inputPrompt,
+  initialLabel,
+  className,
+  setType
+}: Props) {
   const styles = useStyles();
   const [label, setLabel] = useState(initialLabel || "");
   const [focused, setFocused] = useState(false);
   const [showSuggestionList, setShowSuggestionList] = useState(false);
   const outsideClickRef = useOnOutsideClick(() => setFocused(false));
 
-  const allSuggestions = useMemo(() => getSortedSuggestions(sourceData), [sourceData]);
-  const suggestionsMatchingLabel = useMemo(() => getSuggestionsMatchingInput(allSuggestions, label), [allSuggestions, label]);
-  const leafKey = useMemo(() => getLeafKey(allSuggestions, label), [allSuggestions, label]);
+  const allSuggestions = useMemo(() => getSortedSuggestions(sourceData), [
+    sourceData
+  ]);
+  const suggestionsMatchingLabel = useMemo(
+    () => getSuggestionsMatchingInput(allSuggestions, label),
+    [allSuggestions, label]
+  );
+  const leafKey = useMemo(() => getLeafKey(allSuggestions, label), [
+    allSuggestions,
+    label
+  ]);
 
   const onSuggestionClick = useCallback((suggestion: string) => {
     setLabel(suggestion);
@@ -211,9 +235,11 @@ type SuggestionProps = {
 function Suggestion({ label, className, onClick }: SuggestionProps) {
   return (
     <Button
-      className={className} onClick={() => onClick(label)}
-      color="primary">
-        {label}
+      className={className}
+      onClick={() => onClick(label)}
+      color="primary"
+    >
+      {label}
     </Button>
   );
 }

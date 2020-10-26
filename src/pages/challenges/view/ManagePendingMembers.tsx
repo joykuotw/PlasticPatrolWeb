@@ -13,6 +13,8 @@ import {
   approveNewMember,
   rejectNewMember
 } from "../../../providers/ChallengesProvider";
+import CheckIcon from "@material-ui/icons/Check";
+import CloseIcon from "@material-ui/icons/Close";
 
 const useStyles = makeStyles((theme) => ({
   wrapper: {
@@ -25,11 +27,15 @@ const useStyles = makeStyles((theme) => ({
     flexDirection: "row",
     paddingBottom: "20px"
   },
-  memberName: {
+  memberNameWrapper: {
     flex: 1,
     flexGrow: 1,
-    paddingTop: `${theme.spacing(0.5)}px`,
     overflow: "hidden"
+  },
+  memberName: {},
+  email: {
+    fontSize: 10,
+    wordWrap: "break-word"
   },
   approveButton: {
     flex: 0,
@@ -37,6 +43,9 @@ const useStyles = makeStyles((theme) => ({
   },
   rejectButton: {
     flex: 0
+  },
+  button: {
+    textTransform: "none"
   }
 }));
 
@@ -64,31 +73,46 @@ export default function ManagePendingMembers({ challenges }: Props) {
       navigationHandler={{ handleBack }}
       className={classes.wrapper}
     >
-      {challenge.pendingUserIds.map((pendingUser) => (
-        <div className={classes.memberWrapper} key={pendingUser.uid}>
-          <div className={classes.memberName}>{pendingUser.displayName}</div>
-          <div className={classes.approveButton}>
-            <Button
-              onClick={() => approveNewMember(pendingUser.uid, challenge.id)}
-              color="primary"
-              size="small"
-              variant="contained"
-            >
-              Approve
-            </Button>
-          </div>
-          <div className={classes.rejectButton}>
-            <Button
-              onClick={() => rejectNewMember(pendingUser.uid, challenge.id)}
-              color="secondary"
-              size="small"
-              variant="contained"
-            >
-              Reject
-            </Button>
-          </div>
+      {challenge.pendingUserIds.length === 0 ? (
+        <div>
+          There are currently no users who have requested to join this
+          challenge.
         </div>
-      ))}
+      ) : (
+        challenge.pendingUserIds.map((pendingUser) => (
+          <div className={classes.memberWrapper} key={pendingUser.uid}>
+            <div className={classes.memberNameWrapper}>
+              <div className={classes.memberName}>
+                {pendingUser.displayName}
+              </div>
+              <div className={classes.email}>{pendingUser.email}</div>
+            </div>
+            <div className={classes.approveButton}>
+              <Button
+                className={classes.button}
+                onClick={() => approveNewMember(pendingUser.uid, challenge.id)}
+                color="default"
+                size="small"
+                variant="outlined"
+              >
+                Approve
+                <CheckIcon fontSize={"small"} style={{ color: "green" }} />
+              </Button>
+            </div>
+            <div className={classes.rejectButton}>
+              <Button
+                className={classes.button}
+                onClick={() => rejectNewMember(pendingUser.uid, challenge.id)}
+                color="default"
+                size="small"
+                variant="outlined"
+              >
+                Reject <CloseIcon fontSize={"small"} style={{ color: "red" }} />
+              </Button>
+            </div>
+          </div>
+        ))
+      )}
     </PageWrapper>
   );
 }

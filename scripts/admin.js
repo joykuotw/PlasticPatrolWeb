@@ -44,6 +44,22 @@ yargs
       console.log(JSON.stringify(users));
     }
   )
+  .command(
+    "token",
+    "get custom token",
+    (yargs) => {
+      yargs
+        .option("id", {
+          description: "UID of the user to generate a custom token for",
+          type: "string"
+        })
+        .demandOption(["id"]);
+    },
+    async (argv) => {
+      const token = await auth.createCustomToken(argv.id);
+      console.log(token);
+    }
+  )
   .demandCommand()
   .help()
   .alias("help", "h").argv;
