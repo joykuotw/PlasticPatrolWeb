@@ -1,7 +1,8 @@
 {
   "projects": {
-    "default": "plastic-patrol-fd3b3",
-    "dev": "plastic-patrol-dev-722eb"
+    "test": "plastic-patrol-dev-test",
+    "staging": "plastic-patrol-dev-722eb",
+    "production": "plastic-patrol-fd3b3"
   },
   "targets": {
     "plastic-patrol-fd3b3": {
