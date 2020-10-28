@@ -40,19 +40,30 @@ export default functions.https.onCall(
     if (!user) {
       // don't see any point in throwing an error here
       // if they want to leave + aren't a member may as well return
-      // TODO: try to remove challengeId from user (Gravatar)
+      await firestore
+        .collection("users")
+        .doc(currentUserId)
+        .update({
+          challenges: admin.firestore.FieldValue.arrayRemove(challengeId)
+        });
 
       return;
     }
 
-    await firestore
-      .collection("challenges")
-      .doc(challengeId)
-      .update({
-        [`totalUserPieces.${currentUserId}`]: admin.firestore.FieldValue.delete()
-      });
-
-    // TODO: remove challengeId from user (Gravatar)
+    await Promise.all([
+      firestore
+        .collection("challenges")
+        .doc(challengeId)
+        .update({
+          [`totalUserPieces.${currentUserId}`]: admin.firestore.FieldValue.delete()
+        }),
+      firestore
+        .collection("users")
+        .doc(currentUserId)
+        .update({
+          challenges: admin.firestore.FieldValue.arrayRemove(challengeId)
+        })
+    ]);
 
     return;
   }

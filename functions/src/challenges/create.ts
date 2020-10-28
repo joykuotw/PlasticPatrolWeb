@@ -5,6 +5,7 @@ import admin from "firebase-admin";
 import { firestore } from "../firestore";
 import { getDisplayName } from "../stats";
 import { ChallengeFromServer, ConfigurableChallengeData } from "./models";
+import addChallengeToUser from "./utils/addChallengeToUser";
 
 type ChallengeToPersist = Omit<ChallengeFromServer, "id">;
 
@@ -38,13 +39,7 @@ export default functions.https.onCall(
       .collection("challenges")
       .add(challengeToPersist);
 
-    // NOTE: this doesn't work - not all users have a record in Firebase, need to check why we have Gravatar
-    // firestore
-    //   .collection("users")
-    //   .doc(ownerUserId)
-    //   .update({
-    //     challengeIds: admin.firestore.FieldValue.arrayUnion(id)
-    //   });
+    await addChallengeToUser(ownerUserId, id);
 
     return { id, ...challengeToPersist };
   }

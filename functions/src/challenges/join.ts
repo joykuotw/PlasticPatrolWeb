@@ -8,6 +8,7 @@ import { getDisplayName } from "../stats";
 
 import getChallengeIfExists from "./utils/getChallengeIfExists";
 import verifyChallengeIsOngoing from "./utils/verifyChallengeIsOngoing";
+import addChallengeToUser from "./utils/addChallengeToUser";
 
 type RequestData = { challengeId: string };
 
@@ -50,18 +51,21 @@ export default functions.https.onCall(
         })
       });
     } else {
-      await challengeRef.set(
-        {
-          totalUserPieces: {
-            [currentUserId]: {
-              uid: currentUserId,
-              displayName,
-              pieces: 0
+      await Promise.all([
+        challengeRef.set(
+          {
+            totalUserPieces: {
+              [currentUserId]: {
+                uid: currentUserId,
+                displayName,
+                pieces: 0
+              }
             }
-          }
-        },
-        { merge: true }
-      );
+          },
+          { merge: true }
+        ),
+        addChallengeToUser(currentUserId, challengeId)
+      ]);
     }
 
     // not sure what to return here

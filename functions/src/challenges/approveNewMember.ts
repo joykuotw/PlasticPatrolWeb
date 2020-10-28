@@ -1,6 +1,7 @@
 import * as functions from "firebase-functions";
 
 import { firestore } from "../firestore";
+import addChallengeToUser from "./utils/addChallengeToUser";
 import getChallengeIfExists from "./utils/getChallengeIfExists";
 import verifyChallengeIsOngoing from "./utils/verifyChallengeIsOngoing";
 
@@ -76,9 +77,10 @@ export default functions.https.onCall(
       )
     };
 
-    await firestore.collection("challenges").doc(challengeId).update(updates);
-
-    // TODO: add challengeId to user (Gravatar)
+    await Promise.all([
+      firestore.collection("challenges").doc(challengeId).update(updates),
+      addChallengeToUser(userIdBeingApproved, challengeId)
+    ]);
 
     return {};
   }
