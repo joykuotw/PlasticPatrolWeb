@@ -3,7 +3,7 @@
   "description": "Cloud Functions for Firebase",
   "scripts": {
     "serve": "firebase serve --only functions",
-    "test": "ts-mocha -p tsconfig.json src/**/*.test.ts",
+    "test": "ts-mocha -p tsconfig.json src/**/*.test.ts --timeout 5000",
     "shell": "firebase functions:shell",
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions",

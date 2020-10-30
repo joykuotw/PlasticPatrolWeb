@@ -6,5 +6,5 @@ export const firebaseTests = testInit(
     projectId: "plastic-patrol-dev-test",
     storageBucket: "plastic-patrol-dev-test.appspot.com"
   },
-  "../../../adminCreds.test.json"
+  "../adminCreds.test.json"
 );
