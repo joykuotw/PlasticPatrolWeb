@@ -8,3 +8,11 @@ export const firebaseTests = testInit(
   },
   "../adminCreds.test.json"
 );
+
+// valid user in plastic-patrol-dev-test
+// email: test@test.com password: 12345678a
+export const validUserId = "gKK0uy46Eke61ZROXr4jrtKeFqH3";
+
+export const authenticatedCallableContext = {
+  auth: { uid: validUserId }
+};

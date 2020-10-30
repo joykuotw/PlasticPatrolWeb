@@ -1,7 +1,11 @@
 import { strict as assert } from "assert";
 import admin from "firebase-admin";
 
-import { firebaseTests } from "../../test/utils";
+import {
+  authenticatedCallableContext,
+  firebaseTests,
+  validUserId
+} from "../../test/utils";
 
 import createChallenge from "../create";
 
@@ -23,18 +27,20 @@ const expectedChallenge = {
   startTime: 1,
   endTime: 2,
   targetPieces: 100,
-  ownerUserId: "gKK0uy46Eke61ZROXr4jrtKeFqH3",
+  ownerUserId: validUserId,
   totalPieces: 0,
   totalUserPieces: {
-    gKK0uy46Eke61ZROXr4jrtKeFqH3: {
-      uid: "gKK0uy46Eke61ZROXr4jrtKeFqH3",
+    [validUserId]: {
+      uid: validUserId,
       pieces: 0,
-      displayName: "gKK0uy46Eke61ZROXr4jrtKeFqH3"
+      displayName: validUserId
     }
   },
   pendingPieces: 0,
   pendingUsers: []
 };
+
+// TODO: add check that user record is created + challengeIds appended
 describe("create challenge", () => {
   before(() => {});
 
@@ -43,11 +49,8 @@ describe("create challenge", () => {
   });
 
   it("should return an enriched challenge", async () => {
-    const context = {
-      auth: { uid: "gKK0uy46Eke61ZROXr4jrtKeFqH3" }
-    };
     try {
-      const data = await create(testChallenge, context);
+      const data = await create(testChallenge, authenticatedCallableContext);
       const { id, ...restOfChallenge } = data;
 
       assert.ok(id);
