@@ -8,40 +8,26 @@ import {
 } from "../../test/utils";
 
 import createChallenge from "../create";
+import { ChallengeBuilder } from "./utils";
 
 const create = firebaseTests.wrap(createChallenge);
 
-const testChallenge = {
-  name: "Test challenge",
-  description: "Im a test",
-  isPrivate: false,
-  startTime: 1,
-  endTime: 2,
-  targetPieces: 100
-};
+const testChallenge = new ChallengeBuilder().withConfigurableValues().build();
 
-const expectedChallenge = {
-  name: "Test challenge",
-  description: "Im a test",
-  isPrivate: false,
-  startTime: 1,
-  endTime: 2,
-  targetPieces: 100,
-  ownerUserId: validUserId,
-  totalPieces: 0,
-  totalUserPieces: {
-    [validUserId]: {
-      uid: validUserId,
-      pieces: 0,
-      displayName: validUserId
-    }
-  },
-  pendingPieces: 0,
-  pendingUsers: []
-};
+const expectedChallenge = new ChallengeBuilder(testChallenge)
+  .ownerUserId(validUserId)
+  .totalPieces(0)
+  .addUser({
+    uid: validUserId,
+    pieces: 0,
+    displayName: validUserId
+  })
+  .pendingPieces(0)
+  .pendingUsers([])
+  .build();
 
 // TODO: add check that user record is created + challengeIds appended
-describe("create challenge", () => {
+describe.only("create challenge", () => {
   before(() => {});
 
   after(() => {
@@ -50,11 +36,25 @@ describe("create challenge", () => {
 
   it("should return an enriched challenge", async () => {
     try {
-      const data = await create(testChallenge, authenticatedCallableContext);
-      const { id, ...restOfChallenge } = data;
+      const res = await create(testChallenge, authenticatedCallableContext);
+      const { id, ...restOfChallenge } = res;
 
       assert.ok(id);
       assert.deepEqual(restOfChallenge, expectedChallenge);
+
+      // TODO: check challenge appended to user
+      const snap = await admin.firestore().doc(`users/${validUserId}`).get();
+
+      const { data, exists } = snap;
+      assert.equal(exists, true, "snapshot exists");
+
+      console.log(data());
+
+      // assert.equal(
+      //   challengeIds.contains(id),
+      //   true,
+      //   "user challenges contains challengeId"
+      // );
     } catch (err) {
       assert.fail(err);
     }
