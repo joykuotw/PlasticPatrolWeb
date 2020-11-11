@@ -46,6 +46,7 @@
     "prefer-arrow-callback": 1,
     "promise/always-return": 2,
     "promise/catch-or-return": 2,
-    "promise/no-nesting": 1
+    "promise/no-nesting": 1,
+    "@typescript-eslint/ban-ts-ignore": "off"
   }
 }

@@ -1,0 +1,70 @@
+{
+  "100": { "label": "4 / 6 pack rings" },
+  "1020": { "label": "Balloon" },
+  "1085": { "label": "Bike" },
+  "1091": { "label": "Cardboard" },
+  "1068": { "label": "Ceramic / pottery" },
+  "106": { "label": "Cigarette butt" },
+  "104": { "label": "Lighter", "synonyms": ["cigarette"] },
+  "1059": { "label": "Cork" },
+  "1050": { "label": "Can", "synonyms": ["drinks", "soda", "tin"] },
+  "1042": { "label": "Clothing" },
+  "1043": {
+    "label": "Footwear",
+    "synonyms": ["shoe", "trainer", "flip flop", "plimsoll"]
+  },
+  "197": { "label": "Electrical" },
+  "1008": { "label": "Fishing equipment" },
+  "1065": { "label": "Glass bottle", "synonyms": ["beer", "wine", "alcohol"] },
+  "1067": { "label": "Glass fragment" },
+  "177": { "label": "Make up / cosmetics container" },
+  "1057": { "label": "Metal fragment", "synonyms": ["piece", "metal piece"] },
+  "1048": { "label": "Metal bottle cap" },
+  "1092": { "label": "Paper packaging" },
+  "1000": { "label": "Plastic bag" },
+  "1003": { "label": "Plastic bottle" },
+  "13": { "label": "Plastic bottle lid" },
+  "117": { "label": "Plastic cup" },
+  "118": { "label": "Plastic cup lid" },
+  "129": {
+    "label": "Plastic fragment",
+    "synonyms": ["piece", "plastic piece"]
+  },
+  "1001": {
+    "label": "Plastic packaging",
+    "synonyms": [
+      "crisp",
+      "packet",
+      "sweet",
+      "chocolate",
+      "chip",
+      "fast food",
+      "food",
+      "supermarket",
+      "film"
+    ]
+  },
+  "125": { "label": "Rope" },
+  "116": { "label": "Plastic straw" },
+  "178": { "label": "Toy" },
+  "114": { "label": "Plastic utensil / cutlery" },
+  "133": { "label": "Rubber" },
+  "135": {
+    "label": "Sanitary towel",
+    "synonyms": ["pad", "period", "menstrual", "panty liner"]
+  },
+  "132": { "label": "Styrofoam / polystyrene container" },
+  "1016": { "label": "Styrofoam / polystyrene fragment" },
+  "1034": { "label": "Tampon" },
+  "1077": { "label": "Tampon applicator" },
+  "10003": { "label": "Tyre" },
+  "1037": { "label": "Wet wipe" },
+  "139": { "label": "Wood" },
+  "2000": { "label": "Crisp packet" },
+  "2001": { "label": "Chocolate wrapper" },
+  "2002": { "label": "Sweet wrapper" },
+  "2003": { "label": "Face mask" },
+  "2004": { "label": "Battery" },
+  "2005": { "label": "Disposable gloves" },
+  "2006": { "label": "Lollypop" }
+}
