@@ -13,7 +13,6 @@ import {
 } from "../../../types/Challenges";
 import { createChallenge } from "../../../providers/ChallengesProvider";
 import User from "../../../types/User";
-import Button from "@material-ui/core/Button";
 
 const useStyles = makeStyles((theme) => ({
   wrapper: {
@@ -52,7 +51,7 @@ export default function CreateChallenge({ user }: Props) {
       />
       <Button
         className={styles.submitButton}
-        onClick={() => createChallenge(user.id, challengeFormData)}
+        onClick={(e) => createChallenge(user.id, challengeFormData)}
         color="primary"
         variant="contained"
         disabled={!challengeReady}

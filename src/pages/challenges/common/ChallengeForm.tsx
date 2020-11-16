@@ -3,7 +3,7 @@ import { linkToAddChallengeCoverPhotoDialog } from "../../../routes/challenges/l
 import { DesktopPhotoFallback } from "../../../components/common/DesktopPhotoFallback";
 import { Route } from "react-router-dom";
 import AddPhotoDialog from "../../photo/components/AddPhotoDialog/AddPhotoDialog";
-import React, { createRef, useEffect, useState } from "react";
+import React, { ChangeEvent, createRef, useEffect, useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import styles from "../../../standard.scss";
 import {
@@ -22,7 +22,6 @@ import { useHistory } from "react-router";
 import Dialog from "@material-ui/core/Dialog";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
-import LinearProgress from "@material-ui/core/LinearProgress";
 import DialogActions from "@material-ui/core/DialogActions";
 
 const CHALLENGE_NAME_LIMIT = 100;
@@ -39,14 +38,14 @@ const useStyles = makeStyles((theme) => ({
   inputLengthTracker: {
     width: "100%",
     textAlign: "right",
-    marginBottom: "5px",
-    color: styles.mediumGrey
+    color: styles.darkGrey
   },
 
   name: {
     border: "none",
     borderRadius: "5px",
     padding: "5px",
+    marginBottom: "5px",
     background: styles.lightGrey,
     fontSize: 16,
     boxSizing: "border-box",
@@ -61,6 +60,7 @@ const useStyles = makeStyles((theme) => ({
     border: "none",
     borderRadius: "5px",
     padding: "5px",
+    marginTop: "5px",
     background: styles.lightGrey,
     fontSize: 16,
     boxSizing: "border-box",
@@ -115,7 +115,7 @@ const useStyles = makeStyles((theme) => ({
   },
 
   fieldLabel: {
-    color: styles.mediumGrey,
+    color: styles.darkGrey,
     fontSize: 14
   },
 
@@ -271,6 +271,25 @@ export default function ChallengeForm({
     isPrivate
   ]);
 
+  const updateStartDate = (e: ChangeEvent<HTMLInputElement>) => {
+    let date = new Date(e.currentTarget.value);
+    // Arbitrary start at 2am, I think daylight savings means setting
+    // this to midnight messes things ups.
+    date.setHours(2,0,0);
+    setStartDate(date)
+  }
+
+  const updateEndDate = (e: ChangeEvent<HTMLInputElement>) => {
+    let date = new Date(e.currentTarget.value);
+    // Set challenge to end at the end of the last day.
+    date.setHours(23,59,59);
+    setEndDate(date)
+  }
+
+  const challengeDurationDays = Math.floor(
+    (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
+  ) + 1;
+
   return (
     <div>
       <input
@@ -358,7 +377,7 @@ export default function ChallengeForm({
           className={classes.dateInput}
           type="date"
           value={startDate.toISOString().split("T")[0]}
-          onChange={(e) => setStartDate(new Date(e.currentTarget.value))}
+          onChange={updateStartDate}
         />
       </div>
 
@@ -368,7 +387,7 @@ export default function ChallengeForm({
           className={classes.dateInput}
           type="date"
           value={endDate.toISOString().split("T")[0]}
-          onChange={(e) => setEndDate(new Date(e.currentTarget.value))}
+          onChange={updateEndDate}
         />
       </div>
 
@@ -378,13 +397,9 @@ export default function ChallengeForm({
         </div>
       )}
 
-      {startDate <= endDate && (
+      {challengeDurationDays > 0 && (
         <div className={classes.dateSummary}>
-          Challenge will run for{" "}
-          {Math.floor(
-            (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
-          ) + 1}{" "}
-          days
+          {`Challenge will run for ${challengeDurationDays} ${challengeDurationDays === 1 ? `day` : `days`}`}
         </div>
       )}
 
