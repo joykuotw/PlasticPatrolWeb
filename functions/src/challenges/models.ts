@@ -24,7 +24,7 @@ export type Challenge = Omit<ChallengeFromServer, "id">;
 export type ConfigurableChallengeData = {
   name: string;
   description: string;
-  isPrivate: string;
+  isPrivate: boolean;
   startTime: number;
   endTime: number;
   targetPieces: number;
