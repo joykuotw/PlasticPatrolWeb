@@ -6,10 +6,6 @@ export function linkToCreateChallenge() {
   return `${linkToChallengesPage()}/create`;
 }
 
-// export function linkToSubmitChallengeDialog() {
-//   return `${linkToCreateChallenge()}/upload`;
-// }
-
 export function linkToAddChallengeCoverPhotoDialog() {
   return `${linkToCreateChallenge()}/addphoto`;
 }
@@ -18,7 +14,9 @@ export function linkToChallenge(challengeId: string = ":challengeId") {
   return `${linkToChallengesPage()}/${challengeId}`;
 }
 
-export function likeToManagePendingMembers(challengeId: string = ":challengeId") {
+export function linkToManagePendingMembers(
+  challengeId: string = ":challengeId"
+) {
   return `${linkToChallengesPage()}/approve/${challengeId}`;
 }
 

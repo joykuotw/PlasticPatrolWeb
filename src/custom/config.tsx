@@ -9,7 +9,6 @@ import HelpIcon from "@material-ui/icons/Help";
 import EventIcon from "@material-ui/icons/Event";
 import FeedbackIcon from "@material-ui/icons/Feedback";
 import LibraryBooksIcon from "@material-ui/icons/LibraryBooks";
-import StarOutlinedIcon from "@material-ui/icons/StarOutlined";
 import ChallengeIconImage from "assets/images/challenge.png";
 
 import styles from "standard.scss";
@@ -126,7 +125,7 @@ const PAGES: { [pageName: string]: Page } = {
     icon: (
       <img
         src={ChallengeIconImage}
-        alt="Challenge icon image"
+        alt="Challenges icon"
         style={{ width: 20, height: 20, paddingLeft: 2 }}
       />
     )
@@ -207,7 +206,7 @@ const config: Config = {
   PAGES,
   ENABLE_GRAVATAR_PROFILES: true, //To update user-profile from Gravatar, value: true or false.
   ENABLE_GROUPS: false,
-  ENABLE_CHALLENGES: false,
+  ENABLE_CHALLENGES: true,
   SECURITY: {
     UPLOAD_REQUIRES_LOGIN: true
   },

@@ -5,9 +5,8 @@ import {
   CreateChallenge,
   EditChallenge
 } from "pages/challenges";
-import { Challenge } from "../../types/Challenges";
 import {
-  likeToManagePendingMembers,
+  linkToManagePendingMembers,
   linkToChallenge,
   linkToChallengesPage,
   linkToCreateChallenge,
@@ -18,30 +17,26 @@ import { useHistory } from "react-router";
 import ManagePendingMembers from "../../pages/challenges/view/ManagePendingMembers";
 import User from "../../types/User";
 
-type Props = {
-  user: User;
-  challenges: Challenge[];
-};
+type Props = {};
 
-export default function ChallengesRoute({ user, challenges }: Props) {
+export default function ChallengesRoute({}: Props) {
   const history = useHistory();
-  const handleClose = () => history.goBack();
   return (
     <Switch>
       <Route exact path={linkToChallengesPage()}>
-        <ChallengesHome challenges={challenges} />
+        <ChallengesHome />
       </Route>
       <Route path={linkToCreateChallenge()}>
-        <CreateChallenge user={user} />
+        <CreateChallenge />
       </Route>
-      <Route path={likeToManagePendingMembers()}>
-        <ManagePendingMembers challenges={challenges} />
+      <Route path={linkToManagePendingMembers()}>
+        <ManagePendingMembers />
       </Route>
       <Route path={linkToEditChallenge()}>
-        <EditChallenge challenges={challenges} />
+        <EditChallenge />
       </Route>
       <Route path={linkToChallenge()}>
-        <ChallengePage user={user} challenges={challenges} />
+        <ChallengePage />
       </Route>
     </Switch>
   );

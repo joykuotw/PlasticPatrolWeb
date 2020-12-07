@@ -1,20 +1,19 @@
-import React from "react";
+import React, { useContext } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 
 import PageWrapper from "components/PageWrapper";
 import "react-circular-progressbar/dist/styles.css";
 import { useHistory } from "react-router";
-import ChallengeThumbnail from "../ChallengeThumbnail";
-import { Challenge } from "../../../types/Challenges";
 import Button from "@material-ui/core/Button";
-import { likeToManagePendingMembers } from "../../../routes/challenges/links";
 import { useParams } from "react-router-dom";
+import CheckIcon from "@material-ui/icons/Check";
+import CloseIcon from "@material-ui/icons/Close";
 import {
   approveNewMember,
   rejectNewMember
-} from "../../../providers/ChallengesProvider";
-import CheckIcon from "@material-ui/icons/Check";
-import CloseIcon from "@material-ui/icons/Close";
+} from "../../../features/firebase/challenges";
+import { useChallenges } from "../../../providers/ChallengesProvider";
+import { PendingUser } from "../../../types/Challenges";
 
 const useStyles = makeStyles((theme) => ({
   wrapper: {
@@ -49,13 +48,14 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-type Props = {
-  challenges: Challenge[];
-};
+type Props = {};
 
-export default function ManagePendingMembers({ challenges }: Props) {
+export default function ManagePendingMembers({}: Props) {
   const classes = useStyles();
   const history = useHistory();
+
+  const challengeData = useChallenges();
+  const challenges = challengeData?.challenges || [];
 
   const { challengeId } = useParams();
   const challenge = challenges.find((ch) => ch.id.toString() === challengeId);
@@ -73,13 +73,13 @@ export default function ManagePendingMembers({ challenges }: Props) {
       navigationHandler={{ handleBack }}
       className={classes.wrapper}
     >
-      {challenge.pendingUserIds.length === 0 ? (
+      {challenge.pendingUsers.length === 0 ? (
         <div>
           There are currently no users who have requested to join this
           challenge.
         </div>
       ) : (
-        challenge.pendingUserIds.map((pendingUser) => (
+        challenge.pendingUsers.map((pendingUser: PendingUser) => (
           <div className={classes.memberWrapper} key={pendingUser.uid}>
             <div className={classes.memberNameWrapper}>
               <div className={classes.memberName}>

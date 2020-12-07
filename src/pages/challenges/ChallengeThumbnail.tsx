@@ -1,9 +1,12 @@
-import { Challenge } from "../../types/Challenges";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import React, { useRef } from "react";
 import { useHistory } from "react-router";
 import { buildStyles, CircularProgressbar } from "react-circular-progressbar";
 import { linkToChallenge } from "../../routes/challenges/links";
+import { Challenge } from "../../types/Challenges";
+import LockOpenIcon from "@material-ui/icons/LockOpen";
+
+import thumbnailBackup from "assets/images/challenge-thumbnail-backup.png";
 
 const useStyles = makeStyles((theme) => ({
   challengeThumbnail: {
@@ -22,6 +25,7 @@ const useStyles = makeStyles((theme) => ({
     height: "100%",
     weight: "100px",
     textAlign: "center",
+    alignItems: "center",
     overflow: "hidden",
     borderRadius: "5px"
   },
@@ -57,6 +61,10 @@ const useStyles = makeStyles((theme) => ({
 
   progress: {
     height: "100%"
+  },
+
+  privateIcon: {
+    fontSize: "12px"
   }
 }));
 
@@ -73,6 +81,8 @@ export default function ChallengeThumbnail({ challenge }: Props) {
 
   const percentage = (challenge.totalPieces / challenge.targetPieces) * 100;
 
+  const imgSrc = challenge.coverPhotoUrl || thumbnailBackup;
+
   return (
     <div
       className={classes.challengeThumbnail}
@@ -80,19 +90,24 @@ export default function ChallengeThumbnail({ challenge }: Props) {
       onClick={() => history.push(linkToChallenge(challenge.id.toString()))}
     >
       <div className={classes.pictureWrapper}>
-        <img src={challenge.coverPhoto?.imgSrc} className={classes.picture} />
+        <img src={imgSrc} className={classes.picture} />
       </div>
       <div className={classes.textSection}>
-        <div className={classes.name}>{challenge.name}</div>
+        <div className={classes.name}>
+          {challenge.isPrivate && (
+            <LockOpenIcon fontSize={"small"} className={classes.privateIcon} />
+          )}{" "}
+          {challenge.name}
+        </div>
         <div className={classes.participantCount}>
-          {challenge.totalUserPieces.length} participants
+          {challenge.totalUserPieces?.length || 0} participants
         </div>
         <div className={classes.durationRemaining}>{textDurationRemaining}</div>
       </div>
       <div className={classes.progressWrapper}>
         <CircularProgressbar
           value={percentage}
-          text={`${percentage}%`}
+          text={`${Math.floor(percentage)}%`}
           className={classes.progress}
           styles={buildStyles({
             strokeLinecap: "round", // Whether to use rounded or flat corners on the ends - can use 'butt' or 'round'

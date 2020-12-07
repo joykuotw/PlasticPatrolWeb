@@ -1,9 +1,8 @@
-import React, { useMemo, useState } from "react";
+import React, { useContext, useMemo, useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { useHistory } from "react-router";
 
 import PageWrapper from "components/PageWrapper";
-import { Challenge } from "../../types/Challenges";
 
 import "react-circular-progressbar/dist/styles.css";
 
@@ -11,6 +10,17 @@ import styles from "standard.scss";
 import Search from "@material-ui/icons/Search";
 import ChallengeThumbnail from "./ChallengeThumbnail";
 import { linkToCreateChallenge } from "../../routes/challenges/links";
+import {
+  ChallengesProviderData,
+  useChallenges
+} from "../../providers/ChallengesProvider";
+import {
+  Challenge,
+  ChallengeFirestoreData,
+  userIsInChallenge
+} from "../../types/Challenges";
+import { useUser } from "../../providers/UserProvider";
+import User from "../../types/User";
 
 const useStyles = makeStyles((theme) => ({
   wrapper: {
@@ -51,32 +61,80 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-type Props = {
-  challenges: Challenge[];
-};
+type Props = {};
 
 function getFilteredChallenges(
-  searchPrefix: string,
-  challenges: Challenge[]
-): Challenge[] {
-  if (searchPrefix === "") {
-    return challenges;
+  searchString: string,
+  challenges: ChallengeFirestoreData[],
+  user?: User
+): ChallengeFirestoreData[] {
+  const userLoggedIn = user !== undefined;
+  const userId = user?.id || "invalid_id";
+
+  // Put challenges that users are in at the top.
+  if (userLoggedIn) {
+    challenges.sort((a: ChallengeFirestoreData, b: ChallengeFirestoreData) => {
+      return userIsInChallenge(a, userId) ? 1 : 0;
+    });
   }
 
-  return challenges.filter((challenge) =>
-    challenge.name.toLowerCase().includes(searchPrefix.toLowerCase())
-  );
+  // If user hasn't searched anything, return all public challenges and challenges user is part of.
+  if (searchString === "") {
+    return challenges.filter(
+      (challenge) =>
+        !challenge.isPrivate || userIsInChallenge(challenge, userId)
+    );
+  }
+
+  const MIN_PRIVATE_CHALLENGE_ID_SEARCH_LENGTH = 6;
+
+  const challengeNameIncludesSubstring = (name: string, substring: string) =>
+    name.toLowerCase().includes(substring.toLowerCase());
+  const searchedPrivateChallengeId = (
+    challenge: Challenge,
+    substring: string
+  ) => {
+    return (
+      challenge.isPrivate &&
+      substring.length > MIN_PRIVATE_CHALLENGE_ID_SEARCH_LENGTH &&
+      challenge.id.includes(substring)
+    );
+  };
+
+  // Filter based on search string.
+  // If it's a public challenge, check if the name includes the search string.
+  // If it's a private challenge, check user logged, and the search string matches a section of the challenge ID.
+  challenges = challenges.filter((challenge) => {
+    const searchedPublicChallenge =
+      (!challenge.isPrivate || userIsInChallenge(challenge, userId || "")) &&
+      challengeNameIncludesSubstring(challenge.name, searchString);
+    const searchedPrivateChallenge =
+      userLoggedIn &&
+      challenge.isPrivate &&
+      searchedPrivateChallengeId(challenge, searchString);
+    return searchedPublicChallenge || searchedPrivateChallenge;
+  });
+
+  return challenges;
 }
 
-export default function ChallengesHome({ challenges }: Props) {
+export default function ChallengesHome({}: Props) {
   const history = useHistory();
   const handleBack = () => history.goBack();
 
+  const challengeData = useChallenges();
+  const user = useUser();
+
   const classes = useStyles();
-  const [searchSubstring, setSearchSubstring] = useState("");
+  const [searchString, setSearchString] = useState("");
   const filteredChallengeList = useMemo(
-    () => getFilteredChallenges(searchSubstring, challenges),
-    [searchSubstring, challenges]
+    () =>
+      getFilteredChallenges(
+        searchString,
+        challengeData?.challenges || [],
+        user
+      ),
+    [searchString, challengeData]
   );
   return (
     <PageWrapper
@@ -90,8 +148,8 @@ export default function ChallengesHome({ challenges }: Props) {
         <input
           placeholder={"Search"}
           className={classes.searchInput}
-          value={searchSubstring}
-          onChange={(e) => setSearchSubstring(e.target.value)}
+          value={searchString}
+          onChange={(e) => setSearchString(e.target.value)}
         />
       </div>
       <div className={classes.challengeList}>
@@ -103,8 +161,8 @@ export default function ChallengesHome({ challenges }: Props) {
             challenge button at the top of the screen.
           </div>
         ) : (
-          filteredChallengeList.map((challenge: Challenge) => (
-            <ChallengeThumbnail challenge={challenge} />
+          filteredChallengeList.map((challenge: ChallengeFirestoreData) => (
+            <ChallengeThumbnail key={challenge.id} challenge={challenge} />
           ))
         )}
       </div>

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Button, makeStyles, IconButton } from "@material-ui/core";
+import { Button, makeStyles } from "@material-ui/core";
 
 import { Item, SuggestionBasedText } from "../../types";
 import QuantitySelector from "../QuantitySelector";

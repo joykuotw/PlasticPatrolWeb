@@ -8,7 +8,9 @@ import { makeStyles } from "@material-ui/core/styles";
 import styles from "../../../standard.scss";
 import {
   Challenge,
-  ChallengeConfigurableData,
+  ChallengeFirestoreData,
+  ConfigurableChallengeData,
+  coverPhotoIsMetaData,
   isSameDay
 } from "../../../types/Challenges";
 import {
@@ -23,6 +25,8 @@ import Dialog from "@material-ui/core/Dialog";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogActions from "@material-ui/core/DialogActions";
+import thumbnailBackup from "../../../assets/images/challenge-thumbnail-backup.png";
+import { ImageMetaData } from "../../photo/state/types";
 
 const CHALLENGE_NAME_LIMIT = 100;
 const CHALLENGE_DESCRIPTION_LIMIT = 300;
@@ -178,9 +182,9 @@ function validateNumberInput(
 }
 
 type Props = {
-  initialData?: ChallengeConfigurableData;
+  initialData?: Challenge;
   refreshCounter: number;
-  onChallengeDataUpdated: (challenge: ChallengeConfigurableData) => void;
+  onChallengeDataUpdated: (challenge: ConfigurableChallengeData) => void;
 };
 
 export default function ChallengeForm({
@@ -228,7 +232,9 @@ export default function ChallengeForm({
   );
   const [startDate, setStartDate] = useState<Date>(new Date());
   const [endDate, setEndDate] = useState<Date>(new Date());
-  const [coverPhoto, setCoverPhoto] = useState<ImageMetadata | undefined>();
+  const [coverPhoto, setCoverPhoto] = useState<
+    ImageMetadata | string | undefined
+  >();
 
   // If we're editing an existing challenge, the parent component passes an initialChallenge
   // prop. We should allow users to discard changes, easy way to do this is have this form
@@ -246,7 +252,7 @@ export default function ChallengeForm({
       setIsPrivate(initialData.isPrivate);
       setStartDate(initialStartDate);
       setEndDate(initialEndDate);
-      setCoverPhoto(initialData.coverPhoto);
+      setCoverPhoto(initialData.coverPhotoUrl || thumbnailBackup);
     }
   }, [initialData, refreshCounter]);
 
@@ -268,27 +274,29 @@ export default function ChallengeForm({
     coverPhoto,
     startDate,
     endDate,
-    isPrivate
+    isPrivate,
+    onChallengeDataUpdated
   ]);
 
   const updateStartDate = (e: ChangeEvent<HTMLInputElement>) => {
     let date = new Date(e.currentTarget.value);
     // Arbitrary start at 2am, I think daylight savings means setting
     // this to midnight messes things ups.
-    date.setHours(2,0,0);
-    setStartDate(date)
-  }
+    date.setHours(2, 0, 0);
+    setStartDate(date);
+  };
 
   const updateEndDate = (e: ChangeEvent<HTMLInputElement>) => {
     let date = new Date(e.currentTarget.value);
     // Set challenge to end at the end of the last day.
-    date.setHours(23,59,59);
-    setEndDate(date)
-  }
+    date.setHours(23, 59, 59);
+    setEndDate(date);
+  };
 
-  const challengeDurationDays = Math.floor(
-    (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
-  ) + 1;
+  const challengeDurationDays =
+    Math.floor(
+      (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
+    ) + 1;
 
   return (
     <div>
@@ -339,7 +347,12 @@ export default function ChallengeForm({
       {coverPhoto && (
         <div className={classes.coverPhotoWrapper}>
           <img
-            src={coverPhoto && coverPhoto.imgSrc}
+            src={
+              coverPhoto &&
+              (coverPhotoIsMetaData(coverPhoto)
+                ? coverPhoto.imgSrc
+                : coverPhoto)
+            }
             className={classes.coverPhotoPreview}
           />
         </div>
@@ -356,9 +369,7 @@ export default function ChallengeForm({
         color="default"
         variant="contained"
       >
-        {coverPhoto && coverPhoto.imgSrc
-          ? "Change cover photo"
-          : "Add cover photo"}
+        {coverPhoto !== undefined ? "Change cover photo" : "Add cover photo"}
       </Button>
       <DesktopPhotoFallback
         ref={desktopPhotoRef}
@@ -399,7 +410,9 @@ export default function ChallengeForm({
 
       {challengeDurationDays > 0 && (
         <div className={classes.dateSummary}>
-          {`Challenge will run for ${challengeDurationDays} ${challengeDurationDays === 1 ? `day` : `days`}`}
+          {`Challenge will run for ${challengeDurationDays} ${
+            challengeDurationDays === 1 ? `day` : `days`
+          }`}
         </div>
       )}
 

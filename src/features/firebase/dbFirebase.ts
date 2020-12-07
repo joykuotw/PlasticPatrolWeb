@@ -11,6 +11,7 @@ import Feature from "types/Feature";
 import { Feedback } from "types/Feedback";
 import Photo from "types/Photo";
 import Config from "types/Config";
+import { updateChallengeOnPhotoModerated } from "./challenges";
 
 const firestore = firebase.firestore();
 export const storageRef = firebase.storage().ref();
@@ -193,7 +194,8 @@ function saveMetadata(data) {
     "location",
     "owner_id",
     "pieces",
-    "categories"
+    "categories",
+    "challengeIds"
   ];
 
   return firestore.collection("photos").add(_.pick(data, fieldsToSave));
@@ -275,7 +277,12 @@ function writeModeration(photoId, userId, published) {
   if (typeof published !== "boolean") {
     throw new Error("Only boolean pls");
   }
-  return firestore.collection("photos").doc(photoId).update({
+
+  const photoDocRef = firestore.collection("photos").doc(photoId);
+
+  updateChallengeOnPhotoModerated(photoDoc.get() as Photo, published);
+
+  return photoDocRef.update({
     moderated: firebase.firestore.FieldValue.serverTimestamp(),
     published: published,
     moderator_id: userId
@@ -292,6 +299,7 @@ function onConnectionStateChanged(fn: (online: boolean) => void) {
   function connectedCallBack(snapshot) {
     fn(Boolean(snapshot.val()));
   }
+
   conRef.on("value", connectedCallBack);
 
   return () => conRef.off("value", connectedCallBack);

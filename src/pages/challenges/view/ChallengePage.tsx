@@ -1,21 +1,38 @@
-import React from "react";
+import React, { useContext, useState } from "react";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 
 import PageWrapper from "components/PageWrapper";
-import { Challenge } from "../../../types/Challenges";
 import "react-circular-progressbar/dist/styles.css";
-import { Route, Switch, useHistory, useParams } from "react-router-dom";
+import { useHistory, useParams } from "react-router-dom";
 
 import Button from "@material-ui/core/Button";
 import { UserPieceRankTable } from "../../../components/Leaderboard";
 import { Line } from "rc-progress";
 import {
-  likeToManagePendingMembers,
-  linkToEditChallenge
+  linkToManagePendingMembers,
+  linkToEditChallenge,
+  linkToChallengesPage
 } from "../../../routes/challenges/links";
 import { UserLeaderboardData } from "../../../components/Leaderboard/UserPieceRankTable";
+import {
+  joinChallenge,
+  challengeHasEnded,
+  leaveChallenge,
+  deleteChallenge
+} from "../../../features/firebase/challenges";
 import User from "../../../types/User";
-import { joinChallenge } from "../../../providers/ChallengesProvider";
+import {
+  ChallengesProviderData,
+  useChallenges
+} from "../../../providers/ChallengesProvider";
+import { useUser } from "../../../providers/UserProvider";
+import thumbnailBackup from "../../../assets/images/challenge-thumbnail-backup.png";
+import {
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText
+} from "@material-ui/core";
 
 const useStyles = makeStyles((theme) => ({
   wrapper: {
@@ -25,7 +42,7 @@ const useStyles = makeStyles((theme) => ({
 
   pictureWrapper: {
     flex: "0 0 auto",
-    height: "150px",
+    height: "200px",
     overflow: "hidden",
     textAlign: "center",
     marginBottom: `${theme.spacing(0.5)}px`
@@ -81,17 +98,21 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-type Props = {
-  user: User;
-  challenges: Challenge[];
-};
+type Props = {};
 
-export default function ChallengePage({ user, challenges }: Props) {
+export default function ChallengePage({}: Props) {
   const classes = useStyles();
   const themes = useTheme();
+  const user = useUser();
 
   const history = useHistory();
   const handleBack = () => history.goBack();
+
+  const challengeData = useChallenges();
+  const challenges = challengeData?.challenges || [];
+
+  const [showLeaveModal, setShowLeaveModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const { challengeId } = useParams();
   const challenge = challenges.find((ch) => ch.id.toString() === challengeId);
@@ -102,22 +123,36 @@ export default function ChallengePage({ user, challenges }: Props) {
   const challengeProgress =
     (challenge.totalPieces / challenge.targetPieces) * 100;
 
-  const userLoggedIn = true; //user && user.id !== undefined;
-  const userChallengeData = challenge.totalUserPieces.find(
-    (challengeUser) => challengeUser.uid == user?.id
-  );
-  const userInChallenge: boolean = true;
-  //userLoggedIn && userChallengeData !== undefined;
-  const userIsModerator: boolean = true;
-  //userLoggedIn && user.isModerator;
-  const userIsChallengeOwner: boolean = true;
-  // userInChallenge && user.id == challenge.ownerUserId;
+  const userLoggedIn: boolean = user !== undefined && user.id !== undefined;
+  const userChallengeData = challenge.totalUserPieces[user?.id || -1];
+  const userInChallenge: boolean = userChallengeData !== undefined;
+  const userIsModerator: boolean = user?.isModerator || false;
+  const userIsChallengeOwner: boolean = user?.id === challenge.ownerUserId;
   const userCanManageChallenge: boolean =
     userIsChallengeOwner || userIsModerator;
 
-  const usersLeaderboard: UserLeaderboardData[] = challenge.totalUserPieces;
+  const usersLeaderboard: UserLeaderboardData[] = Object.values(
+    challenge.totalUserPieces || []
+  );
 
   const shareChallenge = () => {};
+
+  const imgSrc = challenge.coverPhotoUrl || thumbnailBackup;
+
+  console.log(challenge);
+  console.log(user);
+
+  const leaveChallengeSubmit = async () => {
+    await leaveChallenge(challengeId, user);
+    challengeData?.refresh();
+    history.push(linkToChallengesPage());
+  };
+
+  const deleteChallengeSubmit = async () => {
+    await deleteChallenge(challengeId);
+    challengeData?.refresh();
+    history.push(linkToChallengesPage());
+  };
 
   return (
     <PageWrapper
@@ -126,7 +161,7 @@ export default function ChallengePage({ user, challenges }: Props) {
       className={classes.wrapper}
     >
       <div className={classes.pictureWrapper}>
-        <img src={challenge.coverPhoto?.imgSrc} className={classes.picture} />
+        <img src={imgSrc} alt={"Mission cover"} className={classes.picture} />
       </div>
       <div className={classes.detailWrapper}>
         <div className={classes.description}>{challenge.description}</div>
@@ -149,10 +184,10 @@ export default function ChallengePage({ user, challenges }: Props) {
               Patrol account, or login to an existing account.
             </div>
           )}
-          {userLoggedIn && !userInChallenge && (
+          {userLoggedIn && !userInChallenge && !challengeHasEnded(challenge) && (
             <div className={classes.challengeButton}>
               <Button
-                onClick={() => joinChallenge(user.id, challenge.id)}
+                onClick={() => joinChallenge(challenge.id, user)}
                 color="primary"
                 size="small"
                 variant="contained"
@@ -161,6 +196,36 @@ export default function ChallengePage({ user, challenges }: Props) {
               </Button>
             </div>
           )}
+          {userLoggedIn &&
+            userInChallenge &&
+            !challengeHasEnded(challenge) &&
+            !userIsChallengeOwner && (
+              <div className={classes.challengeButton}>
+                <Button
+                  onClick={() => setShowLeaveModal(true)}
+                  color="primary"
+                  size="small"
+                  variant="contained"
+                >
+                  Leave challenge
+                </Button>
+              </div>
+            )}
+          {userLoggedIn &&
+            userInChallenge &&
+            !challengeHasEnded(challenge) &&
+            userIsChallengeOwner && (
+              <div className={classes.challengeButton}>
+                <Button
+                  onClick={() => setShowDeleteModal(true)}
+                  color="primary"
+                  size="small"
+                  variant="contained"
+                >
+                  Delete challenge
+                </Button>
+              </div>
+            )}
           {userLoggedIn && userInChallenge && (
             <div className={classes.challengeButton}>
               <Button
@@ -175,11 +240,11 @@ export default function ChallengePage({ user, challenges }: Props) {
           )}
           {userLoggedIn &&
             userCanManageChallenge &&
-            challenge.pendingUserIds.length > 0 && (
+            challenge.pendingUsers.length > 0 && (
               <div className={classes.challengeButton}>
                 <Button
                   onClick={() => {
-                    history.push(likeToManagePendingMembers(challengeId));
+                    history.push(linkToManagePendingMembers(challengeId));
                   }}
                   color="primary"
                   size="small"
@@ -206,8 +271,82 @@ export default function ChallengePage({ user, challenges }: Props) {
         </div>
       </div>
       <div className={classes.tableWrapper}>
-        <UserPieceRankTable usersLeaderboard={usersLeaderboard} user={user} />
+        <UserPieceRankTable
+          usersLeaderboard={usersLeaderboard}
+          user={user}
+          allowZeroPieces={true}
+        />
       </div>
+      <Modal
+        isOpen={showLeaveModal}
+        text={
+          "Are you sure you want to leave this challenge? " +
+          "You're pieces collected will remain in the leaderboard, but none of your new uploads will contribute to this challenge. " +
+          "If it's a public challenge, you can rejoin at any time. " +
+          "If it's a private challenge, you'll need to request to rejoin."
+        }
+        confirmText={"Leave Challenge"}
+        handleConfirm={leaveChallengeSubmit}
+        handleCancel={() => setShowLeaveModal(false)}
+      />
+      <Modal
+        isOpen={showDeleteModal}
+        text={
+          "Are you sure you want to delete this challenge? You'll need to ask Planet Patrol staff to retrieve it."
+        }
+        confirmText={"Delete Challenge"}
+        handleConfirm={deleteChallengeSubmit}
+        handleCancel={() => setShowDeleteModal(false)}
+      />
     </PageWrapper>
   );
 }
+
+type ModalProps = {
+  isOpen: boolean;
+  text: string;
+  confirmText: string;
+  handleConfirm: () => void;
+  handleCancel: () => void;
+};
+
+const Modal = ({
+  isOpen,
+  text,
+  confirmText,
+  handleConfirm,
+  handleCancel
+}: ModalProps) => {
+  return (
+    <Dialog
+      open={isOpen}
+      onClose={() => handleCancel()}
+      aria-labelledby="alert-dialog-title"
+      aria-describedby="alert-dialog-description"
+    >
+      <DialogContent>
+        <DialogContentText id="alert-dialog-description">
+          {text}
+        </DialogContentText>
+      </DialogContent>
+      <DialogActions>
+        <Button
+          onClick={(e) => {
+            handleCancel();
+          }}
+          color="default"
+        >
+          Cancel
+        </Button>
+        <Button
+          onClick={(e) => {
+            handleConfirm();
+          }}
+          color="secondary"
+        >
+          {confirmText}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+};

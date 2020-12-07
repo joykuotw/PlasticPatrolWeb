@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useContext } from "react";
 
 import _ from "lodash";
 
@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 
 import Avatar from "@material-ui/core/Avatar";
 import Typography from "@material-ui/core/Typography";
-import { makeStyles, useTheme } from "@material-ui/core/styles";
+import { makeStyles } from "@material-ui/core/styles";
 
 import PageWrapper from "../../components/PageWrapper";
 import MapLocation from "../../types/MapLocation";
@@ -15,12 +15,18 @@ import Geojson from "types/Geojson";
 import Tooltip from "components/common/Tooltip";
 import User from "types/User";
 import { Config } from "custom/config";
-import { FakeChallenge } from "../../providers/ChallengesProvider";
+import {
+  ChallengesContext,
+  ChallengesProviderData
+} from "../../providers/ChallengesProvider";
 import ChallengeThumbnail from "../challenges/ChallengeThumbnail";
-import { Challenge } from "../../types/Challenges";
 import { linkToChallengesPage } from "../../routes/challenges/links";
 
 import styles from "standard.scss";
+import {
+  ChallengeFirestoreData,
+  userIsInChallenge
+} from "../../types/Challenges";
 
 const LARGE_COLLECTION_THRESHOLD = 1000;
 
@@ -104,7 +110,16 @@ export default function AccountPage({
 
   const numPieces = _.sumBy(myPhotos, (o) => o.properties.pieces);
 
-  const challenges: Challenge[] = [FakeChallenge, FakeChallenge];
+  const challengeData = useContext<ChallengesProviderData | undefined>(
+    ChallengesContext
+  );
+  const challenges = challengeData?.challenges?.filter(
+    (challenge: ChallengeFirestoreData) =>
+      userIsInChallenge(challenge, user.id) && !challenge.hidden
+  );
+
+  console.log("user");
+  console.log(user.id);
 
   return (
     <PageWrapper
@@ -181,7 +196,7 @@ export default function AccountPage({
             My challenges
           </Typography>
 
-          {challenges.length === 0 ? (
+          {challenges === undefined || challenges?.length === 0 ? (
             <Typography className={classes.challengeJoinPrompt}>
               You haven't joined any challenges yet!
               <br />
@@ -192,7 +207,7 @@ export default function AccountPage({
               to find a challenge to join.
             </Typography>
           ) : (
-            challenges.map((challenge) => (
+            challenges?.map((challenge) => (
               <ChallengeThumbnail key={challenge.id} challenge={challenge} />
             ))
           )}

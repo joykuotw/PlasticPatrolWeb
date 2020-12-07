@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 
 import PageWrapper from "components/PageWrapper";
@@ -8,12 +8,17 @@ import Button from "@material-ui/core/Button";
 import { Route, useParams } from "react-router-dom";
 import ChallengeForm from "../common/ChallengeForm";
 import {
-  Challenge,
-  ChallengeConfigurableData,
+  ChallengeFirestoreData,
+  ConfigurableChallengeData,
   equal,
-  isChallengeReady
+  isChallengeDataValid,
+  isDuplicatingExistingChallengeName
 } from "../../../types/Challenges";
-import { editChallenge } from "../../../providers/ChallengesProvider";
+import { editChallenge } from "../../../features/firebase/challenges";
+import {
+  ChallengesProviderData,
+  useChallenges
+} from "../../../providers/ChallengesProvider";
 
 const useStyles = makeStyles((theme) => ({
   wrapper: {
@@ -27,17 +32,22 @@ const useStyles = makeStyles((theme) => ({
   button: {
     marginLeft: 5,
     marginRight: 5
+  },
+  formErrorWarning: {
+    color: "#f00",
+    margin: "5px 0"
   }
 }));
 
-type Props = {
-  challenges: Challenge[];
-};
+type Props = {};
 
-export default function EditChallenge({ challenges }: Props) {
+export default function EditChallenge({}: Props) {
   const styles = useStyles();
   const history = useHistory();
   const handleBack = { handleBack: () => history.goBack(), confirm: true };
+
+  const challengeData = useChallenges();
+  const challenges = challengeData?.challenges || [];
 
   const { challengeId } = useParams();
   const originalChallenge = challenges.find(
@@ -51,10 +61,15 @@ export default function EditChallenge({ challenges }: Props) {
 
   const [formRefreshCounter, setFormRefreshCounter] = useState(0);
   const [challengeFormData, setChallengeFormData] = useState<
-    ChallengeConfigurableData | undefined
+    ConfigurableChallengeData | undefined
   >(originalChallenge);
 
-  const challengeReady: boolean = isChallengeReady(challengeFormData);
+  const duplicatingExistingChallengeName = isDuplicatingExistingChallengeName(
+    challengeFormData,
+    challenges,
+    challengeId
+  );
+  const challengeReady: boolean = isChallengeDataValid(challengeFormData);
   const challengeChanged: boolean =
     originalChallenge === undefined ||
     challengeFormData === undefined ||
@@ -103,6 +118,11 @@ export default function EditChallenge({ challenges }: Props) {
           Discard changes
         </Button>
       </div>
+      {duplicatingExistingChallengeName && (
+        <div className={styles.formErrorWarning}>
+          Cannot have the same name as an existing challenge
+        </div>
+      )}
     </PageWrapper>
   );
 }

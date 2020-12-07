@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { useHistory } from "react-router-dom";
 
 import firebase from "firebase/app";
@@ -9,6 +9,9 @@ import { Item } from "pages/photo/types";
 
 import { linkToUploadSuccess } from "routes/upload-success/links";
 import useEffectOnMount from "hooks/useEffectOnMount";
+import User from "../../../../types/User";
+import UserProvider, { useUser } from "../../../../providers/UserProvider";
+import { updateChallengeOnPhotoUploaded } from "../../../../features/firebase/challenges";
 
 type HookArgs = {
   imgSrc: string;
@@ -23,6 +26,7 @@ type Args = {
   setSendingProgress: (progress: number) => void;
   setUploadTask: (task: any) => void;
   history: any;
+  challengeIds: string[];
 } & HookArgs;
 
 export default function useSendFile(args: HookArgs) {
@@ -30,10 +34,20 @@ export default function useSendFile(args: HookArgs) {
   const [sendingProgress, setSendingProgress] = useState(0);
   const [errorMessage, setErrorMessage] = useState<string>();
   const history = useHistory();
+  const challengeIds = useUser()?.challenges || [];
+
+  console.log("useSendFile");
+  console.log(challengeIds);
 
   const sendFileFunc = async () => {
     try {
-      await sendFile({ ...args, setUploadTask, setSendingProgress, history });
+      await sendFile({
+        ...args,
+        setUploadTask,
+        setSendingProgress,
+        history,
+        challengeIds
+      });
     } catch (err) {
       setErrorMessage(err.message);
     }
@@ -62,13 +76,17 @@ async function sendFile({
   history,
   setSendingProgress,
   setUploadTask,
-  onCancelUpload
+  onCancelUpload,
+  challengeIds
 }: Args) {
   if (!online) {
     throw new Error(
       "It appears you're offline, please turn on your data or wifi to upload this photo"
     );
   }
+
+  console.log("sendFile");
+  console.log(challengeIds);
 
   gtagEvent("Upload", "Photo");
 
@@ -87,7 +105,8 @@ async function sendFile({
   const dataToSend = {
     ...imgLocation,
     pieces: totalCount,
-    categories: transformedItems
+    categories: transformedItems,
+    challengeIds: challengeIds
   };
 
   let photoRef;
@@ -103,34 +122,38 @@ async function sendFile({
     throw new Error(`Photo upload was canceled. ${extraInfo}`);
   }
 
+  try {
+    updateChallengeOnPhotoUploaded(totalCount, challengeIds);
+  } catch (error) {
+    console.error(error);
+  }
+
   const base64 = imgSrc.split(",")[1];
   const uploadTask = dbFirebase.savePhoto(photoRef.id, base64);
 
   setUploadTask(uploadTask);
 
-  uploadTask.on(firebase.storage.TaskEvent.STATE_CHANGED,
-    (snapshot) => {
-      const sendingProgress = Math.ceil(
-        (snapshot.bytesTransferred / snapshot.totalBytes) * 98 + 1
-      );
-      setSendingProgress(sendingProgress);
+  uploadTask.on(firebase.storage.TaskEvent.STATE_CHANGED, (snapshot) => {
+    const sendingProgress = Math.ceil(
+      (snapshot.bytesTransferred / snapshot.totalBytes) * 98 + 1
+    );
+    setSendingProgress(sendingProgress);
 
-      switch (snapshot.state) {
-        case firebase.storage.TaskState.PAUSED: // or 'paused'
-          console.log("Upload is paused");
-          break;
-        case firebase.storage.TaskState.RUNNING: // or 'running'
-          console.log("Upload is running");
-          break;
-        default:
-          console.log(snapshot.state);
-      }
-    });
+    switch (snapshot.state) {
+      case firebase.storage.TaskState.PAUSED: // or 'paused'
+        console.log("Upload is paused");
+        break;
+      case firebase.storage.TaskState.RUNNING: // or 'running'
+        console.log("Upload is running");
+        break;
+      default:
+        console.log(snapshot.state);
+    }
+  });
 
   await uploadTask.then(() => {
-      history.push(linkToUploadSuccess(totalCount as any));
-    }
-  );
+    history.push(linkToUploadSuccess(totalCount as any));
+  });
 
   await uploadTask.catch((error) => {
     // @ts-ignore
