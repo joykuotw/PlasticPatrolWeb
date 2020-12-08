@@ -16,17 +16,14 @@ import Tooltip from "components/common/Tooltip";
 import User from "types/User";
 import { Config } from "custom/config";
 import {
-  ChallengesContext,
-  ChallengesProviderData
-} from "../../providers/ChallengesProvider";
-import ChallengeThumbnail from "../challenges/ChallengeThumbnail";
-import { linkToChallengesPage } from "../../routes/challenges/links";
+  MissionsContext,
+  MissionsProviderData
+} from "../../providers/MissionsProvider";
+import MissionThumbnail from "../missions/MissionThumbnail";
+import { linkToMissionsPage } from "../../routes/missions/links";
 
 import styles from "standard.scss";
-import {
-  ChallengeFirestoreData,
-  userIsInChallenge
-} from "../../types/Challenges";
+import { MissionFirestoreData, userIsInMission } from "../../types/Missions";
 
 const LARGE_COLLECTION_THRESHOLD = 1000;
 
@@ -49,16 +46,16 @@ const useStyles = makeStyles((theme) => ({
   wrapper: {
     alignItems: "center"
   },
-  challengesWrapper: {
+  missionsWrapper: {
     alignItems: "left",
     width: "100%",
     boxSizing: "border-box",
     padding: 20
   },
-  challengesTitle: {
+  missionsTitle: {
     paddingBottom: 10
   },
-  challengeJoinPrompt: {
+  missionJoinPrompt: {
     paddingTop: 20,
     color: styles.darkGrey,
     fontWeight: "bold"
@@ -110,12 +107,12 @@ export default function AccountPage({
 
   const numPieces = _.sumBy(myPhotos, (o) => o.properties.pieces);
 
-  const challengeData = useContext<ChallengesProviderData | undefined>(
-    ChallengesContext
+  const missionData = useContext<MissionsProviderData | undefined>(
+    MissionsContext
   );
-  const challenges = challengeData?.challenges?.filter(
-    (challenge: ChallengeFirestoreData) =>
-      userIsInChallenge(challenge, user.id) && !challenge.hidden
+  const missions = missionData?.missions?.filter(
+    (mission: MissionFirestoreData) =>
+      userIsInMission(mission, user.id) && !mission.hidden
   );
 
   console.log("user");
@@ -190,25 +187,25 @@ export default function AccountPage({
         </>
       )}
 
-      {config.ENABLE_CHALLENGES && (
-        <div className={classes.challengesWrapper}>
-          <Typography variant="h6" className={classes.challengesTitle}>
-            My challenges
+      {config.ENABLE_MISSIONS && (
+        <div className={classes.missionsWrapper}>
+          <Typography variant="h6" className={classes.missionsTitle}>
+            My missions
           </Typography>
 
-          {challenges === undefined || challenges?.length === 0 ? (
-            <Typography className={classes.challengeJoinPrompt}>
-              You haven't joined any challenges yet!
+          {missions === undefined || missions?.length === 0 ? (
+            <Typography className={classes.missionJoinPrompt}>
+              You haven't joined any missions yet!
               <br />
               Tap{" "}
-              <Link to={linkToChallengesPage()} className={classes.link}>
+              <Link to={linkToMissionsPage()} className={classes.link}>
                 here
               </Link>{" "}
-              to find a challenge to join.
+              to find a mission to join.
             </Typography>
           ) : (
-            challenges?.map((challenge) => (
-              <ChallengeThumbnail key={challenge.id} challenge={challenge} />
+            missions?.map((mission) => (
+              <MissionThumbnail key={mission.id} mission={mission} />
             ))
           )}
         </div>

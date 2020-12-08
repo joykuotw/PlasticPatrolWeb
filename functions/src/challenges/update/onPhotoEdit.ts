@@ -1,16 +1,16 @@
 import * as functions from "firebase-functions";
 import admin from "firebase-admin";
 
-import getChallengeIfExists from "../../challenges/utils/getChallengeIfExists";
+import getMissionIfExists from "../../missions/utils/getMissionIfExists";
 import { firestore } from "../../firestore";
 
 async function decrementPendingPieces(
-  challengeId: string,
+  missionId: string,
   numberToDecrement: number
 ) {
   return await firestore
-    .collection("challenges")
-    .doc(challengeId)
+    .collection("missions")
+    .doc(missionId)
     .update({
       pendingPieces: admin.firestore.FieldValue.increment(-numberToDecrement)
     });
@@ -28,7 +28,7 @@ export default functions.firestore
     }
 
     const {
-      challenges,
+      missions,
       pieces,
       moderated: newModerated,
       owner_id: photoUploaderId,
@@ -39,8 +39,8 @@ export default functions.firestore
     const hasJustBeenModerated = newModerated && !prevModerated;
 
     if (
-      !challenges ||
-      challenges.length === 0 ||
+      !missions ||
+      missions.length === 0 ||
       Number(pieces) === 0 ||
       !hasJustBeenModerated
     ) {
@@ -48,21 +48,21 @@ export default functions.firestore
     }
 
     await Promise.all(
-      challenges.map(async (challengeId: string) => {
+      missions.map(async (missionId: string) => {
         try {
-          const challenge = await getChallengeIfExists(challengeId);
+          const mission = await getMissionIfExists(missionId);
 
           if (published) {
-            //check user is still part of challenge, if they aren't we won't add to the challenge total
+            //check user is still part of mission, if they aren't we won't add to the mission total
             //but still need to decrement the pending pieces as we will have incremented it in `onPhotoUpload`
-            if (!challenge.totalUserPieces[photoUploaderId]) {
-              await decrementPendingPieces(challengeId, pieces);
+            if (!mission.totalUserPieces[photoUploaderId]) {
+              await decrementPendingPieces(missionId, pieces);
               return;
             }
 
             await firestore
-              .collection("challenges")
-              .doc(challengeId)
+              .collection("missions")
+              .doc(missionId)
               .update({
                 totalPieces: admin.firestore.FieldValue.increment(pieces),
                 pendingPieces: admin.firestore.FieldValue.increment(-pieces),
@@ -71,7 +71,7 @@ export default functions.firestore
                 )
               });
           } else {
-            await decrementPendingPieces(challengeId, pieces);
+            await decrementPendingPieces(missionId, pieces);
           }
         } catch (err) {
           console.error(err);

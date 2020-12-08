@@ -11,9 +11,9 @@ import CloseIcon from "@material-ui/icons/Close";
 import {
   approveNewMember,
   rejectNewMember
-} from "../../../features/firebase/challenges";
-import { useChallenges } from "../../../providers/ChallengesProvider";
-import { PendingUser } from "../../../types/Challenges";
+} from "../../../features/firebase/missions";
+import { useMissions } from "../../../providers/MissionsProvider";
+import { PendingUser } from "../../../types/Missions";
 
 const useStyles = makeStyles((theme) => ({
   wrapper: {
@@ -54,13 +54,13 @@ export default function ManagePendingMembers({}: Props) {
   const classes = useStyles();
   const history = useHistory();
 
-  const challengeData = useChallenges();
-  const challenges = challengeData?.challenges || [];
+  const missionData = useMissions();
+  const missions = missionData?.missions || [];
 
-  const { challengeId } = useParams();
-  const challenge = challenges.find((ch) => ch.id.toString() === challengeId);
-  if (challenge === undefined) {
-    const errorMessage = `Trying to manage pending challenge members but couldn't find challenge ${challengeId} data in list.`;
+  const { missionId } = useParams();
+  const mission = missions.find((ch) => ch.id.toString() === missionId);
+  if (mission === undefined) {
+    const errorMessage = `Trying to manage pending mission members but couldn't find mission ${missionId} data in list.`;
     console.warn(errorMessage);
     return <div>{errorMessage}</div>;
   }
@@ -73,13 +73,12 @@ export default function ManagePendingMembers({}: Props) {
       navigationHandler={{ handleBack }}
       className={classes.wrapper}
     >
-      {challenge.pendingUsers.length === 0 ? (
+      {mission.pendingUsers.length === 0 ? (
         <div>
-          There are currently no users who have requested to join this
-          challenge.
+          There are currently no users who have requested to join this mission.
         </div>
       ) : (
-        challenge.pendingUsers.map((pendingUser: PendingUser) => (
+        mission.pendingUsers.map((pendingUser: PendingUser) => (
           <div className={classes.memberWrapper} key={pendingUser.uid}>
             <div className={classes.memberNameWrapper}>
               <div className={classes.memberName}>
@@ -90,7 +89,7 @@ export default function ManagePendingMembers({}: Props) {
             <div className={classes.approveButton}>
               <Button
                 className={classes.button}
-                onClick={() => approveNewMember(pendingUser.uid, challenge.id)}
+                onClick={() => approveNewMember(pendingUser.uid, mission.id)}
                 color="default"
                 size="small"
                 variant="outlined"
@@ -102,7 +101,7 @@ export default function ManagePendingMembers({}: Props) {
             <div className={classes.rejectButton}>
               <Button
                 className={classes.button}
-                onClick={() => rejectNewMember(pendingUser.uid, challenge.id)}
+                onClick={() => rejectNewMember(pendingUser.uid, mission.id)}
                 color="default"
                 size="small"
                 variant="outlined"

@@ -4,16 +4,16 @@ import admin from "firebase-admin";
 
 import { firestore } from "../firestore";
 import { getDisplayName } from "../stats";
-import { ChallengeFromServer, ConfigurableChallengeData } from "./models";
-import addChallengeToUser from "./utils/addChallengeToUser";
+import { MissionFromServer, ConfigurableMissionData } from "./models";
+import addMissionToUser from "./utils/addMissionToUser";
 
-type ChallengeToPersist = Omit<ChallengeFromServer, "id">;
+type MissionToPersist = Omit<MissionFromServer, "id">;
 
 export default functions.https.onCall(
   async (
-    restOfChallenge: ConfigurableChallengeData,
+    restOfMission: ConfigurableMissionData,
     callableContext
-  ): Promise<ChallengeFromServer> => {
+  ): Promise<MissionFromServer> => {
     const ownerUserId = callableContext.auth?.uid;
     if (!ownerUserId) {
       throw new functions.https.HttpsError(
@@ -24,8 +24,8 @@ export default functions.https.onCall(
     const user = await admin.auth().getUser(ownerUserId);
     const displayName = getDisplayName(user);
 
-    const challengeToPersist: ChallengeToPersist = {
-      ...restOfChallenge,
+    const missionToPersist: MissionToPersist = {
+      ...restOfMission,
       ownerUserId,
       totalPieces: 0,
       totalUserPieces: {
@@ -35,12 +35,10 @@ export default functions.https.onCall(
       pendingUsers: []
     };
 
-    const { id } = await firestore
-      .collection("challenges")
-      .add(challengeToPersist);
+    const { id } = await firestore.collection("missions").add(missionToPersist);
 
-    await addChallengeToUser(ownerUserId, id);
+    await addMissionToUser(ownerUserId, id);
 
-    return { id, ...challengeToPersist };
+    return { id, ...missionToPersist };
   }
 );

@@ -3,20 +3,20 @@ import * as functions from "firebase-functions";
 import admin from "firebase-admin";
 
 import { firestore } from "../firestore";
-import getChallengeIfExists from "./utils/getChallengeIfExists";
-import verifyChallengeIsOngoing from "./utils/verifyChallengeIsOngoing";
+import getMissionIfExists from "./utils/getMissionIfExists";
+import verifyMissionIsOngoing from "./utils/verifyMissionIsOngoing";
 
-type RequestData = { challengeId: string; userId: string };
+type RequestData = { missionId: string; userId: string };
 
 export default functions.https.onCall(
   async (
-    { challengeId, userId: userIdBeingRejected }: RequestData,
+    { missionId, userId: userIdBeingRejected }: RequestData,
     callableContext
   ) => {
-    if (!challengeId) {
+    if (!missionId) {
       throw new functions.https.HttpsError(
         "invalid-argument",
-        "Missing challengeId"
+        "Missing missionId"
       );
     }
     const currentUserId = callableContext.auth?.uid;
@@ -27,9 +27,9 @@ export default functions.https.onCall(
       );
     }
 
-    const challenge = await getChallengeIfExists(challengeId);
+    const mission = await getMissionIfExists(missionId);
 
-    const { ownerUserId, pendingUsers } = challenge;
+    const { ownerUserId, pendingUsers } = mission;
 
     const pendingUser = pendingUsers.find(
       ({ uid }) => uid === userIdBeingRejected
@@ -57,17 +57,14 @@ export default functions.https.onCall(
       }
     }
 
-    const challengeIsOngoing = verifyChallengeIsOngoing(challenge);
-    if (!challengeIsOngoing) {
-      throw new functions.https.HttpsError(
-        "unavailable",
-        "Challenge has ended"
-      );
+    const missionIsOngoing = verifyMissionIsOngoing(mission);
+    if (!missionIsOngoing) {
+      throw new functions.https.HttpsError("unavailable", "Mission has ended");
     }
 
     await firestore
-      .collection("challenges")
-      .doc(challengeId)
+      .collection("missions")
+      .doc(missionId)
       .update({
         pendingUsers: admin.firestore.FieldValue.arrayRemove(pendingUser)
       });

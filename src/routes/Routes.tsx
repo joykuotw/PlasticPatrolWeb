@@ -38,8 +38,8 @@ import { linkToTutorialPage } from "./tutorial/links";
 import AccountPageRoute from "./account/Route";
 import { linkToAccountPage } from "./account/links";
 import { useStats } from "providers/StatsProvider";
-import { linkToChallengesPage } from "./challenges/links";
-import ChallengesRoute from "./challenges/Route";
+import { linkToMissionsPage } from "./missions/links";
+import MissionsRoute from "./missions/Route";
 
 type Props = {
   user: User;
@@ -136,8 +136,8 @@ export function Routes({
         )}
       />
 
-      <Route path={linkToChallengesPage()}>
-        <ChallengesRoute />
+      <Route path={linkToMissionsPage()}>
+        <MissionsRoute />
       </Route>
 
       <ModeratorRoute path={config.PAGES.moderator.path} user={user}>

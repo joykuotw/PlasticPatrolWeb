@@ -1,18 +1,18 @@
 import faker from "faker";
 
 import {
-  Challenge,
+  Mission,
   PendingUser,
   PendingUsers,
   TotalUserPieces,
   User
 } from "../models";
 
-export class ChallengeBuilder {
-  model: Partial<Challenge> = {};
+export class MissionBuilder {
+  model: Partial<Mission> = {};
 
-  constructor(partialChallenge: Partial<Challenge> = {}) {
-    this.model = partialChallenge;
+  constructor(partialMission: Partial<Mission> = {}) {
+    this.model = partialMission;
   }
 
   withValidValues() {

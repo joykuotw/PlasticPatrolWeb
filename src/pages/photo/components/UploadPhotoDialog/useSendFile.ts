@@ -11,7 +11,7 @@ import { linkToUploadSuccess } from "routes/upload-success/links";
 import useEffectOnMount from "hooks/useEffectOnMount";
 import User from "../../../../types/User";
 import UserProvider, { useUser } from "../../../../providers/UserProvider";
-import { updateChallengeOnPhotoUploaded } from "../../../../features/firebase/challenges";
+import { updateMissionOnPhotoUploaded } from "../../../../features/firebase/missions";
 
 type HookArgs = {
   imgSrc: string;
@@ -26,7 +26,7 @@ type Args = {
   setSendingProgress: (progress: number) => void;
   setUploadTask: (task: any) => void;
   history: any;
-  challengeIds: string[];
+  missionIds: string[];
 } & HookArgs;
 
 export default function useSendFile(args: HookArgs) {
@@ -34,10 +34,10 @@ export default function useSendFile(args: HookArgs) {
   const [sendingProgress, setSendingProgress] = useState(0);
   const [errorMessage, setErrorMessage] = useState<string>();
   const history = useHistory();
-  const challengeIds = useUser()?.challenges || [];
+  const missionIds = useUser()?.missions || [];
 
   console.log("useSendFile");
-  console.log(challengeIds);
+  console.log(missionIds);
 
   const sendFileFunc = async () => {
     try {
@@ -46,7 +46,7 @@ export default function useSendFile(args: HookArgs) {
         setUploadTask,
         setSendingProgress,
         history,
-        challengeIds
+        missionIds
       });
     } catch (err) {
       setErrorMessage(err.message);
@@ -77,7 +77,7 @@ async function sendFile({
   setSendingProgress,
   setUploadTask,
   onCancelUpload,
-  challengeIds
+  missionIds
 }: Args) {
   if (!online) {
     throw new Error(
@@ -86,7 +86,7 @@ async function sendFile({
   }
 
   console.log("sendFile");
-  console.log(challengeIds);
+  console.log(missionIds);
 
   gtagEvent("Upload", "Photo");
 
@@ -106,7 +106,7 @@ async function sendFile({
     ...imgLocation,
     pieces: totalCount,
     categories: transformedItems,
-    challengeIds: challengeIds
+    missionIds: missionIds
   };
 
   let photoRef;
@@ -123,7 +123,7 @@ async function sendFile({
   }
 
   try {
-    updateChallengeOnPhotoUploaded(totalCount, challengeIds);
+    updateMissionOnPhotoUploaded(totalCount, missionIds);
   } catch (error) {
     console.error(error);
   }

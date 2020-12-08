@@ -6,16 +6,16 @@ import {
   validUserId
 } from "../../test/utils";
 
-import leaveChallenge from "../leave";
-import { ChallengeBuilder } from "./utils";
+import leaveMission from "../leave";
+import { MissionBuilder } from "./utils";
 
-const leave = firebaseTests.wrap(leaveChallenge);
+const leave = firebaseTests.wrap(leaveMission);
 
-const builder = new ChallengeBuilder().withValidValues();
+const builder = new MissionBuilder().withValidValues();
 
-const expectedChallenge = builder.build();
+const expectedMission = builder.build();
 
-const mockChallenge = builder
+const mockMission = builder
   .addUser({
     uid: validUserId,
     displayName: "test user",
@@ -23,12 +23,12 @@ const mockChallenge = builder
   })
   .build();
 
-// TODO: add check that user record is leaved + challengeIds appended
-describe("leave challenge", () => {
+// TODO: add check that user record is leaved + missionIds appended
+describe("leave mission", () => {
   beforeEach(async () => {
     await firebaseTests.firestore.makeDocumentSnapshot(
-      mockChallenge,
-      "challenges/test-challenge-id"
+      mockMission,
+      "missions/test-mission-id"
     );
   });
 
@@ -36,16 +36,13 @@ describe("leave challenge", () => {
     firebaseTests.cleanup();
   });
 
-  it("should return an enriched challenge", async () => {
+  it("should return an enriched mission", async () => {
     try {
-      const data = await leave(
-        "test-challenge-id",
-        authenticatedCallableContext
-      );
-      const { id, ...restOfChallenge } = data;
+      const data = await leave("test-mission-id", authenticatedCallableContext);
+      const { id, ...restOfMission } = data;
 
       assert.ok(id);
-      assert.deepEqual(restOfChallenge, expectedChallenge);
+      assert.deepEqual(restOfMission, expectedMission);
     } catch (err) {
       assert.fail(err);
     }
@@ -54,7 +51,7 @@ describe("leave challenge", () => {
   describe("failure", () => {
     it("throws if user is not authenticated", async () => {
       try {
-        await leave("test-challenge-id");
+        await leave("test-mission-id");
       } catch (err) {
         assert.equal(err.message, "User must be authenticated");
         return;
@@ -63,11 +60,11 @@ describe("leave challenge", () => {
       assert.fail("Did not throw");
     });
 
-    it("throws if no challengeId is passed", async () => {
+    it("throws if no missionId is passed", async () => {
       try {
-        await leave("test-challenge-id");
+        await leave("test-mission-id");
       } catch (err) {
-        assert.equal(err.message, "Missing challengeId");
+        assert.equal(err.message, "Missing missionId");
         return;
       }
 

@@ -26,10 +26,7 @@ import { useOnline } from "./providers/OnlineProvider";
 import UserProvider, { useUser } from "./providers/UserProvider";
 import StatsProvider from "./providers/StatsProvider";
 import { dbFirebase } from "features/firebase";
-import {
-  ChallengesProvider,
-  useChallenges
-} from "./providers/ChallengesProvider";
+import { MissionsProvider, useChallenges } from "./providers/MissionsProvider";
 
 serviceWorker.register();
 
@@ -96,11 +93,11 @@ const startApp = () => {
         <LocationProvider>
           <SelectedFeatureProvider>
             <StatsProvider>
-              <ChallengesProvider>
+              <MissionsProvider>
                 <UserProvider>
                   <Wrapper />
                 </UserProvider>
-              </ChallengesProvider>
+              </MissionsProvider>
             </StatsProvider>
           </SelectedFeatureProvider>
         </LocationProvider>

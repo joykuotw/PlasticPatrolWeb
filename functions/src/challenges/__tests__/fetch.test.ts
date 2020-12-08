@@ -3,11 +3,11 @@ import admin from "firebase-admin";
 
 import { authenticatedCallableContext, firebaseTests } from "../../test/utils";
 
-import fetchChallenge from "../fetch";
+import fetchMission from "../fetch";
 
-const fetch = firebaseTests.wrap(fetchChallenge);
+const fetch = firebaseTests.wrap(fetchMission);
 
-describe("fetch challenge", () => {
+describe("fetch mission", () => {
   before(() => {});
 
   after(() => {
@@ -16,11 +16,11 @@ describe("fetch challenge", () => {
   describe("success", () => {});
 
   describe("error", () => {
-    it("throws if no challenge id is passed", async () => {
+    it("throws if no mission id is passed", async () => {
       try {
         await fetch({}, authenticatedCallableContext);
       } catch (err) {
-        assert.equal(err.message, "Missing challengeId");
+        assert.equal(err.message, "Missing missionId");
         return;
       }
 
@@ -29,7 +29,7 @@ describe("fetch challenge", () => {
 
     it("throws if user is not authenticated", async () => {
       try {
-        await fetch({ challengeId: "any-string" });
+        await fetch({ missionId: "any-string" });
       } catch (err) {
         assert.equal(err.message, "User must be authenticated");
         return;
@@ -41,11 +41,11 @@ describe("fetch challenge", () => {
     it("throws if no change exists", async () => {
       try {
         await fetch(
-          { challengeId: "not-a-real-challenge" },
+          { missionId: "not-a-real-mission" },
           authenticatedCallableContext
         );
       } catch (err) {
-        assert.equal(err.message, "No challenge exists for id");
+        assert.equal(err.message, "No mission exists for id");
         return;
       }
 

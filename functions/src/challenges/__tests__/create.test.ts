@@ -7,14 +7,14 @@ import {
   validUserId
 } from "../../test/utils";
 
-import createChallenge from "../create";
-import { ChallengeBuilder } from "./utils";
+import createMission from "../create";
+import { MissionBuilder } from "./utils";
 
-const create = firebaseTests.wrap(createChallenge);
+const create = firebaseTests.wrap(createMission);
 
-const testChallenge = new ChallengeBuilder().withConfigurableValues().build();
+const testMission = new MissionBuilder().withConfigurableValues().build();
 
-const expectedChallenge = new ChallengeBuilder(testChallenge)
+const expectedMission = new MissionBuilder(testMission)
   .ownerUserId(validUserId)
   .totalPieces(0)
   .addUser({
@@ -26,23 +26,23 @@ const expectedChallenge = new ChallengeBuilder(testChallenge)
   .pendingUsers([])
   .build();
 
-// TODO: add check that user record is created + challengeIds appended
-describe.only("create challenge", () => {
+// TODO: add check that user record is created + missionIds appended
+describe.only("create mission", () => {
   before(() => {});
 
   after(() => {
     firebaseTests.cleanup();
   });
 
-  it("should return an enriched challenge", async () => {
+  it("should return an enriched mission", async () => {
     try {
-      const res = await create(testChallenge, authenticatedCallableContext);
-      const { id, ...restOfChallenge } = res;
+      const res = await create(testMission, authenticatedCallableContext);
+      const { id, ...restOfMission } = res;
 
       assert.ok(id);
-      assert.deepEqual(restOfChallenge, expectedChallenge);
+      assert.deepEqual(restOfMission, expectedMission);
 
-      // TODO: check challenge appended to user
+      // TODO: check mission appended to user
       const snap = await admin.firestore().doc(`users/${validUserId}`).get();
 
       const { data, exists } = snap;
@@ -51,9 +51,9 @@ describe.only("create challenge", () => {
       console.log(data());
 
       // assert.equal(
-      //   challengeIds.contains(id),
+      //   missionIds.contains(id),
       //   true,
-      //   "user challenges contains challengeId"
+      //   "user missions contains missionId"
       // );
     } catch (err) {
       assert.fail(err);
@@ -62,7 +62,7 @@ describe.only("create challenge", () => {
 
   it("throws if user is not authenticated", async () => {
     try {
-      await create(testChallenge);
+      await create(testMission);
     } catch (err) {
       assert.equal(err.message, "User must be authenticated");
       return;

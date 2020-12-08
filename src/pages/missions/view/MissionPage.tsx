@@ -10,23 +10,23 @@ import { UserPieceRankTable } from "../../../components/Leaderboard";
 import { Line } from "rc-progress";
 import {
   linkToManagePendingMembers,
-  linkToEditChallenge,
-  linkToChallengesPage
-} from "../../../routes/challenges/links";
+  linkToEditMission,
+  linkToMissionsPage
+} from "../../../routes/missions/links";
 import { UserLeaderboardData } from "../../../components/Leaderboard/UserPieceRankTable";
 import {
-  joinChallenge,
-  challengeHasEnded,
-  leaveChallenge,
-  deleteChallenge
-} from "../../../features/firebase/challenges";
+  joinMission,
+  missionHasEnded,
+  leaveMission,
+  deleteMission
+} from "../../../features/firebase/missions";
 import User from "../../../types/User";
 import {
-  ChallengesProviderData,
-  useChallenges
-} from "../../../providers/ChallengesProvider";
+  MissionsProviderData,
+  useMissions
+} from "../../../providers/MissionsProvider";
 import { useUser } from "../../../providers/UserProvider";
-import thumbnailBackup from "../../../assets/images/challenge-thumbnail-backup.png";
+import thumbnailBackup from "../../../assets/images/mission-thumbnail-backup.png";
 import {
   Dialog,
   DialogActions,
@@ -89,7 +89,7 @@ const useStyles = makeStyles((theme) => ({
     padding: `0 ${theme.spacing(0.5)}px`
   },
 
-  challengeButton: {
+  missionButton: {
     margin: `${theme.spacing(1)}px ${theme.spacing(0.5)}px`
   },
 
@@ -100,7 +100,7 @@ const useStyles = makeStyles((theme) => ({
 
 type Props = {};
 
-export default function ChallengePage({}: Props) {
+export default function MissionPage({}: Props) {
   const classes = useStyles();
   const themes = useTheme();
   const user = useUser();
@@ -108,55 +108,53 @@ export default function ChallengePage({}: Props) {
   const history = useHistory();
   const handleBack = () => history.goBack();
 
-  const challengeData = useChallenges();
-  const challenges = challengeData?.challenges || [];
+  const missionData = useMissions();
+  const missions = missionData?.missions || [];
 
   const [showLeaveModal, setShowLeaveModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-  const { challengeId } = useParams();
-  const challenge = challenges.find((ch) => ch.id.toString() === challengeId);
-  if (challenge === undefined) {
-    return <div>Could not find challenge</div>;
+  const { missionId } = useParams();
+  const mission = missions.find((ch) => ch.id.toString() === missionId);
+  if (mission === undefined) {
+    return <div>Could not find mission</div>;
   }
 
-  const challengeProgress =
-    (challenge.totalPieces / challenge.targetPieces) * 100;
+  const missionProgress = (mission.totalPieces / mission.targetPieces) * 100;
 
   const userLoggedIn: boolean = user !== undefined && user.id !== undefined;
-  const userChallengeData = challenge.totalUserPieces[user?.id || -1];
-  const userInChallenge: boolean = userChallengeData !== undefined;
+  const userMissionData = mission.totalUserPieces[user?.id || -1];
+  const userInMission: boolean = userMissionData !== undefined;
   const userIsModerator: boolean = user?.isModerator || false;
-  const userIsChallengeOwner: boolean = user?.id === challenge.ownerUserId;
-  const userCanManageChallenge: boolean =
-    userIsChallengeOwner || userIsModerator;
+  const userIsMissionOwner: boolean = user?.id === mission.ownerUserId;
+  const userCanManageMission: boolean = userIsMissionOwner || userIsModerator;
 
   const usersLeaderboard: UserLeaderboardData[] = Object.values(
-    challenge.totalUserPieces || []
+    mission.totalUserPieces || []
   );
 
-  const shareChallenge = () => {};
+  const shareMission = () => {};
 
-  const imgSrc = challenge.coverPhotoUrl || thumbnailBackup;
+  const imgSrc = mission.coverPhotoUrl || thumbnailBackup;
 
-  console.log(challenge);
+  console.log(mission);
   console.log(user);
 
-  const leaveChallengeSubmit = async () => {
-    await leaveChallenge(challengeId, user);
-    challengeData?.refresh();
-    history.push(linkToChallengesPage());
+  const leaveMissionSubmit = async () => {
+    await leaveMission(missionId, user);
+    missionData?.refresh();
+    history.push(linkToMissionsPage());
   };
 
-  const deleteChallengeSubmit = async () => {
-    await deleteChallenge(challengeId);
-    challengeData?.refresh();
-    history.push(linkToChallengesPage());
+  const deleteMissionSubmit = async () => {
+    await deleteMission(missionId);
+    missionData?.refresh();
+    history.push(linkToMissionsPage());
   };
 
   return (
     <PageWrapper
-      label={challenge.name}
+      label={mission.name}
       navigationHandler={{ handleBack }}
       className={classes.wrapper}
     >
@@ -164,14 +162,14 @@ export default function ChallengePage({}: Props) {
         <img src={imgSrc} alt={"Mission cover"} className={classes.picture} />
       </div>
       <div className={classes.detailWrapper}>
-        <div className={classes.description}>{challenge.description}</div>
+        <div className={classes.description}>{mission.description}</div>
         <div className={classes.progressWrapper}>
           <div className={classes.progressText}>
-            {challenge.totalPieces}/{challenge.targetPieces} pieces of litter
+            {mission.totalPieces}/{mission.targetPieces} pieces of litter
             collected so far!
           </div>
           <Line
-            percent={challengeProgress}
+            percent={missionProgress}
             strokeWidth={2}
             trailWidth={2}
             strokeColor={themes.palette.secondary.main}
@@ -180,56 +178,56 @@ export default function ChallengePage({}: Props) {
         <div className={classes.buttonsWrapper}>
           {!userLoggedIn && (
             <div className={classes.notLoggedInMessage}>
-              Before you can join a challenge, you’ll have to create a Planet
+              Before you can join a mission, you’ll have to create a Planet
               Patrol account, or login to an existing account.
             </div>
           )}
-          {userLoggedIn && !userInChallenge && !challengeHasEnded(challenge) && (
-            <div className={classes.challengeButton}>
+          {userLoggedIn && !userInMission && !missionHasEnded(mission) && (
+            <div className={classes.missionButton}>
               <Button
-                onClick={() => joinChallenge(challenge.id, user)}
+                onClick={() => joinMission(mission.id, user)}
                 color="primary"
                 size="small"
                 variant="contained"
               >
-                Join challenge
+                Join mission
               </Button>
             </div>
           )}
           {userLoggedIn &&
-            userInChallenge &&
-            !challengeHasEnded(challenge) &&
-            !userIsChallengeOwner && (
-              <div className={classes.challengeButton}>
+            userInMission &&
+            !missionHasEnded(mission) &&
+            !userIsMissionOwner && (
+              <div className={classes.missionButton}>
                 <Button
                   onClick={() => setShowLeaveModal(true)}
                   color="primary"
                   size="small"
                   variant="contained"
                 >
-                  Leave challenge
+                  Leave mission
                 </Button>
               </div>
             )}
           {userLoggedIn &&
-            userInChallenge &&
-            !challengeHasEnded(challenge) &&
-            userIsChallengeOwner && (
-              <div className={classes.challengeButton}>
+            userInMission &&
+            !missionHasEnded(mission) &&
+            userIsMissionOwner && (
+              <div className={classes.missionButton}>
                 <Button
                   onClick={() => setShowDeleteModal(true)}
                   color="primary"
                   size="small"
                   variant="contained"
                 >
-                  Delete challenge
+                  Delete mission
                 </Button>
               </div>
             )}
-          {userLoggedIn && userInChallenge && (
-            <div className={classes.challengeButton}>
+          {userLoggedIn && userInMission && (
+            <div className={classes.missionButton}>
               <Button
-                onClick={shareChallenge}
+                onClick={shareMission}
                 color="primary"
                 size="small"
                 variant="contained"
@@ -239,12 +237,12 @@ export default function ChallengePage({}: Props) {
             </div>
           )}
           {userLoggedIn &&
-            userCanManageChallenge &&
-            challenge.pendingUsers.length > 0 && (
-              <div className={classes.challengeButton}>
+            userCanManageMission &&
+            mission.pendingUsers.length > 0 && (
+              <div className={classes.missionButton}>
                 <Button
                   onClick={() => {
-                    history.push(linkToManagePendingMembers(challengeId));
+                    history.push(linkToManagePendingMembers(missionId));
                   }}
                   color="primary"
                   size="small"
@@ -254,11 +252,11 @@ export default function ChallengePage({}: Props) {
                 </Button>
               </div>
             )}
-          {userCanManageChallenge && (
-            <div className={classes.challengeButton}>
+          {userCanManageMission && (
+            <div className={classes.missionButton}>
               <Button
                 onClick={() => {
-                  history.push(linkToEditChallenge(challengeId));
+                  history.push(linkToEditMission(missionId));
                 }}
                 color="primary"
                 size="small"
@@ -280,22 +278,22 @@ export default function ChallengePage({}: Props) {
       <Modal
         isOpen={showLeaveModal}
         text={
-          "Are you sure you want to leave this challenge? " +
-          "You're pieces collected will remain in the leaderboard, but none of your new uploads will contribute to this challenge. " +
-          "If it's a public challenge, you can rejoin at any time. " +
-          "If it's a private challenge, you'll need to request to rejoin."
+          "Are you sure you want to leave this mission? " +
+          "You're pieces collected will remain in the leaderboard, but none of your new uploads will contribute to this mission. " +
+          "If it's a public mission, you can rejoin at any time. " +
+          "If it's a private mission, you'll need to request to rejoin."
         }
-        confirmText={"Leave Challenge"}
-        handleConfirm={leaveChallengeSubmit}
+        confirmText={"Leave Mission"}
+        handleConfirm={leaveMissionSubmit}
         handleCancel={() => setShowLeaveModal(false)}
       />
       <Modal
         isOpen={showDeleteModal}
         text={
-          "Are you sure you want to delete this challenge? You'll need to ask Planet Patrol staff to retrieve it."
+          "Are you sure you want to delete this mission? You'll need to ask Planet Patrol staff to retrieve it."
         }
-        confirmText={"Delete Challenge"}
-        handleConfirm={deleteChallengeSubmit}
+        confirmText={"Delete Mission"}
+        handleConfirm={deleteMissionSubmit}
         handleCancel={() => setShowDeleteModal(false)}
       />
     </PageWrapper>

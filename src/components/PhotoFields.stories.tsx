@@ -29,7 +29,7 @@ const dataProps = {
         error: false
       }
     ],
-    challenges: []
+    missions: []
   }
 };
 

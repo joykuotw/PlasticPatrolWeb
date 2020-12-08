@@ -6,19 +6,19 @@ import "react-circular-progressbar/dist/styles.css";
 import { useHistory } from "react-router";
 import Button from "@material-ui/core/Button";
 import { Route, useParams } from "react-router-dom";
-import ChallengeForm from "../common/ChallengeForm";
+import MissionForm from "../common/MissionForm";
 import {
-  ChallengeFirestoreData,
-  ConfigurableChallengeData,
+  MissionFirestoreData,
+  ConfigurableMissionData,
   equal,
-  isChallengeDataValid,
-  isDuplicatingExistingChallengeName
-} from "../../../types/Challenges";
-import { editChallenge } from "../../../features/firebase/challenges";
+  isMissionDataValid,
+  isDuplicatingExistingMissionName
+} from "../../../types/Missions";
+import { editMission } from "../../../features/firebase/missions";
 import {
-  ChallengesProviderData,
-  useChallenges
-} from "../../../providers/ChallengesProvider";
+  MissionsProviderData,
+  useMissions
+} from "../../../providers/MissionsProvider";
 
 const useStyles = makeStyles((theme) => ({
   wrapper: {
@@ -41,62 +41,60 @@ const useStyles = makeStyles((theme) => ({
 
 type Props = {};
 
-export default function EditChallenge({}: Props) {
+export default function EditMission({}: Props) {
   const styles = useStyles();
   const history = useHistory();
   const handleBack = { handleBack: () => history.goBack(), confirm: true };
 
-  const challengeData = useChallenges();
-  const challenges = challengeData?.challenges || [];
+  const missionData = useMissions();
+  const missions = missionData?.missions || [];
 
-  const { challengeId } = useParams();
-  const originalChallenge = challenges.find(
-    (ch) => ch.id.toString() === challengeId
-  );
-  if (originalChallenge === undefined) {
+  const { missionId } = useParams();
+  const originalMission = missions.find((ch) => ch.id.toString() === missionId);
+  if (originalMission === undefined) {
     console.warn(
-      `Trying to edit challenge ${challengeId} but couldn't find challenge data in list.`
+      `Trying to edit mission ${missionId} but couldn't find mission data in list.`
     );
   }
 
   const [formRefreshCounter, setFormRefreshCounter] = useState(0);
-  const [challengeFormData, setChallengeFormData] = useState<
-    ConfigurableChallengeData | undefined
-  >(originalChallenge);
+  const [missionFormData, setMissionFormData] = useState<
+    ConfigurableMissionData | undefined
+  >(originalMission);
 
-  const duplicatingExistingChallengeName = isDuplicatingExistingChallengeName(
-    challengeFormData,
-    challenges,
-    challengeId
+  const duplicatingExistingMissionName = isDuplicatingExistingMissionName(
+    missionFormData,
+    missions,
+    missionId
   );
-  const challengeReady: boolean = isChallengeDataValid(challengeFormData);
-  const challengeChanged: boolean =
-    originalChallenge === undefined ||
-    challengeFormData === undefined ||
-    !equal(originalChallenge, challengeFormData);
+  const missionReady: boolean = isMissionDataValid(missionFormData);
+  const missionChanged: boolean =
+    originalMission === undefined ||
+    missionFormData === undefined ||
+    !equal(originalMission, missionFormData);
 
   const applyEdits = () => {
-    if (challengeFormData === undefined) {
+    if (missionFormData === undefined) {
       return;
     }
-    editChallenge(challengeId, challengeFormData);
+    editMission(missionId, missionFormData);
   };
 
   const discardEdits = () => {
-    setChallengeFormData(originalChallenge);
+    setMissionFormData(originalMission);
     setFormRefreshCounter(formRefreshCounter + 1);
   };
 
   return (
     <PageWrapper
-      label={"Edit challenge"}
+      label={"Edit mission"}
       navigationHandler={handleBack}
       className={styles.wrapper}
     >
-      <ChallengeForm
-        initialData={originalChallenge}
+      <MissionForm
+        initialData={originalMission}
         refreshCounter={formRefreshCounter}
-        onChallengeDataUpdated={setChallengeFormData}
+        onMissionDataUpdated={setMissionFormData}
       />
       <div className={styles.buttons}>
         <Button
@@ -104,7 +102,7 @@ export default function EditChallenge({}: Props) {
           onClick={applyEdits}
           color="primary"
           variant="contained"
-          disabled={!challengeReady || !challengeChanged}
+          disabled={!missionReady || !missionChanged}
         >
           Apply changes
         </Button>
@@ -113,14 +111,14 @@ export default function EditChallenge({}: Props) {
           onClick={discardEdits}
           color="primary"
           variant="contained"
-          disabled={!challengeChanged}
+          disabled={!missionChanged}
         >
           Discard changes
         </Button>
       </div>
-      {duplicatingExistingChallengeName && (
+      {duplicatingExistingMissionName && (
         <div className={styles.formErrorWarning}>
-          Cannot have the same name as an existing challenge
+          Cannot have the same name as an existing mission
         </div>
       )}
     </PageWrapper>

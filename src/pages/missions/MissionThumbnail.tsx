@@ -2,14 +2,14 @@ import { makeStyles, useTheme } from "@material-ui/core/styles";
 import React, { useRef } from "react";
 import { useHistory } from "react-router";
 import { buildStyles, CircularProgressbar } from "react-circular-progressbar";
-import { linkToChallenge } from "../../routes/challenges/links";
-import { Challenge } from "../../types/Challenges";
+import { linkToMission } from "../../routes/missions/links";
+import { Mission } from "../../types/Missions";
 import LockOpenIcon from "@material-ui/icons/LockOpen";
 
-import thumbnailBackup from "assets/images/challenge-thumbnail-backup.png";
+import thumbnailBackup from "assets/images/mission-thumbnail-backup.png";
 
 const useStyles = makeStyles((theme) => ({
-  challengeThumbnail: {
+  missionThumbnail: {
     padding: "4%",
     display: "flex",
     height: "80px",
@@ -69,38 +69,38 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 type Props = {
-  challenge: Challenge;
+  mission: Mission;
 };
 
-export default function ChallengeThumbnail({ challenge }: Props) {
+export default function MissionThumbnail({ mission }: Props) {
   const classes = useStyles();
   const theme = useTheme();
   const history = useHistory();
   const textDurationRemaining = "10 minutes remaining";
   const wrapperElement = useRef(null);
 
-  const percentage = (challenge.totalPieces / challenge.targetPieces) * 100;
+  const percentage = (mission.totalPieces / mission.targetPieces) * 100;
 
-  const imgSrc = challenge.coverPhotoUrl || thumbnailBackup;
+  const imgSrc = mission.coverPhotoUrl || thumbnailBackup;
 
   return (
     <div
-      className={classes.challengeThumbnail}
+      className={classes.missionThumbnail}
       ref={wrapperElement}
-      onClick={() => history.push(linkToChallenge(challenge.id.toString()))}
+      onClick={() => history.push(linkToMission(mission.id.toString()))}
     >
       <div className={classes.pictureWrapper}>
         <img src={imgSrc} className={classes.picture} />
       </div>
       <div className={classes.textSection}>
         <div className={classes.name}>
-          {challenge.isPrivate && (
+          {mission.isPrivate && (
             <LockOpenIcon fontSize={"small"} className={classes.privateIcon} />
           )}{" "}
-          {challenge.name}
+          {mission.name}
         </div>
         <div className={classes.participantCount}>
-          {challenge.totalUserPieces?.length || 0} participants
+          {mission.totalUserPieces?.length || 0} participants
         </div>
         <div className={classes.durationRemaining}>{textDurationRemaining}</div>
       </div>

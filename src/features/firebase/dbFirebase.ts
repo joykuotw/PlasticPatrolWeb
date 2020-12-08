@@ -11,7 +11,7 @@ import Feature from "types/Feature";
 import { Feedback } from "types/Feedback";
 import Photo from "types/Photo";
 import Config from "types/Config";
-import { updateChallengeOnPhotoModerated } from "./challenges";
+import { updateMissionOnPhotoModerated } from "./missions";
 
 const firestore = firebase.firestore();
 export const storageRef = firebase.storage().ref();
@@ -195,7 +195,7 @@ function saveMetadata(data) {
     "owner_id",
     "pieces",
     "categories",
-    "challengeIds"
+    "missionIds"
   ];
 
   return firestore.collection("photos").add(_.pick(data, fieldsToSave));
@@ -280,7 +280,7 @@ function writeModeration(photoId, userId, published) {
 
   const photoDocRef = firestore.collection("photos").doc(photoId);
 
-  updateChallengeOnPhotoModerated(photoDoc.get() as Photo, published);
+  updateMissionOnPhotoModerated(photoDoc.get() as Photo, published);
 
   return photoDocRef.update({
     moderated: firebase.firestore.FieldValue.serverTimestamp(),
