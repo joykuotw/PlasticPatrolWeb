@@ -6,7 +6,7 @@ import {
 import { Mission, MissionFirestoreData } from "../types/Missions";
 
 export type MissionsProviderData = {
-  missions: Mission[];
+  missions?: Mission[];
   refresh: () => Promise<void>;
 };
 
@@ -53,11 +53,11 @@ export const MissionsProvider = ({ children }: Props) => {
   const updateMissions = async () =>
     setData({
       ...data,
-      missions: await refreshMission(data.missions)
+      missions: await refreshMission(data.missions || [])
     });
 
   const [data, setData] = useState<MissionsProviderData>({
-    missions: [],
+    missions: undefined,
     refresh: updateMissions
   });
 

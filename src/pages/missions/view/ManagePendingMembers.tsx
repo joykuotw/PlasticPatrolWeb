@@ -14,6 +14,7 @@ import {
 } from "../../../features/firebase/missions";
 import { useMissions } from "../../../providers/MissionsProvider";
 import { PendingUser } from "../../../types/Missions";
+import authFirebase from "../../../features/firebase/authFirebase";
 
 const useStyles = makeStyles((theme) => ({
   wrapper: {
@@ -89,7 +90,11 @@ export default function ManagePendingMembers({}: Props) {
             <div className={classes.approveButton}>
               <Button
                 className={classes.button}
-                onClick={() => approveNewMember(pendingUser.uid, mission.id)}
+                onClick={async () => {
+                  await approveNewMember(mission.id, pendingUser);
+                  await missionData?.refresh();
+                  await authFirebase.reloadUser();
+                }}
                 color="default"
                 size="small"
                 variant="outlined"
@@ -101,7 +106,10 @@ export default function ManagePendingMembers({}: Props) {
             <div className={classes.rejectButton}>
               <Button
                 className={classes.button}
-                onClick={() => rejectNewMember(pendingUser.uid, mission.id)}
+                onClick={async () => {
+                  await rejectNewMember(pendingUser.uid, mission.id);
+                  await missionData?.refresh();
+                }}
                 color="default"
                 size="small"
                 variant="outlined"

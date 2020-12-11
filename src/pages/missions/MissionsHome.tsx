@@ -17,6 +17,7 @@ import {
 import {
   Mission,
   MissionFirestoreData,
+  userHasCollectedPiecesForMission,
   userIsInMission
 } from "../../types/Missions";
 import { useUser } from "../../providers/UserProvider";
@@ -73,17 +74,10 @@ function getFilteredMissions(
   const userId = user?.id || "invalid_id";
 
   // Put missions that users are in at the top.
-  if (userLoggedIn) {
+  if (user !== undefined) {
     missions.sort((a: MissionFirestoreData, b: MissionFirestoreData) => {
-      return userIsInMission(a, userId) ? 1 : 0;
+      return userIsInMission(user, a.id) ? -1 : 1;
     });
-  }
-
-  // If user hasn't searched anything, return all public missions and missions user is part of.
-  if (searchString === "") {
-    return missions.filter(
-      (mission) => !mission.isPrivate || userIsInMission(mission, userId)
-    );
   }
 
   const MIN_PRIVATE_MISSION_ID_SEARCH_LENGTH = 6;
@@ -93,23 +87,29 @@ function getFilteredMissions(
   const searchedPrivateMissionId = (mission: Mission, substring: string) => {
     return (
       mission.isPrivate &&
-      substring.length > MIN_PRIVATE_MISSION_ID_SEARCH_LENGTH &&
+      substring.length >= MIN_PRIVATE_MISSION_ID_SEARCH_LENGTH &&
       mission.id.includes(substring)
     );
   };
 
-  // Filter based on search string.
-  // If it's a public mission, check if the name includes the search string.
-  // If it's a private mission, check user logged, and the search string matches a section of the mission ID.
+  // Filter missions to show missions if:
+  //  - the user is in the mission.
+  //  - the user is a moderator.
+  //  - if it's a private mission AND the search string matches a section of the mission ID.
+  //  - if it's a public mission AND the search string matches a section of the challenge name.
   missions = missions.filter((mission) => {
-    const searchedPublicMission =
-      (!mission.isPrivate || userIsInMission(mission, userId || "")) &&
-      missionNameIncludesSubstring(mission.name, searchString);
-    const searchedPrivateMission =
-      userLoggedIn &&
-      mission.isPrivate &&
-      searchedPrivateMissionId(mission, searchString);
-    return searchedPublicMission || searchedPrivateMission;
+    if (
+      user !== undefined &&
+      (user.isModerator || userIsInMission(user, mission.id))
+    ) {
+      return true;
+    }
+
+    if (mission.isPrivate) {
+      return userLoggedIn && searchedPrivateMissionId(mission, searchString);
+    }
+
+    return missionNameIncludesSubstring(mission.name, searchString);
   });
 
   return missions;
@@ -145,7 +145,9 @@ export default function MissionsHome({}: Props) {
         />
       </div>
       <div className={classes.missionList}>
-        {filteredMissionList.length === 0 ? (
+        {missionData?.missions === undefined ? (
+          <div>Loading...</div>
+        ) : filteredMissionList.length === 0 ? (
           <div>
             Unfortunately, there are no matches for your search. <br />
             <br />

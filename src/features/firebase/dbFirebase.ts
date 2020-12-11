@@ -195,7 +195,7 @@ function saveMetadata(data) {
     "owner_id",
     "pieces",
     "categories",
-    "missionIds"
+    "missions"
   ];
 
   return firestore.collection("photos").add(_.pick(data, fieldsToSave));
@@ -273,14 +273,19 @@ function photosToModerateRT(
     });
 }
 
-function writeModeration(photoId, userId, published) {
-  if (typeof published !== "boolean") {
-    throw new Error("Only boolean pls");
-  }
+async function writeModeration(
+  photoId: string,
+  userId: string,
+  published: boolean
+) {
+  console.log(`Approving photo ${photoId}`);
 
   const photoDocRef = firestore.collection("photos").doc(photoId);
+  const photoDocData = await photoDocRef.get();
 
-  updateMissionOnPhotoModerated(photoDoc.get() as Photo, published);
+  console.log(photoDocData.data() as Photo);
+
+  await updateMissionOnPhotoModerated(photoDocData.data() as Photo, published);
 
   return photoDocRef.update({
     moderated: firebase.firestore.FieldValue.serverTimestamp(),

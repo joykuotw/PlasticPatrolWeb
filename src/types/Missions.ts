@@ -78,7 +78,7 @@ export const EmptyMissionData: ConfigurableMissionData = {
 export const isMissionFinished = (mission: MissionFirestoreData): boolean => {
   const today: Date = new Date();
   today.setHours(0, 0, 0, 0);
-  return mission.endTime > today.getTime();
+  return mission.endTime < today.getTime();
 };
 
 export const isSameDay = (date: Date, other: Date) => {
@@ -124,9 +124,51 @@ export function isMissionDataValid(
   );
 }
 
-export const userIsInMission = (
+export const userIsInMission = (user: User, missionId: MissionId): boolean => {
+  return user.missions.includes(missionId);
+};
+
+export const userHasCollectedPiecesForMission = (
   mission: MissionFirestoreData,
   userId: string
 ): boolean => {
   return userId in mission.totalUserPieces;
+};
+
+export const userIsInPendingMissionMembers = (
+  mission: MissionFirestoreData,
+  userId: string
+): boolean => {
+  return mission.pendingUsers.some((user) => user.uid === userId);
+};
+
+export const getDaysBetweenTimes = (
+  startTimeMs: number,
+  endTimeMs: number
+): number => {
+  return Math.floor((endTimeMs - startTimeMs) / (1000 * 60 * 60 * 24)) + 1;
+};
+
+export const getTextDurationBetweenTimes = (
+  startTimeMs: number,
+  endTimeMs: number
+): string => {
+  const daysRemaining = getDaysBetweenTimes(startTimeMs, endTimeMs);
+
+  let duration;
+  if (daysRemaining >= 31) {
+    const months = Math.floor(daysRemaining / 31);
+    duration = `${months} ${months > 1 ? `months` : `month`}`;
+  } else if (daysRemaining >= 7) {
+    const weeks = Math.floor(daysRemaining / 7);
+    duration = `${weeks} ${weeks > 1 ? `weeks` : `week`}`;
+  } else {
+    duration = `${daysRemaining} ${daysRemaining > 1 ? `days` : `day`}`;
+  }
+
+  if (daysRemaining < 0) {
+    return `Finished ${duration} ago`;
+  }
+
+  return `${duration} remaining`;
 };

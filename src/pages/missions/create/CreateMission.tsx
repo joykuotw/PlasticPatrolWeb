@@ -25,6 +25,7 @@ const useStyles = makeStyles((theme) => ({
   },
 
   submitButton: {
+    marginTop: "10px",
     width: "100%"
   },
 

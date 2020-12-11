@@ -19,6 +19,10 @@ import {
   MissionsProviderData,
   useMissions
 } from "../../../providers/MissionsProvider";
+import {
+  linkToMission,
+  linkToMissionsPage
+} from "../../../routes/missions/links";
 
 const useStyles = makeStyles((theme) => ({
   wrapper: {
@@ -73,11 +77,13 @@ export default function EditMission({}: Props) {
     missionFormData === undefined ||
     !equal(originalMission, missionFormData);
 
-  const applyEdits = () => {
+  const applyEdits = async () => {
     if (missionFormData === undefined) {
       return;
     }
-    editMission(missionId, missionFormData);
+    await editMission(missionId, missionFormData);
+    await missionData?.refresh();
+    await history.push(linkToMission(missionId));
   };
 
   const discardEdits = () => {

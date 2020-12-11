@@ -12,6 +12,7 @@ import useEffectOnMount from "hooks/useEffectOnMount";
 import User from "../../../../types/User";
 import UserProvider, { useUser } from "../../../../providers/UserProvider";
 import { updateMissionOnPhotoUploaded } from "../../../../features/firebase/missions";
+import { useMissions } from "../../../../providers/MissionsProvider";
 
 type HookArgs = {
   imgSrc: string;
@@ -35,6 +36,7 @@ export default function useSendFile(args: HookArgs) {
   const [errorMessage, setErrorMessage] = useState<string>();
   const history = useHistory();
   const missionIds = useUser()?.missions || [];
+  const missionData = useMissions();
 
   console.log("useSendFile");
   console.log(missionIds);
@@ -48,6 +50,7 @@ export default function useSendFile(args: HookArgs) {
         history,
         missionIds
       });
+      await missionData?.refresh();
     } catch (err) {
       setErrorMessage(err.message);
     }
@@ -85,9 +88,6 @@ async function sendFile({
     );
   }
 
-  console.log("sendFile");
-  console.log(missionIds);
-
   gtagEvent("Upload", "Photo");
 
   let totalCount: number = 0;
@@ -106,7 +106,7 @@ async function sendFile({
     ...imgLocation,
     pieces: totalCount,
     categories: transformedItems,
-    missionIds: missionIds
+    missions: missionIds
   };
 
   let photoRef;
@@ -123,7 +123,7 @@ async function sendFile({
   }
 
   try {
-    updateMissionOnPhotoUploaded(totalCount, missionIds);
+    await updateMissionOnPhotoUploaded(totalCount, missionIds);
   } catch (error) {
     console.error(error);
   }

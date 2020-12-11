@@ -3,7 +3,11 @@ import React, { useRef } from "react";
 import { useHistory } from "react-router";
 import { buildStyles, CircularProgressbar } from "react-circular-progressbar";
 import { linkToMission } from "../../routes/missions/links";
-import { Mission } from "../../types/Missions";
+import {
+  getDaysBetweenTimes,
+  getTextDurationBetweenTimes,
+  Mission
+} from "../../types/Missions";
 import LockOpenIcon from "@material-ui/icons/LockOpen";
 
 import thumbnailBackup from "assets/images/mission-thumbnail-backup.png";
@@ -76,7 +80,11 @@ export default function MissionThumbnail({ mission }: Props) {
   const classes = useStyles();
   const theme = useTheme();
   const history = useHistory();
-  const textDurationRemaining = "10 minutes remaining";
+  const textDurationRemaining = getTextDurationBetweenTimes(
+    Date.now(),
+    mission.endTime
+  );
+
   const wrapperElement = useRef(null);
 
   const percentage = (mission.totalPieces / mission.targetPieces) * 100;

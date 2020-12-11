@@ -11,7 +11,8 @@ import {
   MissionFirestoreData,
   ConfigurableMissionData,
   coverPhotoIsMetaData,
-  isSameDay
+  isSameDay,
+  getDaysBetweenTimes
 } from "../../../types/Missions";
 import {
   CordovaCameraImage,
@@ -291,10 +292,10 @@ export default function MissionForm({
     setEndDate(date);
   };
 
-  const missionDurationDays =
-    Math.floor(
-      (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
-    ) + 1;
+  const missionDurationDays = getDaysBetweenTimes(
+    startDate.getTime(),
+    endDate.getTime()
+  );
 
   return (
     <div>

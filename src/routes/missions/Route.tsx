@@ -15,12 +15,10 @@ import {
 import { Route, Switch } from "react-router-dom";
 import { useHistory } from "react-router";
 import ManagePendingMembers from "../../pages/missions/view/ManagePendingMembers";
-import User from "../../types/User";
 
 type Props = {};
 
 export default function MissionsRoute({}: Props) {
-  const history = useHistory();
   return (
     <Switch>
       <Route exact path={linkToMissionsPage()}>

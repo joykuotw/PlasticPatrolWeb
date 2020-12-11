@@ -20,11 +20,7 @@ import {
   leaveMission,
   deleteMission
 } from "../../../features/firebase/missions";
-import User from "../../../types/User";
-import {
-  MissionsProviderData,
-  useMissions
-} from "../../../providers/MissionsProvider";
+import { useMissions } from "../../../providers/MissionsProvider";
 import { useUser } from "../../../providers/UserProvider";
 import thumbnailBackup from "../../../assets/images/mission-thumbnail-backup.png";
 import {
@@ -33,6 +29,13 @@ import {
   DialogContent,
   DialogContentText
 } from "@material-ui/core";
+import {
+  isMissionFinished,
+  userHasCollectedPiecesForMission,
+  userIsInPendingMissionMembers,
+  userIsInMission
+} from "../../../types/Missions";
+import authFirebase from "../../../features/firebase/authFirebase";
 
 const useStyles = makeStyles((theme) => ({
   wrapper: {
@@ -93,8 +96,19 @@ const useStyles = makeStyles((theme) => ({
     margin: `${theme.spacing(1)}px ${theme.spacing(0.5)}px`
   },
 
+  pendingRequestLabel: {
+    fontSize: "14px"
+  },
+
   tableWrapper: {
     flex: "1 1 auto"
+  },
+
+  hiddenTableLabel: {
+    marginTop: "20px",
+    padding: "20px",
+    textAlign: "center",
+    color: "grey"
   }
 }));
 
@@ -122,12 +136,17 @@ export default function MissionPage({}: Props) {
 
   const missionProgress = (mission.totalPieces / mission.targetPieces) * 100;
 
-  const userLoggedIn: boolean = user !== undefined && user.id !== undefined;
-  const userMissionData = mission.totalUserPieces[user?.id || -1];
-  const userInMission: boolean = userMissionData !== undefined;
+  const userId = user?.id || "-1";
+  const userLoggedIn: boolean = user !== undefined;
+  const userInMission: boolean =
+    user !== undefined && userIsInMission(user, missionId);
   const userIsModerator: boolean = user?.isModerator || false;
   const userIsMissionOwner: boolean = user?.id === mission.ownerUserId;
   const userCanManageMission: boolean = userIsMissionOwner || userIsModerator;
+  const userIsPendingMember: boolean = userIsInPendingMissionMembers(
+    mission,
+    userId
+  );
 
   const usersLeaderboard: UserLeaderboardData[] = Object.values(
     mission.totalUserPieces || []
@@ -137,20 +156,23 @@ export default function MissionPage({}: Props) {
 
   const imgSrc = mission.coverPhotoUrl || thumbnailBackup;
 
-  console.log(mission);
-  console.log(user);
-
   const leaveMissionSubmit = async () => {
     await leaveMission(missionId, user);
-    missionData?.refresh();
+    await missionData?.refresh();
+    await authFirebase.reloadUser();
     history.push(linkToMissionsPage());
   };
 
   const deleteMissionSubmit = async () => {
     await deleteMission(missionId);
-    missionData?.refresh();
+    await missionData?.refresh();
     history.push(linkToMissionsPage());
   };
+
+  const pieceTotal = `${mission.totalPieces}/${mission.targetPieces}`;
+  const progressText = isMissionFinished(mission)
+    ? `This missions has finished, it managed to collect ${pieceTotal} pieces of litter!`
+    : `${pieceTotal} pieces of litter collected so far!`;
 
   return (
     <PageWrapper
@@ -162,12 +184,14 @@ export default function MissionPage({}: Props) {
         <img src={imgSrc} alt={"Mission cover"} className={classes.picture} />
       </div>
       <div className={classes.detailWrapper}>
+        <div className={classes.description}>
+          {`${new Date(mission.startTime).toLocaleDateString()} - ${new Date(
+            mission.endTime
+          ).toLocaleDateString()}`}
+        </div>
         <div className={classes.description}>{mission.description}</div>
         <div className={classes.progressWrapper}>
-          <div className={classes.progressText}>
-            {mission.totalPieces}/{mission.targetPieces} pieces of litter
-            collected so far!
-          </div>
+          <div className={classes.progressText}>{progressText}</div>
           <Line
             percent={missionProgress}
             strokeWidth={2}
@@ -182,48 +206,31 @@ export default function MissionPage({}: Props) {
               Patrol account, or login to an existing account.
             </div>
           )}
-          {userLoggedIn && !userInMission && !missionHasEnded(mission) && (
-            <div className={classes.missionButton}>
-              <Button
-                onClick={() => joinMission(mission.id, user)}
-                color="primary"
-                size="small"
-                variant="contained"
-              >
-                Join mission
-              </Button>
-            </div>
-          )}
           {userLoggedIn &&
-            userInMission &&
+            !userInMission &&
             !missionHasEnded(mission) &&
-            !userIsMissionOwner && (
+            (userIsPendingMember ? (
+              <div className={classes.pendingRequestLabel}>
+                Your request to join this mission needs to be approved by a
+                moderator or mission owner.
+              </div>
+            ) : (
               <div className={classes.missionButton}>
                 <Button
-                  onClick={() => setShowLeaveModal(true)}
+                  onClick={async () => {
+                    await joinMission(mission.id, user);
+                    await missionData?.refresh();
+                  }}
                   color="primary"
                   size="small"
                   variant="contained"
                 >
-                  Leave mission
+                  {userHasCollectedPiecesForMission(mission, userId)
+                    ? `REJOIN MISSION`
+                    : `JOIN MISSION`}
                 </Button>
               </div>
-            )}
-          {userLoggedIn &&
-            userInMission &&
-            !missionHasEnded(mission) &&
-            userIsMissionOwner && (
-              <div className={classes.missionButton}>
-                <Button
-                  onClick={() => setShowDeleteModal(true)}
-                  color="primary"
-                  size="small"
-                  variant="contained"
-                >
-                  Delete mission
-                </Button>
-              </div>
-            )}
+            ))}
           {userLoggedIn && userInMission && (
             <div className={classes.missionButton}>
               <Button
@@ -266,14 +273,53 @@ export default function MissionPage({}: Props) {
               </Button>
             </div>
           )}
+          {userLoggedIn &&
+            userInMission &&
+            !missionHasEnded(mission) &&
+            !userIsMissionOwner && (
+              <div className={classes.missionButton}>
+                <Button
+                  onClick={() => setShowLeaveModal(true)}
+                  color="secondary"
+                  size="small"
+                  variant="outlined"
+                >
+                  Leave mission
+                </Button>
+              </div>
+            )}
+          {userLoggedIn &&
+            userInMission &&
+            !missionHasEnded(mission) &&
+            userIsMissionOwner && (
+              <div className={classes.missionButton}>
+                <Button
+                  onClick={() => setShowDeleteModal(true)}
+                  color="secondary"
+                  size="small"
+                  variant="outlined"
+                >
+                  Delete mission
+                </Button>
+              </div>
+            )}
         </div>
       </div>
       <div className={classes.tableWrapper}>
-        <UserPieceRankTable
-          usersLeaderboard={usersLeaderboard}
-          user={user}
-          allowZeroPieces={true}
-        />
+        {!mission.isPrivate ||
+        (user && userHasCollectedPiecesForMission(mission, user.id)) ||
+        user?.isModerator ? (
+          <UserPieceRankTable
+            usersLeaderboard={usersLeaderboard}
+            user={user}
+            allowZeroPieces={true}
+          />
+        ) : (
+          <div className={classes.hiddenTableLabel}>
+            You need to join and be accepted into the mission to view the
+            leaderboard.
+          </div>
+        )}
       </div>
       <Modal
         isOpen={showLeaveModal}

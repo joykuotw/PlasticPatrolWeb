@@ -72,6 +72,7 @@ const onAuthStateChanged = ({ onSignOut, setUser }: Args) => {
 
     dbFirebase.getUser(user.uid).then((fbUser) => {
       currentUser.isModerator = fbUser ? fbUser.isModerator : false;
+      currentUser.missions = fbUser ? fbUser.missions : [];
 
       // creates a new object ref so react updates
       setUser({ ...currentUser });

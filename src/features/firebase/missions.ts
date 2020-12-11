@@ -5,11 +5,13 @@ import {
   MissionId,
   ConfigurableMissionData,
   coverPhotoIsMetaData,
-  userIsInMission
+  userHasCollectedPiecesForMission,
+  PendingUser
 } from "../../types/Missions";
 import Photo from "../../types/Photo";
 import User from "../../types/User";
 import _ from "lodash";
+import { ImageMetaData } from "../../pages/photo/state/types";
 
 const MISSION_FIRESTORE_COLLECTION = "missions";
 const MISSION_PHOTO_STORAGE = "missions";
@@ -88,21 +90,7 @@ export const createMission = async (
     return;
   }
 
-  console.log(`Uploading cover photo for mission ${id}`);
-  const coverPhotoStorageRef = await firebase
-    .storage()
-    .ref()
-    .child(MISSION_PHOTO_STORAGE)
-    .child(id)
-    .child(MISSION_PHOTO_FILENAME);
-
-  console.log("coverPhotoStorageRef");
-  console.log(coverPhotoStorageRef);
-
-  const base64Image = mission.coverPhoto.imgSrc.split(",")[1];
-  await coverPhotoStorageRef.putString(base64Image, "base64", {
-    contentType: "image/jpeg"
-  });
+  await uploadMissionCoverPhoto(id, mission.coverPhoto);
 };
 
 export async function fetchAllMissions(): Promise<MissionFirestoreData[]> {
@@ -125,8 +113,6 @@ export async function fetchAllMissions(): Promise<MissionFirestoreData[]> {
   return missions;
 }
 
-export const fetchMissionPhoto = async (missionId: string) => {};
-
 // Edit mission with pending user
 export const joinMission = async (missionId: MissionId, user?: User) => {
   console.log(`User ${user?.id} trying to join mission ${missionId}`);
@@ -147,7 +133,7 @@ export const joinMission = async (missionId: MissionId, user?: User) => {
   }
 
   if (mission.isPrivate) {
-    await addToPendingMissionUsers(mission, user);
+    await addToPendingMissionUsers(missionId, user);
     return;
   }
 
@@ -155,10 +141,12 @@ export const joinMission = async (missionId: MissionId, user?: User) => {
 };
 
 export const addToPendingMissionUsers = async (
-  mission: MissionFirestoreData,
+  missionId: MissionId,
   user: User
 ) => {
-  const missionRef = await getMissionRefFromId(mission.id);
+  console.log(`Adding ${user.id} to mission ${missionId} pending users`);
+
+  const missionRef = await getMissionRefFromId(missionId);
   await missionRef.set(
     {
       pendingUsers: [
@@ -179,7 +167,9 @@ export const addUserToMission = async (
 ) => {
   // If the user left and rejoined the mission, they'll already have a piece count,
   // so we don't need to add a new one.
-  if (!userIsInMission(mission, user.id)) {
+  if (!userHasCollectedPiecesForMission(mission, user.id)) {
+    console.log(`Adding user ${user.id} to mission ${mission.id} leaderboard`);
+
     const missionRef = await getMissionRefFromId(mission.id);
     await missionRef.set(
       {
@@ -218,37 +208,122 @@ export const leaveMission = async (missionId: MissionId, user?: User) => {
 
   // We remove the user from seeing the mission, and preventing their future uploads contributing.
   // We still leave them in the mission though.
-  await firebase
+  const userDocRef = await firebase
     .firestore()
     .collection("users")
-    .doc(user.id)
-    .update({
-      missions: firebase.firestore.FieldValue.arrayRemove(missionId)
-    });
+    .doc(user.id);
+
+  if (!(await userDocRef.get()).exists) {
+    console.warn(
+      `Failed to remove mission ${missionId} from user ${user.id}. User Firebase entry didn't exist.`
+    );
+    return;
+  }
+
+  userDocRef.update({
+    missions: firebase.firestore.FieldValue.arrayRemove(missionId)
+  });
 };
 
 // Edit mission to remove user from pending users and add user count (if not present).
 // Edit user to add missionId.
-export const approveNewMember = async (missionId: MissionId, uid: string) => {
-  await firebase.functions().httpsCallable("approveNewMemberMission")({
-    missionId,
-    uid
-  });
+export const approveNewMember = async (
+  missionId: MissionId,
+  user: PendingUser
+) => {
+  const missionRef = await getMissionRefFromId(missionId);
+  const currentMissionSnapshot = await missionRef.get();
+  const missionData = currentMissionSnapshot.data() as MissionFirestoreData;
+
+  console.log(`Accepting pending member ${user.uid} for mission ${missionId}`);
+
+  const newPendingUsers = missionData.pendingUsers.filter(
+    (pendingUser) => pendingUser.uid !== user.uid
+  );
+
+  await missionRef.set(
+    {
+      pendingUsers: newPendingUsers,
+      totalUserPieces: {
+        [user.uid]: {
+          uid: user.uid,
+          displayName: user.displayName,
+          pieces: 0
+        }
+      }
+    },
+    { merge: true }
+  );
+
+  await addMissionToUser(user.uid, missionId);
 };
 
 // Edit mission to remove user from pending users.
 export const rejectNewMember = async (uid: string, missionId: MissionId) => {
-  await firebase.functions().httpsCallable("rejectNewMemberMission")({
-    missionId,
-    uid
-  });
+  const missionRef = await getMissionRefFromId(missionId);
+  const currentMissionSnapshot = await missionRef.get();
+  const missionData = currentMissionSnapshot.data() as MissionFirestoreData;
+
+  console.log(`Rejecting pending member ${uid} for mission ${missionId}`);
+
+  const newPendingUsers = missionData.pendingUsers.filter(
+    (pendingUser) => pendingUser.uid !== uid
+  );
+
+  await missionRef.set(
+    {
+      pendingUsers: newPendingUsers
+    },
+    { merge: true }
+  );
 };
 
 // Edit mission configurable data
-export const editMission = (
+export const editMission = async (
   missionId: MissionId,
   mission: ConfigurableMissionData
-) => {};
+) => {
+  const missionRef = await getMissionRefFromId(missionId);
+  const currentMissionSnapshot = await missionRef.get();
+  const missionData = currentMissionSnapshot.data() as MissionFirestoreData;
+
+  console.log(`Editing mission ${missionId}`);
+  console.log(mission);
+
+  await missionRef.set(
+    {
+      ..._.omit(mission, "coverPhoto")
+    },
+    { merge: true }
+  );
+
+  if (
+    mission.coverPhoto === undefined ||
+    !coverPhotoIsMetaData(mission.coverPhoto)
+  ) {
+    return;
+  }
+
+  await uploadMissionCoverPhoto(missionId, mission.coverPhoto);
+};
+
+const uploadMissionCoverPhoto = async (
+  missionId: MissionId,
+  coverPhoto: ImageMetaData
+) => {
+  console.log(`Uploading cover photo for mission ${missionId}`);
+  const coverPhotoStorageRef = await firebase
+    .storage()
+    .ref()
+    .child(MISSION_PHOTO_STORAGE)
+    .child(missionId)
+    .child(MISSION_PHOTO_FILENAME);
+
+  const base64Image = coverPhoto.imgSrc.split(",")[1];
+  await coverPhotoStorageRef.putString(base64Image, "base64", {
+    contentType: "image/jpeg"
+  });
+};
 
 // Delete mission (maybe just mark as hidden to avoid accidents).
 export const deleteMission = async (missionId: MissionId) => {
@@ -277,7 +352,7 @@ const addMissionToUser = async (userId: string, missionId: string) => {
       .doc(userId)
       .set(
         {
-          missionIds: [missionId]
+          missions: [missionId]
         },
         { merge: true }
       );
@@ -317,8 +392,13 @@ export const updateMissionOnPhotoUploaded = async (
   pieces: number,
   missionIds: string[]
 ) => {
+  console.log(
+    `User uploaded photo with ${pieces} for ${missionIds.length} missions`
+  );
+  console.log(missionIds);
+
   await Promise.all(
-    missionIds.map(async (missionId: string) => {
+    (missionIds || []).map(async (missionId: string) => {
       try {
         const mission = await getMissionIfExists(missionId);
 
@@ -367,7 +447,7 @@ export const updateMissionOnPhotoModerated = async (
           // If the user is NOT still part of mission, we:
           // - won't add to the mission total,
           // - still need to decrement the pending pieces that was incremented it in `onPhotoUpload`.
-          if (!userIsInMission(mission, photo.owner_id)) {
+          if (!userHasCollectedPiecesForMission(mission, photo.owner_id)) {
             console.log(
               `Photo ${photo.id} was uploaded within mission ${missionId} but uploading user ${photo.owner_id} was no longer in mission.`
             );
@@ -376,7 +456,7 @@ export const updateMissionOnPhotoModerated = async (
           }
 
           console.log(
-            `Moderated approved ${photo.pieces} pieces for mission ${missionId}`
+            `Moderator approved ${photo.pieces} pieces for mission ${missionId}`
           );
 
           const missionRef = await getMissionRefFromId(missionId);
