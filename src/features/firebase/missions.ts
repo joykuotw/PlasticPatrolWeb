@@ -165,6 +165,7 @@ export const addUserToMission = async (
   mission: MissionFirestoreData,
   user: User
 ) => {
+  console.log(mission);
   // If the user left and rejoined the mission, they'll already have a piece count,
   // so we don't need to add a new one.
   if (!userHasCollectedPiecesForMission(mission, user.id)) {
@@ -378,7 +379,7 @@ const getMissionIfExists = async (
     throw new Error("No mission exists for id");
   }
 
-  return snapshot.data() as MissionFirestoreData;
+  return { ...snapshot.data(), id: missionId } as MissionFirestoreData;
 };
 
 export const missionHasEnded = (mission: Mission) => {
