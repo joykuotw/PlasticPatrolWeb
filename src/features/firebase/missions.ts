@@ -43,7 +43,7 @@ export const getMissionCoverPhotoUrl = async (
   return coverPhotoUrl;
 };
 
-const getMissionRefFromId = async (missionId: string) => {
+const getMissionRefFromId = (missionId: string) => {
   return firebase
     .firestore()
     .collection(MISSION_FIRESTORE_COLLECTION)
@@ -146,7 +146,7 @@ export const addToPendingMissionUsers = async (
 ) => {
   console.log(`Adding ${user.id} to mission ${missionId} pending users`);
 
-  const missionRef = await getMissionRefFromId(missionId);
+  const missionRef = getMissionRefFromId(missionId);
   await missionRef.set(
     {
       pendingUsers: [
@@ -171,7 +171,7 @@ export const addUserToMission = async (
   if (!userHasCollectedPiecesForMission(mission, user.id)) {
     console.log(`Adding user ${user.id} to mission ${mission.id} leaderboard`);
 
-    const missionRef = await getMissionRefFromId(mission.id);
+    const missionRef = getMissionRefFromId(mission.id);
     await missionRef.set(
       {
         totalUserPieces: {
@@ -232,7 +232,7 @@ export const approveNewMember = async (
   missionId: MissionId,
   user: PendingUser
 ) => {
-  const missionRef = await getMissionRefFromId(missionId);
+  const missionRef = getMissionRefFromId(missionId);
   const currentMissionSnapshot = await missionRef.get();
   const missionData = currentMissionSnapshot.data() as MissionFirestoreData;
 
@@ -261,7 +261,7 @@ export const approveNewMember = async (
 
 // Edit mission to remove user from pending users.
 export const rejectNewMember = async (uid: string, missionId: MissionId) => {
-  const missionRef = await getMissionRefFromId(missionId);
+  const missionRef = getMissionRefFromId(missionId);
   const currentMissionSnapshot = await missionRef.get();
   const missionData = currentMissionSnapshot.data() as MissionFirestoreData;
 
@@ -284,7 +284,7 @@ export const editMission = async (
   missionId: MissionId,
   mission: ConfigurableMissionData
 ) => {
-  const missionRef = await getMissionRefFromId(missionId);
+  const missionRef = getMissionRefFromId(missionId);
   const currentMissionSnapshot = await missionRef.get();
   const missionData = currentMissionSnapshot.data() as MissionFirestoreData;
 
@@ -328,7 +328,7 @@ const uploadMissionCoverPhoto = async (
 
 // Delete mission (maybe just mark as hidden to avoid accidents).
 export const deleteMission = async (missionId: MissionId) => {
-  const missionRef = await getMissionRefFromId(missionId);
+  const missionRef = getMissionRefFromId(missionId);
   try {
     await missionRef.set(
       {
@@ -367,7 +367,7 @@ const getMissionIfExists = async (
 ): Promise<MissionFirestoreData> => {
   let snapshot;
   try {
-    const missionRef = await getMissionRefFromId(missionId);
+    const missionRef = getMissionRefFromId(missionId);
     snapshot = await missionRef.get();
   } catch (err) {
     throw new Error(`Failed to get mission by mission ID: ${err}`);
@@ -417,7 +417,7 @@ export const updateMissionOnPhotoUploaded = async (
           `Photo with ${pieces} pieces uploaded for mission: ${missionId}.`
         );
 
-        const missionRef = await getMissionRefFromId(missionId);
+        const missionRef = getMissionRefFromId(missionId);
         await missionRef.update({
           pendingPieces: firebase.firestore.FieldValue.increment(pieces)
         });
@@ -460,7 +460,7 @@ export const updateMissionOnPhotoModerated = async (
             `Moderator approved ${photo.pieces} pieces for mission ${missionId}`
           );
 
-          const missionRef = await getMissionRefFromId(missionId);
+          const missionRef = getMissionRefFromId(missionId);
           await missionRef.update({
             totalPieces: firebase.firestore.FieldValue.increment(photo.pieces),
             pendingPieces: firebase.firestore.FieldValue.increment(
@@ -487,7 +487,7 @@ const decrementPendingPieces = async (
   console.log(
     `Decrement ${numberToDecrement} pending pieces for mission ${missionId}`
   );
-  const missionRef = await getMissionRefFromId(missionId);
+  const missionRef = getMissionRefFromId(missionId);
   return await missionRef.update({
     pendingPieces: firebase.firestore.FieldValue.increment(-numberToDecrement)
   });
