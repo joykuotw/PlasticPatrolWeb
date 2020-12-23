@@ -128,11 +128,21 @@ export const userIsInMission = (user: User, missionId: MissionId): boolean => {
   return user.missions.includes(missionId);
 };
 
-export const userHasCollectedPiecesForMission = (
+export const userOnMissionLeaderboard = (
   mission: MissionFirestoreData,
   userId: string
 ): boolean => {
   return userId in mission.totalUserPieces;
+};
+
+export const userCollectedPiecesForMission = (
+  mission: MissionFirestoreData,
+  userId: string
+): boolean => {
+  return (
+    userOnMissionLeaderboard(mission, userId) &&
+    mission.totalUserPieces[userId].pieces > 0
+  );
 };
 
 export const userIsInPendingMissionMembers = (
@@ -158,12 +168,14 @@ export const getTextDurationBetweenTimes = (
   let duration;
   if (daysRemaining >= 31) {
     const months = Math.floor(daysRemaining / 31);
-    duration = `${months} ${months > 1 ? `months` : `month`}`;
+    duration = `${Math.abs(months)} ${months > 1 ? `months` : `month`}`;
   } else if (daysRemaining >= 7) {
     const weeks = Math.floor(daysRemaining / 7);
-    duration = `${weeks} ${weeks > 1 ? `weeks` : `week`}`;
+    duration = `${Math.abs(weeks)} ${weeks > 1 ? `weeks` : `week`}`;
   } else {
-    duration = `${daysRemaining} ${daysRemaining > 1 ? `days` : `day`}`;
+    duration = `${Math.abs(daysRemaining)} ${
+      daysRemaining > 1 ? `days` : `day`
+    }`;
   }
 
   if (daysRemaining < 0) {

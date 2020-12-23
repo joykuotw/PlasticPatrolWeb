@@ -42,7 +42,12 @@ const refreshMission = async (currentMissions: Mission[]) => {
   // Download cover photos for missions which we don't have already.
   for (let mission of newMissions) {
     if (mission.coverPhotoUrl === undefined) {
-      mission.coverPhotoUrl = await getMissionCoverPhotoUrl(mission.id);
+      try {
+        mission.coverPhotoUrl = await getMissionCoverPhotoUrl(mission.id);
+      } catch (err) {
+        console.error(`Caught error getting mission cover photo URL`);
+        console.error(err);
+      }
     }
   }
 

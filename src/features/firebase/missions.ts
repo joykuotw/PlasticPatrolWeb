@@ -5,13 +5,15 @@ import {
   MissionId,
   ConfigurableMissionData,
   coverPhotoIsMetaData,
-  userHasCollectedPiecesForMission,
-  PendingUser
+  userOnMissionLeaderboard,
+  PendingUser,
+  userCollectedPiecesForMission
 } from "../../types/Missions";
 import Photo from "../../types/Photo";
 import User from "../../types/User";
 import _ from "lodash";
 import { ImageMetaData } from "../../pages/photo/state/types";
+import { firestore } from "../../../functions/src/firestore";
 
 const MISSION_FIRESTORE_COLLECTION = "missions";
 const MISSION_PHOTO_STORAGE = "missions";
@@ -36,6 +38,7 @@ export const getMissionCoverPhotoUrl = async (
       console.error(
         `Failed to download mission ${missionId} cover photo for unexpected reason.`
       );
+      console.error(err);
     }
     return undefined;
   }
@@ -168,7 +171,7 @@ export const addUserToMission = async (
   console.log(mission);
   // If the user left and rejoined the mission, they'll already have a piece count,
   // so we don't need to add a new one.
-  if (!userHasCollectedPiecesForMission(mission, user.id)) {
+  if (!userOnMissionLeaderboard(mission, user.id)) {
     console.log(`Adding user ${user.id} to mission ${mission.id} leaderboard`);
 
     const missionRef = getMissionRefFromId(mission.id);
@@ -201,14 +204,14 @@ export const leaveMission = async (missionId: MissionId, user?: User) => {
   }
 
   if (missionHasEnded(mission)) {
-    console.log(`User not leaving mission because the mission was empty.`);
+    console.log(`User not leaving mission because the mission had ended.`);
     return;
   }
 
   console.log(`User ${user.id} leaving mission ${missionId}`);
 
-  // We remove the user from seeing the mission, and preventing their future uploads contributing.
-  // We still leave them in the mission though.
+  // We remove the mission from the user data list of  missions.
+  // This prevents their future uploads contributing.
   const userDocRef = await firebase
     .firestore()
     .collection("users")
@@ -224,6 +227,15 @@ export const leaveMission = async (missionId: MissionId, user?: User) => {
   userDocRef.update({
     missions: firebase.firestore.FieldValue.arrayRemove(missionId)
   });
+
+  // Unless the user upload count for this mission is still 0, we still leave
+  // their piece uploads in the mission so the total makes sense.
+  if (!userCollectedPiecesForMission(mission, user.id)) {
+    const missionRef = getMissionRefFromId(missionId);
+    await missionRef.update({
+      [`totalUserPieces.${user.id}`]: firebase.firestore.FieldValue.delete()
+    });
+  }
 };
 
 // Edit mission to remove user from pending users and add user count (if not present).
@@ -448,7 +460,7 @@ export const updateMissionOnPhotoModerated = async (
           // If the user is NOT still part of mission, we:
           // - won't add to the mission total,
           // - still need to decrement the pending pieces that was incremented it in `onPhotoUpload`.
-          if (!userHasCollectedPiecesForMission(mission, photo.owner_id)) {
+          if (!userOnMissionLeaderboard(mission, photo.owner_id)) {
             console.log(
               `Photo ${photo.id} was uploaded within mission ${missionId} but uploading user ${photo.owner_id} was no longer in mission.`
             );

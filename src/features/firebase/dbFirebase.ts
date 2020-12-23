@@ -12,6 +12,7 @@ import { Feedback } from "types/Feedback";
 import Photo from "types/Photo";
 import Config from "types/Config";
 import { updateMissionOnPhotoModerated } from "./missions";
+import User from "../../types/User";
 
 const firestore = firebase.firestore();
 export const storageRef = firebase.storage().ref();
@@ -217,9 +218,9 @@ function savePhoto(id, base64) {
   });
 }
 
-async function getUser(id) {
+async function getUser(id): Promise<Partial<User> | undefined> {
   const fbUser = await firestore.collection("users").doc(id).get();
-  return fbUser.exists ? fbUser.data() : null;
+  return fbUser.exists ? (fbUser.data() as Partial<User>) : undefined;
 }
 
 async function getFeedbackByID(id: string): Promise<Feedback | null> {
