@@ -24,7 +24,7 @@ export type Mission = Omit<MissionFromServer, "id">;
 export type ConfigurableMissionData = {
   name: string;
   description: string;
-  isPrivate: string;
+  isPrivate: boolean;
   startTime: number;
   endTime: number;
   targetPieces: number;
