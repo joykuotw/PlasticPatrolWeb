@@ -25,7 +25,7 @@ import { linkToMissionsPage } from "../../routes/missions/links";
 import styles from "standard.scss";
 import {
   MissionFirestoreData,
-  userHasCollectedPiecesForMission
+  userOnMissionLeaderboard
 } from "../../types/Missions";
 
 const LARGE_COLLECTION_THRESHOLD = 1000;
@@ -115,11 +115,8 @@ export default function AccountPage({
   );
   const missions = missionData?.missions?.filter(
     (mission: MissionFirestoreData) =>
-      userHasCollectedPiecesForMission(mission, user.id) && !mission.hidden
+      userOnMissionLeaderboard(mission, user.id) && !mission.hidden
   );
-
-  console.log("user");
-  console.log(user.id);
 
   return (
     <PageWrapper

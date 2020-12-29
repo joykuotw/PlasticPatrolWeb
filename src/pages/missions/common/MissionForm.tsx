@@ -27,10 +27,9 @@ import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogActions from "@material-ui/core/DialogActions";
 import thumbnailBackup from "../../../assets/images/mission-thumbnail-backup.png";
-import { ImageMetaData } from "../../photo/state/types";
 
 const MISSION_NAME_LIMIT = 100;
-const MISSION_DESCRIPTION_LIMIT = 300;
+const MISSION_DESCRIPTION_LIMIT = 200;
 const MISSION_PIECE_TARGET_LIMIT = 10000000;
 
 const useStyles = makeStyles((theme) => ({
@@ -67,7 +66,7 @@ const useStyles = makeStyles((theme) => ({
     padding: "5px",
     marginTop: "5px",
     background: styles.lightGrey,
-    fontSize: 16,
+    fontSize: 15,
     boxSizing: "border-box",
     width: "100%",
     textOverflow: "ellipsis",
@@ -106,7 +105,7 @@ const useStyles = makeStyles((theme) => ({
 
   coverPhotoPreview: {
     maxWidth: "100%",
-    maxHeight: "200px"
+    maxHeight: "180px"
   },
 
   addPhotoButton: {

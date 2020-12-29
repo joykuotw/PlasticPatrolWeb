@@ -57,7 +57,7 @@ export default function CreateMission({}: Props) {
         navigationHandler={handleBack}
         className={styles.wrapper}
       >
-        You need to be logged in to create a mission.
+        You need to be logged in to create a mission!
       </PageWrapper>
     );
   }
@@ -70,11 +70,7 @@ export default function CreateMission({}: Props) {
     isMissionDataValid(missionFormData) && !duplicatingExistingMissionName;
 
   const createAndViewMission = async () => {
-    if (user !== undefined) {
-      await createMission(user, missionFormData);
-    } else {
-      console.error(`Tried to create mission but user was undefined.`);
-    }
+    await createMission(user, missionFormData);
     await missionData?.refresh();
     history.push(linkToMissionsPage());
   };

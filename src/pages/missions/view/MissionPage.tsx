@@ -31,11 +31,10 @@ import {
 } from "@material-ui/core";
 import {
   isMissionFinished,
-  userHasCollectedPiecesForMission,
+  userOnMissionLeaderboard,
   userIsInPendingMissionMembers,
   userIsInMission
 } from "../../../types/Missions";
-import authFirebase from "../../../features/firebase/authFirebase";
 
 const useStyles = makeStyles((theme) => ({
   wrapper: {
@@ -45,7 +44,7 @@ const useStyles = makeStyles((theme) => ({
 
   pictureWrapper: {
     flex: "0 0 auto",
-    height: "200px",
+    height: "180px",
     overflow: "hidden",
     textAlign: "center",
     marginBottom: `${theme.spacing(0.5)}px`
@@ -62,10 +61,16 @@ const useStyles = makeStyles((theme) => ({
     flexDirection: "column"
   },
 
+  datesLabel: {
+    flex: "1 1 auto",
+    fontSize: 13,
+    padding: `0px ${theme.spacing(1.5)}px`
+  },
+
   description: {
     flex: "1 1 auto",
     padding: `${theme.spacing(0.5)}px ${theme.spacing(1.5)}px`,
-    fontSize: 13
+    fontSize: 12
   },
 
   progressWrapper: {
@@ -89,11 +94,12 @@ const useStyles = makeStyles((theme) => ({
 
   notLoggedInMessage: {
     color: `${theme.palette.primary.main}`,
+    fontSize: "14px",
     padding: `0 ${theme.spacing(0.5)}px`
   },
 
   missionButton: {
-    margin: `${theme.spacing(1)}px ${theme.spacing(0.5)}px`
+    margin: `${theme.spacing(0.2)}px ${theme.spacing(0.5)}px`
   },
 
   pendingRequestLabel: {
@@ -159,7 +165,6 @@ export default function MissionPage({}: Props) {
   const leaveMissionSubmit = async () => {
     await leaveMission(missionId, user);
     await missionData?.refresh();
-    await authFirebase.reloadUser();
     history.push(linkToMissionsPage());
   };
 
@@ -184,7 +189,7 @@ export default function MissionPage({}: Props) {
         <img src={imgSrc} alt={"Mission cover"} className={classes.picture} />
       </div>
       <div className={classes.detailWrapper}>
-        <div className={classes.description}>
+        <div className={classes.datesLabel}>
           {`${new Date(mission.startTime).toLocaleDateString()} - ${new Date(
             mission.endTime
           ).toLocaleDateString()}`}
@@ -200,7 +205,7 @@ export default function MissionPage({}: Props) {
           />
         </div>
         <div className={classes.buttonsWrapper}>
-          {!userLoggedIn && (
+          {!userLoggedIn && !missionHasEnded(mission) && (
             <div className={classes.notLoggedInMessage}>
               Before you can join a mission, you’ll have to create a Planet
               Patrol account, or login to an existing account.
@@ -225,7 +230,7 @@ export default function MissionPage({}: Props) {
                   size="small"
                   variant="contained"
                 >
-                  {userHasCollectedPiecesForMission(mission, userId)
+                  {userOnMissionLeaderboard(mission, userId)
                     ? `REJOIN MISSION`
                     : `JOIN MISSION`}
                 </Button>
@@ -307,7 +312,7 @@ export default function MissionPage({}: Props) {
       </div>
       <div className={classes.tableWrapper}>
         {!mission.isPrivate ||
-        (user && userHasCollectedPiecesForMission(mission, user.id)) ||
+        (user && userOnMissionLeaderboard(mission, user.id)) ||
         user?.isModerator ? (
           <UserPieceRankTable
             usersLeaderboard={usersLeaderboard}

@@ -6,7 +6,6 @@ import { withStyles } from "@material-ui/core/styles";
 
 import { Routes } from "routes/Routes";
 
-import { authFirebase } from "features/firebase";
 import { linkToNewPhoto } from "routes/photo/routes/new/links";
 import getMapIsVisible from "utils/getMapIsVisible";
 import {
@@ -25,6 +24,7 @@ import { extractPathnameParams } from "./providers/PhotosProvider";
 
 import { gtagEvent } from "./gtag.js";
 import "./App.scss";
+import { signOut } from "./features/firebase/authFirebase";
 
 const styles = (theme) => ({
   rootDialog: {
@@ -138,7 +138,7 @@ class App extends Component {
 
   handleClickLoginLogout = () => {
     if (this.props.user) {
-      authFirebase.signOut();
+      signOut();
     } else {
       this.props.history.push(linkToLogin());
     }

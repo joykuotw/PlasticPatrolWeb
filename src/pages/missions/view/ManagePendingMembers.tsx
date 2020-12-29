@@ -14,7 +14,7 @@ import {
 } from "../../../features/firebase/missions";
 import { useMissions } from "../../../providers/MissionsProvider";
 import { PendingUser } from "../../../types/Missions";
-import authFirebase from "../../../features/firebase/authFirebase";
+import { useUser } from "../../../providers/UserProvider";
 
 const useStyles = makeStyles((theme) => ({
   wrapper: {
@@ -54,6 +54,7 @@ type Props = {};
 export default function ManagePendingMembers({}: Props) {
   const classes = useStyles();
   const history = useHistory();
+  const user = useUser();
 
   const missionData = useMissions();
   const missions = missionData?.missions || [];
@@ -93,7 +94,6 @@ export default function ManagePendingMembers({}: Props) {
                 onClick={async () => {
                   await approveNewMember(mission.id, pendingUser);
                   await missionData?.refresh();
-                  await authFirebase.reloadUser();
                 }}
                 color="default"
                 size="small"
