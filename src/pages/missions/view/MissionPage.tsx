@@ -33,7 +33,8 @@ import {
   isMissionFinished,
   userOnMissionLeaderboard,
   userIsInPendingMissionMembers,
-  userIsInMission
+  userIsInMission,
+  PRIVATE_MISSION_ID_SEARCH_LENGTH
 } from "../../../types/Missions";
 
 const useStyles = makeStyles((theme) => ({
@@ -133,6 +134,7 @@ export default function MissionPage({}: Props) {
 
   const [showLeaveModal, setShowLeaveModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
 
   const { missionId } = useParams();
   const mission = missions.find((ch) => ch.id.toString() === missionId);
@@ -157,8 +159,6 @@ export default function MissionPage({}: Props) {
   const usersLeaderboard: UserLeaderboardData[] = Object.values(
     mission.totalUserPieces || []
   );
-
-  const shareMission = () => {};
 
   const imgSrc = mission.coverPhotoUrl || thumbnailBackup;
 
@@ -239,7 +239,7 @@ export default function MissionPage({}: Props) {
           {userLoggedIn && userInMission && (
             <div className={classes.missionButton}>
               <Button
-                onClick={shareMission}
+                onClick={() => setShowShareModal(true)}
                 color="primary"
                 size="small"
                 variant="contained"
@@ -326,7 +326,31 @@ export default function MissionPage({}: Props) {
           </div>
         )}
       </div>
-      <Modal
+      <Dialog
+        open={showShareModal}
+        onClose={() => setShowLeaveModal(false)}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            {`The private ID for this mission is: ${mission.id.substr(
+              0,
+              PRIVATE_MISSION_ID_SEARCH_LENGTH
+            )}`}
+          </DialogContentText>
+          <DialogContentText>
+            {`Other Planet Patrol users can request to join your mission by copying this into the search bar in the 
+            Missions home page.`}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setShowShareModal(false)} color="default">
+            Ok
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <ConfirmationModal
         isOpen={showLeaveModal}
         text={
           "Are you sure you want to leave this mission? " +
@@ -338,7 +362,7 @@ export default function MissionPage({}: Props) {
         handleConfirm={leaveMissionSubmit}
         handleCancel={() => setShowLeaveModal(false)}
       />
-      <Modal
+      <ConfirmationModal
         isOpen={showDeleteModal}
         text={
           "Are you sure you want to delete this mission? You'll need to ask Planet Patrol staff to retrieve it."
@@ -351,7 +375,7 @@ export default function MissionPage({}: Props) {
   );
 }
 
-type ModalProps = {
+type ConfirmationModalProps = {
   isOpen: boolean;
   text: string;
   confirmText: string;
@@ -359,13 +383,13 @@ type ModalProps = {
   handleCancel: () => void;
 };
 
-const Modal = ({
+const ConfirmationModal = ({
   isOpen,
   text,
   confirmText,
   handleConfirm,
   handleCancel
-}: ModalProps) => {
+}: ConfirmationModalProps) => {
   return (
     <Dialog
       open={isOpen}
