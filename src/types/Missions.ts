@@ -1,6 +1,8 @@
 import { ImageMetaData } from "../pages/photo/state/types";
 import User from "./User";
 
+export const PRIVATE_MISSION_ID_SEARCH_LENGTH = 6;
+
 export type MissionId = string;
 
 export type UserMissionData = {

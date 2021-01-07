@@ -18,7 +18,8 @@ import {
   Mission,
   MissionFirestoreData,
   userOnMissionLeaderboard,
-  userIsInMission
+  userIsInMission,
+  PRIVATE_MISSION_ID_SEARCH_LENGTH
 } from "../../types/Missions";
 import { useUser } from "../../providers/UserProvider";
 import User from "../../types/User";
@@ -80,14 +81,12 @@ function getFilteredMissions(
     });
   }
 
-  const MIN_PRIVATE_MISSION_ID_SEARCH_LENGTH = 6;
-
   const missionNameIncludesSubstring = (name: string, substring: string) =>
     name.toLowerCase().includes(substring.trim().toLowerCase());
   const searchedPrivateMissionId = (mission: Mission, substring: string) => {
     return (
       mission.isPrivate &&
-      substring.length >= MIN_PRIVATE_MISSION_ID_SEARCH_LENGTH &&
+      substring.length >= PRIVATE_MISSION_ID_SEARCH_LENGTH &&
       mission.id.includes(substring.trim())
     );
   };
