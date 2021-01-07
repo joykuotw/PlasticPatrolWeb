@@ -178,8 +178,8 @@ class App extends Component {
               this.handleMapLocationChange(newMapLocation)
             }
             handleLocationClick={this.handleLocationClick}
-            gpsOffline={!gpsLocation.online}
-            gpsDisabled={!gpsLocation.updated}
+            gpsOffline={!(gpsLocation && gpsLocation.online)}
+            gpsDisabled={!(gpsLocation && gpsLocation.updated)}
           />
           <Routes
             user={user}
