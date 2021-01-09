@@ -14,17 +14,19 @@ const getProvider = (user) => {
   return null;
 };
 
+type _User = User | undefined;
+
 type Args = {
   onSignOut: () => void;
-  setUser: (user?: User) => void;
+  setUser: (_User) => void;
 };
 
-export const onAuthStateChanged = ({ onSignOut, setUser }: Args) => {
+const onAuthStateChanged = ({ onSignOut, setUser }: Args) => {
   let userRef;
-  const firebaseStatusChange = async (user: firebase.User) => {
+  const firebaseStatusChange = (user) => {
     if (userRef && !user) {
       userRef = undefined;
-      onSignOut();
+      onSignOut(undefined);
       setUser(undefined);
       return;
     }
@@ -35,17 +37,17 @@ export const onAuthStateChanged = ({ onSignOut, setUser }: Args) => {
     const gravatarURL = "https://www.gravatar.com/" + md5(user.email) + ".json";
     const photoURL =
       user.photoURL || "https://www.gravatar.com/avatar/" + md5(user.email);
-    let currentUser = new User(
+    const currentUser = new User(
       user.uid,
-      user.displayName || "",
+      user.displayName,
       false,
-      user.email || "",
+      user.email,
       user.isAnonymous,
-      user.phoneNumber || "",
+      user.phoneNumber,
       photoURL,
-      "",
       null,
-      "",
+      null,
+      null,
       getProvider(user)
     );
 
@@ -68,44 +70,50 @@ export const onAuthStateChanged = ({ onSignOut, setUser }: Args) => {
     setUser(currentUser);
     userRef = currentUser;
 
-    try {
-      const userFirebaseData = await dbFirebase.getUser(user.uid);
-      currentUser = {
-        ...currentUser,
-        ...userFirebaseData
-      };
-    } catch {}
+    dbFirebase.getUser(user.uid).then((fbUser) => {
+      currentUser.isModerator = fbUser ? fbUser.isModerator : false;
 
-    // creates a new object ref so react updates
-    console.log(
-      `calling setUser inside firebase status change for ${user.uid}`
-    );
-    setUser({ ...currentUser });
+      // creates a new object ref so react updates
+      setUser({ ...currentUser });
+    });
   };
   return firebase.auth().onAuthStateChanged(firebaseStatusChange);
 };
 
-export const signOut = async () => {
-  await firebase.auth().signOut();
+const signOut = () => {
+  firebase.auth().signOut();
 };
 
-export const sendEmailVerification = () => {
+const sendEmailVerification = () => {
   return firebase
     .auth()
-    .currentUser?.sendEmailVerification()
+    .currentUser.sendEmailVerification()
     .then(() => {
       const message = {
         title: "Notification",
         body:
           "A verification link has been sent to email account: " +
-          firebase.auth().currentUser?.email
+          firebase.auth().currentUser.email
       };
       return message;
     })
     .catch((error) => {
-      return {
+      const message = {
         title: "Warning",
         body: error.message
       };
+      return message;
     });
+};
+
+const reloadUser = async () => {
+  await firebase.auth().currentUser.reload();
+  return firebase.auth().currentUser;
+};
+
+export default {
+  onAuthStateChanged,
+  signOut,
+  sendEmailVerification,
+  reloadUser
 };

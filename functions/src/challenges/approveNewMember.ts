@@ -1,21 +1,21 @@
 import * as functions from "firebase-functions";
 
 import { firestore } from "../firestore";
-import addMissionToUser from "./utils/addMissionToUser";
-import getMissionIfExists from "./utils/getMissionIfExists";
-import verifyMissionIsOngoing from "./utils/verifyMissionIsOngoing";
+import addChallengeToUser from "./utils/addChallengeToUser";
+import getChallengeIfExists from "./utils/getChallengeIfExists";
+import verifyChallengeIsOngoing from "./utils/verifyChallengeIsOngoing";
 
-type RequestData = { missionId: string; userId: string };
+type RequestData = { challengeId: string; userId: string };
 
 export default functions.https.onCall(
   async (
-    { missionId, userId: userIdBeingApproved }: RequestData,
+    { challengeId, userId: userIdBeingApproved }: RequestData,
     callableContext
   ) => {
-    if (!missionId) {
+    if (!challengeId) {
       throw new functions.https.HttpsError(
         "invalid-argument",
-        "Missing missionId"
+        "Missing challengeId"
       );
     }
     const currentUserId = callableContext.auth?.uid;
@@ -26,9 +26,9 @@ export default functions.https.onCall(
       );
     }
 
-    const mission = await getMissionIfExists(missionId);
+    const challenge = await getChallengeIfExists(challengeId);
 
-    const { ownerUserId, pendingUsers } = mission;
+    const { ownerUserId, pendingUsers } = challenge;
 
     const pendingUser = pendingUsers.find(
       ({ uid }) => uid === userIdBeingApproved
@@ -56,14 +56,17 @@ export default functions.https.onCall(
       }
     }
 
-    const missionIsOngoing = verifyMissionIsOngoing(mission);
-    if (!missionIsOngoing) {
-      throw new functions.https.HttpsError("unavailable", "Mission has ended");
+    const challengeIsOngoing = verifyChallengeIsOngoing(challenge);
+    if (!challengeIsOngoing) {
+      throw new functions.https.HttpsError(
+        "unavailable",
+        "Challenge has ended"
+      );
     }
 
     const updates = {
       totalUserPieces: {
-        ...mission.totalUserPieces,
+        ...challenge.totalUserPieces,
         [userIdBeingApproved]: {
           ...pendingUser,
           pieces: 0
@@ -75,8 +78,8 @@ export default functions.https.onCall(
     };
 
     await Promise.all([
-      firestore.collection("missions").doc(missionId).update(updates),
-      addMissionToUser(userIdBeingApproved, missionId)
+      firestore.collection("challenges").doc(challengeId).update(updates),
+      addChallengeToUser(userIdBeingApproved, challengeId)
     ]);
 
     return {};

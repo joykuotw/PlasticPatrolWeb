@@ -77,7 +77,7 @@ const merge = (
 };
 
 export const extractPathnameParams = (
-  location: Location<any>
+  location: Location<History.PoorMansUnknown>
 ): { photoId?: string; mapLocation: MapLocation } => {
   // extracts photoID
   const regexPhotoIDMatch = location.pathname.match(

@@ -18,6 +18,9 @@ import {
 
 import { sortArrayByObjectKey } from "utils";
 
+import PageWrapper from "../PageWrapper";
+import { StatsUser } from "types/Stats";
+
 declare module "@material-ui/core/styles/withStyles" {
   // Augment the BaseCSSProperties so that we can control jss-rtl
   interface BaseCSSProperties {
@@ -101,7 +104,9 @@ export interface UserLeaderboardData {
   largeCollectionPieces?: number;
 }
 
-class MuiVirtualizedTable extends React.PureComponent<MuiVirtualizedTableProps> {
+class MuiVirtualizedTable extends React.PureComponent<
+  MuiVirtualizedTableProps
+> {
   static defaultProps = {
     headerHeight: 40,
     rowHeight: 48
@@ -176,7 +181,6 @@ class MuiVirtualizedTable extends React.PureComponent<MuiVirtualizedTableProps> 
       headerHeight,
       ...tableProps
     } = this.props;
-
     return (
       <AutoSizer>
         {({ height, width }) => (
@@ -220,17 +224,12 @@ const VirtualizedTable = withStyles(styles)(MuiVirtualizedTable);
 
 type Props = {
   usersLeaderboard: UserLeaderboardData[];
-  user?: { id?: string };
-  allowZeroPieces: boolean;
+  user: { id?: string };
 };
 
-export default function UserPieceRankTable({
-  user,
-  usersLeaderboard,
-  allowZeroPieces
-}: Props) {
+export default function UserPieceRankTable({ user, usersLeaderboard }: Props) {
   const copy = usersLeaderboard
-    .filter(({ pieces }) => allowZeroPieces || pieces > 0)
+    .filter(({ pieces }) => pieces > 0)
     .map(({ pieces, largeCollectionPieces, ...rest }) => ({
       pieces:
         pieces -
@@ -245,7 +244,6 @@ export default function UserPieceRankTable({
     ...value
   }));
   const width = window.innerWidth;
-
   return (
     <VirtualizedTable
       rowCount={withRank.length}

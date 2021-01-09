@@ -4,7 +4,7 @@ export type PendingUser = { uid: string; displayName: string };
 
 export type TotalUserPieces = { [uid: string]: User };
 export type PendingUsers = Array<PendingUser>;
-export type MissionFromServer = {
+export type ChallengeFromServer = {
   id: string;
   name: string;
   ownerUserId: string;
@@ -19,9 +19,9 @@ export type MissionFromServer = {
   pendingUsers: PendingUsers;
 };
 
-export type Mission = Omit<MissionFromServer, "id">;
+export type Challenge = Omit<ChallengeFromServer, "id">;
 
-export type ConfigurableMissionData = {
+export type ConfigurableChallengeData = {
   name: string;
   description: string;
   isPrivate: boolean;

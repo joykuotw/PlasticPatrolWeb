@@ -24,7 +24,6 @@ import User from "types/User";
 import usePhotosToModerate from "hooks/usePhotosToModerate";
 import { dbFirebase } from "features/firebase";
 import ConfirmationDialog, { Confirmation } from "./common/ConfirmationDialog";
-import { useMissions } from "../providers/MissionsProvider";
 
 const placeholderImage = process.env.PUBLIC_URL + "/custom/images/logo.svg";
 
@@ -51,7 +50,6 @@ const ModeratorPage = ({ user, label, handleClose }: Props) => {
   const [photoSelected, setPhotoSelected] = useState<Photo | undefined>();
   const [confirmation, setConfirmation] = useState<Confirmation | undefined>();
   const photos = usePhotosToModerate();
-  const missions = useMissions();
 
   const closeZoomDialog = () => setZoomDialogOpen(false);
   const handlePhotoClick = (photoSelected: Photo) => {
@@ -67,14 +65,10 @@ const ModeratorPage = ({ user, label, handleClose }: Props) => {
     );
   }
 
-  const reject = async (photo: Photo) => {
-    await dbFirebase.writeModeration(photo.id, user.id, false);
-    await missions?.refresh();
-  };
-  const approve = async (photo: Photo) => {
-    await dbFirebase.writeModeration(photo.id, user.id, true);
-    await missions?.refresh();
-  };
+  const reject = (photo: Photo) =>
+    dbFirebase.writeModeration(photo.id, user.id, false);
+  const approve = (photo: Photo) =>
+    dbFirebase.writeModeration(photo.id, user.id, true);
 
   return (
     <PageWrapper label={label} navigationHandler={{ handleClose }}>

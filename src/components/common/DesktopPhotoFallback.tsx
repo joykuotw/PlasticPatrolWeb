@@ -1,4 +1,4 @@
-import React from "react";
+import React, { RefObject } from "react";
 import { CordovaCameraImage } from "../../types/Photo";
 
 type Props = {

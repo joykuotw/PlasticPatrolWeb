@@ -38,8 +38,9 @@ import { linkToTutorialPage } from "./tutorial/links";
 import AccountPageRoute from "./account/Route";
 import { linkToAccountPage } from "./account/links";
 import { useStats } from "providers/StatsProvider";
-import { linkToMissionsPage } from "./missions/links";
-import MissionsRoute from "./missions/Route";
+import { linkToChallengesPage } from "./challenges/links";
+import ChallengesRoute from "./challenges/Route";
+import { Challenge } from "../types/Challenges";
 
 type Props = {
   user: User;
@@ -50,6 +51,7 @@ type Props = {
   handlePhotoClick: () => void;
   selectedFeature: any;
   sponsorImage?: string;
+  challenges: Challenge[];
 };
 
 export function Routes({
@@ -60,7 +62,8 @@ export function Routes({
   geojson,
   handlePhotoClick,
   selectedFeature,
-  sponsorImage
+  sponsorImage,
+  challenges
 }: Props) {
   const history = useHistory();
 
@@ -136,8 +139,8 @@ export function Routes({
         )}
       />
 
-      <Route path={linkToMissionsPage()}>
-        <MissionsRoute />
+      <Route path={linkToChallengesPage()}>
+        <ChallengesRoute challenges={challenges} user={user} />
       </Route>
 
       <ModeratorRoute path={config.PAGES.moderator.path} user={user}>

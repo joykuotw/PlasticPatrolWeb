@@ -1,8 +1,8 @@
 import * as functions from "firebase-functions";
 import admin from "firebase-admin";
 
-import getMissionIfExists from "../../missions/utils/getMissionIfExists";
-import verifyMissionIsOngoing from "../../missions/utils/verifyMissionIsOngoing";
+import getChallengeIfExists from "../../challenges/utils/getChallengeIfExists";
+import verifyChallengeIsOngoing from "../../challenges/utils/verifyChallengeIsOngoing";
 import { firestore } from "../../firestore";
 
 export default functions.firestore
@@ -14,28 +14,28 @@ export default functions.firestore
       throw new Error("No photo data available from snapshot");
     }
 
-    const { missions, pieces } = photo;
+    const { challenges, pieces } = photo;
 
-    if (!missions || missions.length === 0 || pieces === 0) {
+    if (!challenges || challenges.length === 0 || pieces === 0) {
       return;
     }
 
     await Promise.all(
-      missions.map(async (missionId: string) => {
+      challenges.map(async (challengeId: string) => {
         try {
-          const mission = await getMissionIfExists(missionId);
-          if (!verifyMissionIsOngoing(mission)) {
+          const challenge = await getChallengeIfExists(challengeId);
+          if (!verifyChallengeIsOngoing(challenge)) {
             return;
           }
 
           await firestore
-            .collection(missions)
-            .doc(missionId)
+            .collection(challenges)
+            .doc(challengeId)
             .update({
               pendingPieces: admin.firestore.FieldValue.increment(pieces)
             });
         } catch (err) {
-          console.info("Error updating mission with pieces");
+          console.info("Error updating challenge with pieces");
         }
       })
     );

@@ -1,15 +1,15 @@
 import * as functions from "firebase-functions";
 
-import getMissionIfExists from "./utils/getMissionIfExists";
+import getChallengeIfExists from "./utils/getChallengeIfExists";
 
-type RequestData = { missionId: string };
+type RequestData = { challengeId: string };
 
 export default functions.https.onCall(
-  async ({ missionId }: RequestData, callableContext) => {
-    if (!missionId) {
+  async ({ challengeId }: RequestData, callableContext) => {
+    if (!challengeId) {
       throw new functions.https.HttpsError(
         "invalid-argument",
-        "Missing missionId"
+        "Missing challengeId"
       );
     }
     const currentUserId = callableContext.auth?.uid;
@@ -20,17 +20,17 @@ export default functions.https.onCall(
       );
     }
 
-    const mission = await getMissionIfExists(missionId);
+    const challenge = await getChallengeIfExists(challengeId);
 
-    const { isPrivate, totalUserPieces } = mission;
+    const { isPrivate, totalUserPieces } = challenge;
 
-    const isInMission = !!Boolean(totalUserPieces[currentUserId]);
+    const isInChallenge = !!Boolean(totalUserPieces[currentUserId]);
 
-    if (isPrivate && !isInMission) {
-      const { totalUserPieces, ...safeMission } = mission;
-      return safeMission;
+    if (isPrivate && !isInChallenge) {
+      const { totalUserPieces, ...safeChallenge } = challenge;
+      return safeChallenge;
     }
 
-    return mission;
+    return challenge;
   }
 );

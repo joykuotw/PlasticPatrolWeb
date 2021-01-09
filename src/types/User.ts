@@ -1,4 +1,4 @@
-import { MissionId } from "./Missions";
+import { ChallengeId } from "./Challenges";
 
 class User {
   id: string;
@@ -11,7 +11,7 @@ class User {
   description: string;
   location: any;
   profileURL: string;
-  missions: MissionId[];
+  challenges: ChallengeId[];
 
   constructor(
     id: string,
@@ -24,8 +24,8 @@ class User {
     description: string,
     location: any,
     profileURL: string,
-    missions: MissionId[]
-  ) {
+    challenges: ChallengeId[]
+) {
     this.id = id;
     this.displayName = displayName;
     this.isModerator = isModerator;
@@ -36,7 +36,7 @@ class User {
     this.description = description;
     this.location = location;
     this.profileURL = profileURL;
-    this.missions = missions;
+    this.challenges = challenges;
   }
 }
 

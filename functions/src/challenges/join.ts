@@ -6,18 +6,18 @@ import { firestore } from "../firestore";
 
 import { getDisplayName } from "../stats";
 
-import getMissionIfExists from "./utils/getMissionIfExists";
-import verifyMissionIsOngoing from "./utils/verifyMissionIsOngoing";
-import addMissionToUser from "./utils/addMissionToUser";
+import getChallengeIfExists from "./utils/getChallengeIfExists";
+import verifyChallengeIsOngoing from "./utils/verifyChallengeIsOngoing";
+import addChallengeToUser from "./utils/addChallengeToUser";
 
-type RequestData = { missionId: string };
+type RequestData = { challengeId: string };
 
 export default functions.https.onCall(
-  async ({ missionId }: RequestData, callableContext) => {
-    if (!missionId) {
+  async ({ challengeId }: RequestData, callableContext) => {
+    if (!challengeId) {
       throw new functions.https.HttpsError(
         "invalid-argument",
-        "Missing missionId"
+        "Missing challengeId"
       );
     }
     const currentUserId = callableContext.auth?.uid;
@@ -28,23 +28,23 @@ export default functions.https.onCall(
       );
     }
 
-    const mission = await getMissionIfExists(missionId);
+    const challenge = await getChallengeIfExists(challengeId);
 
-    const missionIsOngoing = verifyMissionIsOngoing(mission);
-    if (!missionIsOngoing) {
+    const challengeIsOngoing = verifyChallengeIsOngoing(challenge);
+    if (!challengeIsOngoing) {
       throw new functions.https.HttpsError(
         "unavailable",
-        "Mission has already ended"
+        "Challenge has already ended"
       );
     }
 
-    const { isPrivate } = mission;
+    const { isPrivate } = challenge;
     const user = await admin.auth().getUser(currentUserId);
     const displayName = getDisplayName(user);
 
-    const missionRef = firestore.collection("missions").doc(missionId);
+    const challengeRef = firestore.collection("challenges").doc(challengeId);
     if (isPrivate) {
-      await missionRef.update({
+      await challengeRef.update({
         pendingUsers: admin.firestore.FieldValue.arrayUnion({
           uid: currentUserId,
           displayName
@@ -52,7 +52,7 @@ export default functions.https.onCall(
       });
     } else {
       await Promise.all([
-        missionRef.set(
+        challengeRef.set(
           {
             totalUserPieces: {
               [currentUserId]: {
@@ -64,7 +64,7 @@ export default functions.https.onCall(
           },
           { merge: true }
         ),
-        addMissionToUser(currentUserId, missionId)
+        addChallengeToUser(currentUserId, challengeId)
       ]);
     }
 

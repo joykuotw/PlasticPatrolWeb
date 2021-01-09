@@ -1,7 +1,7 @@
-import { Mission } from "missions/models";
+import { Challenge } from "challenges/models";
 
-export default function verifyMissionIsOngoing(mission: Mission) {
-  const { endTime } = mission;
+export default function verifyChallengeIsOngoing(challenge: Challenge) {
+  const { endTime } = challenge;
   const currentTime = new Date().getUTCMinutes();
 
   return endTime < currentTime;

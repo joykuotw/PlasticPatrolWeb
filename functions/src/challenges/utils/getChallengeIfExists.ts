@@ -1,20 +1,23 @@
 import * as functions from "firebase-functions";
 
-import { Mission } from "missions/models";
+import { Challenge } from "challenges/models";
 import { firestore } from "../../firestore";
 
-export default async function getMissionIfExists(
-  missionId: string
-): Promise<Mission> {
-  const snapshot = await firestore.collection("missions").doc(missionId).get();
+export default async function getChallengeIfExists(
+  challengeId: string
+): Promise<Challenge> {
+  const snapshot = await firestore
+    .collection("challenges")
+    .doc(challengeId)
+    .get();
 
   const { exists, data } = snapshot;
   if (!exists) {
     throw new functions.https.HttpsError(
       "not-found",
-      "No mission exists for id"
+      "No challenge exists for id"
     );
   }
 
-  return data() as Mission;
+  return data() as Challenge;
 }

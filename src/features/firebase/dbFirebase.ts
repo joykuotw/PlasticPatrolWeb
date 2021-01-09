@@ -11,8 +11,6 @@ import Feature from "types/Feature";
 import { Feedback } from "types/Feedback";
 import Photo from "types/Photo";
 import Config from "types/Config";
-import { updateMissionOnPhotoModerated } from "./missions";
-import User from "../../types/User";
 
 const firestore = firebase.firestore();
 export const storageRef = firebase.storage().ref();
@@ -195,8 +193,7 @@ function saveMetadata(data) {
     "location",
     "owner_id",
     "pieces",
-    "categories",
-    "missions"
+    "categories"
   ];
 
   return firestore.collection("photos").add(_.pick(data, fieldsToSave));
@@ -218,9 +215,9 @@ function savePhoto(id, base64) {
   });
 }
 
-async function getUser(id): Promise<Partial<User> | undefined> {
+async function getUser(id) {
   const fbUser = await firestore.collection("users").doc(id).get();
-  return fbUser.exists ? (fbUser.data() as Partial<User>) : undefined;
+  return fbUser.exists ? fbUser.data() : null;
 }
 
 async function getFeedbackByID(id: string): Promise<Feedback | null> {
@@ -274,21 +271,11 @@ function photosToModerateRT(
     });
 }
 
-async function writeModeration(
-  photoId: string,
-  userId: string,
-  published: boolean
-) {
-  console.log(`Approving photo ${photoId}`);
-
-  const photoDocRef = firestore.collection("photos").doc(photoId);
-  const photoDocData = await photoDocRef.get();
-
-  console.log(photoDocData.data() as Photo);
-
-  await updateMissionOnPhotoModerated(photoDocData.data() as Photo, published);
-
-  return photoDocRef.update({
+function writeModeration(photoId, userId, published) {
+  if (typeof published !== "boolean") {
+    throw new Error("Only boolean pls");
+  }
+  return firestore.collection("photos").doc(photoId).update({
     moderated: firebase.firestore.FieldValue.serverTimestamp(),
     published: published,
     moderator_id: userId
@@ -305,7 +292,6 @@ function onConnectionStateChanged(fn: (online: boolean) => void) {
   function connectedCallBack(snapshot) {
     fn(Boolean(snapshot.val()));
   }
-
   conRef.on("value", connectedCallBack);
 
   return () => conRef.off("value", connectedCallBack);

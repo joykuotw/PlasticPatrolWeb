@@ -1,5 +1,5 @@
 import Button from "@material-ui/core/Button";
-import { linkToAddMissionCoverPhotoDialog } from "../../../routes/missions/links";
+import { linkToAddChallengeCoverPhotoDialog } from "../../../routes/challenges/links";
 import { DesktopPhotoFallback } from "../../../components/common/DesktopPhotoFallback";
 import { Route } from "react-router-dom";
 import AddPhotoDialog from "../../photo/components/AddPhotoDialog/AddPhotoDialog";
@@ -7,13 +7,10 @@ import React, { ChangeEvent, createRef, useEffect, useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import styles from "../../../standard.scss";
 import {
-  Mission,
-  MissionFirestoreData,
-  ConfigurableMissionData,
-  coverPhotoIsMetaData,
-  isSameDay,
-  getDaysBetweenTimes
-} from "../../../types/Missions";
+  Challenge,
+  ChallengeConfigurableData,
+  isSameDay
+} from "../../../types/Challenges";
 import {
   CordovaCameraImage,
   ImageMetadata,
@@ -26,11 +23,10 @@ import Dialog from "@material-ui/core/Dialog";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogActions from "@material-ui/core/DialogActions";
-import thumbnailBackup from "../../../assets/images/mission-thumbnail-backup.png";
 
-const MISSION_NAME_LIMIT = 100;
-const MISSION_DESCRIPTION_LIMIT = 200;
-const MISSION_PIECE_TARGET_LIMIT = 10000000;
+const CHALLENGE_NAME_LIMIT = 100;
+const CHALLENGE_DESCRIPTION_LIMIT = 300;
+const CHALLENGE_PIECE_TARGET_LIMIT = 10000000;
 
 const useStyles = makeStyles((theme) => ({
   form: {
@@ -66,7 +62,7 @@ const useStyles = makeStyles((theme) => ({
     padding: "5px",
     marginTop: "5px",
     background: styles.lightGrey,
-    fontSize: 15,
+    fontSize: 16,
     boxSizing: "border-box",
     width: "100%",
     textOverflow: "ellipsis",
@@ -105,7 +101,7 @@ const useStyles = makeStyles((theme) => ({
 
   coverPhotoPreview: {
     maxWidth: "100%",
-    maxHeight: "180px"
+    maxHeight: "200px"
   },
 
   addPhotoButton: {
@@ -182,15 +178,15 @@ function validateNumberInput(
 }
 
 type Props = {
-  initialData?: Mission;
+  initialData?: ChallengeConfigurableData;
   refreshCounter: number;
-  onMissionDataUpdated: (mission: ConfigurableMissionData) => void;
+  onChallengeDataUpdated: (challenge: ChallengeConfigurableData) => void;
 };
 
-export default function MissionForm({
+export default function ChallengeForm({
   initialData,
   refreshCounter,
-  onMissionDataUpdated
+  onChallengeDataUpdated
 }: Props) {
   const classes = useStyles();
   const history = useHistory();
@@ -227,14 +223,14 @@ export default function MissionForm({
   const [description, setDescription] = useState("");
   const [targetPieces, setTargetPieces] = useState(0);
   const [isPrivate, setIsPrivate] = useState(false);
-  const [showPrivateMissionInfo, setShowPrivateMissionInfo] = useState(false);
+  const [showPrivateChallengeInfo, setShowPrivateChallengeInfo] = useState(
+    false
+  );
   const [startDate, setStartDate] = useState<Date>(new Date());
   const [endDate, setEndDate] = useState<Date>(new Date());
-  const [coverPhoto, setCoverPhoto] = useState<
-    ImageMetadata | string | undefined
-  >();
+  const [coverPhoto, setCoverPhoto] = useState<ImageMetadata | undefined>();
 
-  // If we're editing an existing mission, the parent component passes an initialMission
+  // If we're editing an existing challenge, the parent component passes an initialChallenge
   // prop. We should allow users to discard changes, easy way to do this is have this form
   // component reset itself to this initial data just by us pushing a state change.
   useEffect(() => {
@@ -250,13 +246,13 @@ export default function MissionForm({
       setIsPrivate(initialData.isPrivate);
       setStartDate(initialStartDate);
       setEndDate(initialEndDate);
-      setCoverPhoto(initialData.coverPhotoUrl || thumbnailBackup);
+      setCoverPhoto(initialData.coverPhoto);
     }
   }, [initialData, refreshCounter]);
 
-  // Keep parent updated on whether the current data in form makes up a valid mission.
+  // Keep parent updated on whether the current data in form makes up a valid challenge.
   useEffect(() => {
-    onMissionDataUpdated({
+    onChallengeDataUpdated({
       name,
       description,
       targetPieces,
@@ -272,42 +268,40 @@ export default function MissionForm({
     coverPhoto,
     startDate,
     endDate,
-    isPrivate,
-    onMissionDataUpdated
+    isPrivate
   ]);
 
   const updateStartDate = (e: ChangeEvent<HTMLInputElement>) => {
     let date = new Date(e.currentTarget.value);
     // Arbitrary start at 2am, I think daylight savings means setting
     // this to midnight messes things ups.
-    date.setHours(2, 0, 0);
-    setStartDate(date);
-  };
+    date.setHours(2,0,0);
+    setStartDate(date)
+  }
 
   const updateEndDate = (e: ChangeEvent<HTMLInputElement>) => {
     let date = new Date(e.currentTarget.value);
-    // Set mission to end at the end of the last day.
-    date.setHours(23, 59, 59);
-    setEndDate(date);
-  };
+    // Set challenge to end at the end of the last day.
+    date.setHours(23,59,59);
+    setEndDate(date)
+  }
 
-  const missionDurationDays = getDaysBetweenTimes(
-    startDate.getTime(),
-    endDate.getTime()
-  );
+  const challengeDurationDays = Math.floor(
+    (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
+  ) + 1;
 
   return (
     <div>
       <input
-        placeholder={"Enter a mission name"}
+        placeholder={"Enter a challenge name"}
         className={classes.name}
         value={name}
         onChange={(e) =>
-          validateStringInput(e.target.value, MISSION_NAME_LIMIT, setName)
+          validateStringInput(e.target.value, CHALLENGE_NAME_LIMIT, setName)
         }
       />
       <div className={classes.inputLengthTracker}>
-        {name.length}/{MISSION_NAME_LIMIT}
+        {name.length}/{CHALLENGE_NAME_LIMIT}
       </div>
       <textarea
         placeholder={"Enter a short description"}
@@ -317,13 +311,13 @@ export default function MissionForm({
         onChange={(e) =>
           validateStringInput(
             e.target.value,
-            MISSION_DESCRIPTION_LIMIT,
+            CHALLENGE_DESCRIPTION_LIMIT,
             setDescription
           )
         }
       />
       <div className={classes.inputLengthTracker}>
-        {description.length}/{MISSION_DESCRIPTION_LIMIT}
+        {description.length}/{CHALLENGE_DESCRIPTION_LIMIT}
       </div>
 
       <div className={classes.pieceTargetWrapper}>
@@ -335,7 +329,7 @@ export default function MissionForm({
           onChange={(e) =>
             validateNumberInput(
               e.target.value,
-              MISSION_PIECE_TARGET_LIMIT,
+              CHALLENGE_PIECE_TARGET_LIMIT,
               setTargetPieces
             )
           }
@@ -345,12 +339,7 @@ export default function MissionForm({
       {coverPhoto && (
         <div className={classes.coverPhotoWrapper}>
           <img
-            src={
-              coverPhoto &&
-              (coverPhotoIsMetaData(coverPhoto)
-                ? coverPhoto.imgSrc
-                : coverPhoto)
-            }
+            src={coverPhoto && coverPhoto.imgSrc}
             className={classes.coverPhotoPreview}
           />
         </div>
@@ -361,19 +350,21 @@ export default function MissionForm({
         // @ts-ignore
         onClick={() =>
           !!window.cordova
-            ? history.push(linkToAddMissionCoverPhotoDialog())
+            ? history.push(linkToAddChallengeCoverPhotoDialog())
             : desktopPhotoRef.current && desktopPhotoRef.current.click()
         }
         color="default"
         variant="contained"
       >
-        {coverPhoto !== undefined ? "Change cover photo" : "Add cover photo"}
+        {coverPhoto && coverPhoto.imgSrc
+          ? "Change cover photo"
+          : "Add cover photo"}
       </Button>
       <DesktopPhotoFallback
         ref={desktopPhotoRef}
         handlePhotoSelect={handlePhotoSelect}
       />
-      <Route path={linkToAddMissionCoverPhotoDialog()}>
+      <Route path={linkToAddChallengeCoverPhotoDialog()}>
         <AddPhotoDialog
           onClose={() => history.goBack()}
           handlePhotoSelect={handlePhotoSelect}
@@ -406,11 +397,9 @@ export default function MissionForm({
         </div>
       )}
 
-      {missionDurationDays > 0 && (
+      {challengeDurationDays > 0 && (
         <div className={classes.dateSummary}>
-          {`Mission will run for ${missionDurationDays} ${
-            missionDurationDays === 1 ? `day` : `days`
-          }`}
+          {`Challenge will run for ${challengeDurationDays} ${challengeDurationDays === 1 ? `day` : `days`}`}
         </div>
       )}
 
@@ -418,31 +407,31 @@ export default function MissionForm({
         <input
           type="radio"
           checked={isPrivate}
-          value={"Private mission"}
+          value={"Private challenge"}
           onChange={() => {}}
           onClick={() => setIsPrivate(!isPrivate)}
         />
-        Private mission{"   "}
+        Private challenge{"   "}
         <span
           className={classes.privateToggleInfo}
-          onClick={() => setShowPrivateMissionInfo(true)}
+          onClick={() => setShowPrivateChallengeInfo(true)}
         >
           What is this?
         </span>
       </div>
 
-      <Dialog open={showPrivateMissionInfo}>
+      <Dialog open={showPrivateChallengeInfo}>
         <DialogContent className={"dialogs__contentProgress"}>
           <DialogContentText id="loading-dialog-text">
-            You may want to make a mission private. This means that it cannot be
-            found in the list of missions, or searched. Only people with a
-            direct link to your mission - which you can share - will be able to
-            view it.
+            You may want to make a challenge private. This means that it cannot
+            be found in the list of challenges, or searched. Only people with a
+            direct link to your challenge - which you can share - will be able
+            to view it.
           </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button
-            onClick={() => setShowPrivateMissionInfo(false)}
+            onClick={() => setShowPrivateChallengeInfo(false)}
             color="primary"
           >
             Ok

@@ -85,7 +85,7 @@ export default function DrawerContainer({
     PAGES.cleanUps
   ]
     .concat(config.ENABLE_GROUPS ? [PAGES.groups] : [])
-    .concat(config.ENABLE_MISSIONS ? [PAGES.missions] : []);
+    .concat(config.ENABLE_CHALLENGES ? [PAGES.challenges] : []);
   const listItemsBottom: Page[] = [
     PAGES.tutorial,
     PAGES.about,

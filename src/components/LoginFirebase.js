@@ -8,7 +8,8 @@ import withMobileDialog from "@material-ui/core/withMobileDialog";
 import * as firebaseui from "firebaseui";
 import firebase from "firebase/app";
 import "firebase/auth";
-import { sendEmailVerification } from "../features/firebase/authFirebase";
+
+import { authFirebase } from "features/firebase";
 
 // TODO: change theme: https://github.com/firebase/firebaseui-web-react/tree/master/dist
 
@@ -28,7 +29,7 @@ const LoginFirebase = (props) => {
       // Avoid redirects after sign-in.
       signInSuccessWithAuthResult: (result) => {
         if (result.additionalUserInfo.isNewUser) {
-          sendEmailVerification();
+          authFirebase.sendEmailVerification();
         }
         onSignIn && onSignIn();
         return false;

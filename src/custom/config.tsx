@@ -9,7 +9,8 @@ import HelpIcon from "@material-ui/icons/Help";
 import EventIcon from "@material-ui/icons/Event";
 import FeedbackIcon from "@material-ui/icons/Feedback";
 import LibraryBooksIcon from "@material-ui/icons/LibraryBooks";
-import MissionIconImage from "assets/images/mission.png";
+import StarOutlinedIcon from "@material-ui/icons/StarOutlined";
+import ChallengeIconImage from "assets/images/challenge.png";
 
 import styles from "standard.scss";
 
@@ -118,14 +119,14 @@ const PAGES: { [pageName: string]: Page } = {
     label: "Create a Group",
     visible: (user, online) => true
   },
-  missions: {
-    path: "/missions",
-    label: "Missions",
+  challenges: {
+    path: "/challenges",
+    label: "Challenges",
     visible: (user, online) => true,
     icon: (
       <img
-        src={MissionIconImage}
-        alt="Missions icon"
+        src={ChallengeIconImage}
+        alt="Challenge icon image"
         style={{ width: 20, height: 20, paddingLeft: 2 }}
       />
     )
@@ -146,7 +147,7 @@ export interface Metadata {
 export interface Config {
   PAGES: { [pageName: string]: Page };
   ENABLE_GROUPS: boolean;
-  ENABLE_MISSIONS: boolean;
+  ENABLE_CHALLENGES: boolean;
   metadata: Metadata;
   MAX_IMAGE_SIZE: number;
   THEME: any;
@@ -206,7 +207,7 @@ const config: Config = {
   PAGES,
   ENABLE_GRAVATAR_PROFILES: true, //To update user-profile from Gravatar, value: true or false.
   ENABLE_GROUPS: false,
-  ENABLE_MISSIONS: true,
+  ENABLE_CHALLENGES: false,
   SECURITY: {
     UPLOAD_REQUIRES_LOGIN: true
   },

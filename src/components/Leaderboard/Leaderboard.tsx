@@ -19,11 +19,7 @@ export default function Leaderboard({
 }: Props) {
   return (
     <PageWrapper navigationHandler={{ handleClose }} label={label}>
-      <UserPieceRankTable
-        usersLeaderboard={usersLeaderboard}
-        user={user}
-        allowZeroPieces={true}
-      />
+      <UserPieceRankTable usersLeaderboard={usersLeaderboard} user={user} />
     </PageWrapper>
   );
 }

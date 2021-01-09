@@ -3,17 +3,17 @@ import * as functions from "firebase-functions";
 import admin from "firebase-admin";
 
 import { firestore } from "../firestore";
-import getMissionIfExists from "./utils/getMissionIfExists";
-import verifyMissionIsOngoing from "./utils/verifyMissionIsOngoing";
+import getChallengeIfExists from "./utils/getChallengeIfExists";
+import verifyChallengeIsOngoing from "./utils/verifyChallengeIsOngoing";
 
-type RequestData = { missionId: string };
+type RequestData = { challengeId: string };
 
 export default functions.https.onCall(
-  async ({ missionId }: RequestData, callableContext) => {
-    if (!missionId) {
+  async ({ challengeId }: RequestData, callableContext) => {
+    if (!challengeId) {
       throw new functions.https.HttpsError(
         "invalid-argument",
-        "Missing missionId"
+        "Missing challengeId"
       );
     }
     const currentUserId = callableContext.auth?.uid;
@@ -24,14 +24,17 @@ export default functions.https.onCall(
       );
     }
 
-    const mission = await getMissionIfExists(missionId);
+    const challenge = await getChallengeIfExists(challengeId);
 
-    const missionIsOngoing = verifyMissionIsOngoing(mission);
-    if (!missionIsOngoing) {
-      throw new functions.https.HttpsError("unavailable", "Mission has ended");
+    const challengeIsOngoing = verifyChallengeIsOngoing(challenge);
+    if (!challengeIsOngoing) {
+      throw new functions.https.HttpsError(
+        "unavailable",
+        "Challenge has ended"
+      );
     }
 
-    const { totalUserPieces } = mission;
+    const { totalUserPieces } = challenge;
     const user = totalUserPieces[currentUserId];
 
     if (!user) {
@@ -41,7 +44,7 @@ export default functions.https.onCall(
         .collection("users")
         .doc(currentUserId)
         .update({
-          missions: admin.firestore.FieldValue.arrayRemove(missionId)
+          challenges: admin.firestore.FieldValue.arrayRemove(challengeId)
         });
 
       return;
@@ -49,8 +52,8 @@ export default functions.https.onCall(
 
     await Promise.all([
       firestore
-        .collection("missions")
-        .doc(missionId)
+        .collection("challenges")
+        .doc(challengeId)
         .update({
           [`totalUserPieces.${currentUserId}`]: admin.firestore.FieldValue.delete()
         }),
@@ -58,7 +61,7 @@ export default functions.https.onCall(
         .collection("users")
         .doc(currentUserId)
         .update({
-          missions: admin.firestore.FieldValue.arrayRemove(missionId)
+          challenges: admin.firestore.FieldValue.arrayRemove(challengeId)
         })
     ]);
 
