@@ -1,12 +1,19 @@
-import { Challenge } from "../../types/Challenges";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import React, { useRef } from "react";
 import { useHistory } from "react-router";
 import { buildStyles, CircularProgressbar } from "react-circular-progressbar";
-import { linkToChallenge } from "../../routes/challenges/links";
+import { linkToMission } from "../../routes/missions/links";
+import {
+  getDaysBetweenTimes,
+  getTextDurationBetweenTimes,
+  Mission
+} from "../../types/Missions";
+import LockOpenIcon from "@material-ui/icons/LockOpen";
+
+import thumbnailBackup from "assets/images/mission-thumbnail-backup.png";
 
 const useStyles = makeStyles((theme) => ({
-  challengeThumbnail: {
+  missionThumbnail: {
     padding: "4%",
     display: "flex",
     height: "80px",
@@ -22,6 +29,7 @@ const useStyles = makeStyles((theme) => ({
     height: "100%",
     weight: "100px",
     textAlign: "center",
+    alignItems: "center",
     overflow: "hidden",
     borderRadius: "5px"
   },
@@ -57,42 +65,57 @@ const useStyles = makeStyles((theme) => ({
 
   progress: {
     height: "100%"
+  },
+
+  privateIcon: {
+    fontSize: "12px"
   }
 }));
 
 type Props = {
-  challenge: Challenge;
+  mission: Mission;
 };
 
-export default function ChallengeThumbnail({ challenge }: Props) {
+export default function MissionThumbnail({ mission }: Props) {
   const classes = useStyles();
   const theme = useTheme();
   const history = useHistory();
-  const textDurationRemaining = "10 minutes remaining";
+  const textDurationRemaining = getTextDurationBetweenTimes(
+    Date.now(),
+    mission.endTime
+  );
+
   const wrapperElement = useRef(null);
 
-  const percentage = (challenge.totalPieces / challenge.targetPieces) * 100;
+  const percentage = (mission.totalPieces / mission.targetPieces) * 100;
+
+  const imgSrc = mission.coverPhotoUrl || thumbnailBackup;
 
   return (
     <div
-      className={classes.challengeThumbnail}
+      className={classes.missionThumbnail}
       ref={wrapperElement}
-      onClick={() => history.push(linkToChallenge(challenge.id.toString()))}
+      onClick={() => history.push(linkToMission(mission.id.toString()))}
     >
       <div className={classes.pictureWrapper}>
-        <img src={challenge.coverPhoto?.imgSrc} className={classes.picture} />
+        <img src={imgSrc} className={classes.picture} />
       </div>
       <div className={classes.textSection}>
-        <div className={classes.name}>{challenge.name}</div>
+        <div className={classes.name}>
+          {mission.isPrivate && (
+            <LockOpenIcon fontSize={"small"} className={classes.privateIcon} />
+          )}{" "}
+          {mission.name}
+        </div>
         <div className={classes.participantCount}>
-          {challenge.totalUserPieces.length} participants
+          {mission.totalUserPieces?.length || 0} participants
         </div>
         <div className={classes.durationRemaining}>{textDurationRemaining}</div>
       </div>
       <div className={classes.progressWrapper}>
         <CircularProgressbar
           value={percentage}
-          text={`${percentage}%`}
+          text={`${Math.floor(percentage)}%`}
           className={classes.progress}
           styles={buildStyles({
             strokeLinecap: "round", // Whether to use rounded or flat corners on the ends - can use 'butt' or 'round'

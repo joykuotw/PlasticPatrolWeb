@@ -1,4 +1,4 @@
-import { LatLong } from "types/GPSLocation";
+import { LatLong } from "../../../types/GPSLocation";
 
 export type CordovaCameraImage = {
   filename: string;

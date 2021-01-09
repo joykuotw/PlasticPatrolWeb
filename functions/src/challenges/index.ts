@@ -5,5 +5,5 @@ export { default as approveNewMember } from "./approveNewMember";
 export { default as rejectNewMember } from "./rejectNewMember";
 export { default as fetch } from "./fetch";
 
-export { default as updateChallengeOnPhotoEdit } from "./update/onPhotoEdit";
-export { default as updateChallengeOnPhotoUpload } from "./update/onPhotoUpload";
+export { default as updateMissionOnPhotoEdit } from "./update/onPhotoEdit";
+export { default as updateMissionOnPhotoUpload } from "./update/onPhotoUpload";

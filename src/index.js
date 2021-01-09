@@ -26,7 +26,7 @@ import { useOnline } from "./providers/OnlineProvider";
 import UserProvider, { useUser } from "./providers/UserProvider";
 import StatsProvider from "./providers/StatsProvider";
 import { dbFirebase } from "features/firebase";
-import { useChallenges } from "./providers/ChallengesProvider";
+import { MissionsProvider, useChallenges } from "./providers/MissionsProvider";
 
 serviceWorker.register();
 
@@ -64,7 +64,6 @@ const Wrapper = () => {
   const online = useOnline();
   const selectedFeature = useSelectedFeature();
   const { sponsorImage } = useConfig();
-  const challenges = useChallenges();
   const user = useUser();
 
   useEffect(() => {
@@ -81,7 +80,6 @@ const Wrapper = () => {
       sponsorImage={sponsorImage}
       selectedFeature={selectedFeature}
       user={user}
-      challenges={challenges}
     />
   );
 };
@@ -95,9 +93,11 @@ const startApp = () => {
         <LocationProvider>
           <SelectedFeatureProvider>
             <StatsProvider>
-              <UserProvider>
-                <Wrapper />
-              </UserProvider>
+              <MissionsProvider>
+                <UserProvider>
+                  <Wrapper />
+                </UserProvider>
+              </MissionsProvider>
             </StatsProvider>
           </SelectedFeatureProvider>
         </LocationProvider>

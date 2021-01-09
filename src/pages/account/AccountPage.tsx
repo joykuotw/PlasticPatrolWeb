@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useContext } from "react";
 
 import _ from "lodash";
 
@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 
 import Avatar from "@material-ui/core/Avatar";
 import Typography from "@material-ui/core/Typography";
-import { makeStyles, useTheme } from "@material-ui/core/styles";
+import { makeStyles } from "@material-ui/core/styles";
 
 import PageWrapper from "../../components/PageWrapper";
 import MapLocation from "../../types/MapLocation";
@@ -15,12 +15,18 @@ import Geojson from "types/Geojson";
 import Tooltip from "components/common/Tooltip";
 import User from "types/User";
 import { Config } from "custom/config";
-import { FakeChallenge } from "../../providers/ChallengesProvider";
-import ChallengeThumbnail from "../challenges/ChallengeThumbnail";
-import { Challenge } from "../../types/Challenges";
-import { linkToChallengesPage } from "../../routes/challenges/links";
+import {
+  MissionsContext,
+  MissionsProviderData
+} from "../../providers/MissionsProvider";
+import MissionThumbnail from "../missions/MissionThumbnail";
+import { linkToMissionsPage } from "../../routes/missions/links";
 
 import styles from "standard.scss";
+import {
+  MissionFirestoreData,
+  userOnMissionLeaderboard
+} from "../../types/Missions";
 
 const LARGE_COLLECTION_THRESHOLD = 1000;
 
@@ -43,16 +49,16 @@ const useStyles = makeStyles((theme) => ({
   wrapper: {
     alignItems: "center"
   },
-  challengesWrapper: {
+  missionsWrapper: {
     alignItems: "left",
     width: "100%",
     boxSizing: "border-box",
     padding: 20
   },
-  challengesTitle: {
+  missionsTitle: {
     paddingBottom: 10
   },
-  challengeJoinPrompt: {
+  missionJoinPrompt: {
     paddingTop: 20,
     color: styles.darkGrey,
     fontWeight: "bold"
@@ -104,7 +110,13 @@ export default function AccountPage({
 
   const numPieces = _.sumBy(myPhotos, (o) => o.properties.pieces);
 
-  const challenges: Challenge[] = [FakeChallenge, FakeChallenge];
+  const missionData = useContext<MissionsProviderData | undefined>(
+    MissionsContext
+  );
+  const missions = missionData?.missions?.filter(
+    (mission: MissionFirestoreData) =>
+      userOnMissionLeaderboard(mission, user.id) && !mission.hidden
+  );
 
   return (
     <PageWrapper
@@ -175,25 +187,25 @@ export default function AccountPage({
         </>
       )}
 
-      {config.ENABLE_CHALLENGES && (
-        <div className={classes.challengesWrapper}>
-          <Typography variant="h6" className={classes.challengesTitle}>
-            My challenges
+      {config.ENABLE_MISSIONS && (
+        <div className={classes.missionsWrapper}>
+          <Typography variant="h6" className={classes.missionsTitle}>
+            My missions
           </Typography>
 
-          {challenges.length === 0 ? (
-            <Typography className={classes.challengeJoinPrompt}>
-              You haven't joined any challenges yet!
+          {missions === undefined || missions?.length === 0 ? (
+            <Typography className={classes.missionJoinPrompt}>
+              You haven't joined any missions yet!
               <br />
               Tap{" "}
-              <Link to={linkToChallengesPage()} className={classes.link}>
+              <Link to={linkToMissionsPage()} className={classes.link}>
                 here
               </Link>{" "}
-              to find a challenge to join.
+              to find a mission to join.
             </Typography>
           ) : (
-            challenges.map((challenge) => (
-              <ChallengeThumbnail key={challenge.id} challenge={challenge} />
+            missions?.map((mission) => (
+              <MissionThumbnail key={mission.id} mission={mission} />
             ))
           )}
         </div>

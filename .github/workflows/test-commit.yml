@@ -13,7 +13,7 @@ jobs:
         # https://stackoverflow.com/questions/59522374/how-to-increase-the-file-limit-of-github-actions
         run: echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
       - name: Cypress run
-        uses: cypress-io/github-action@v1
+        uses: cypress-io/github-action@v2
         with:
           start: yarn start
           wait-on: "http://localhost:3000"

@@ -42,7 +42,7 @@ const user: User = {
   description: "some thing",
   location: undefined,
   profileURL: "",
-  challenges: []
+  missions: []
 };
 
 const makeFeature = (ownerId: string, pictureId: string): Feature => {
@@ -63,7 +63,7 @@ const makeFeature = (ownerId: string, pictureId: string): Feature => {
       location: new firebase.firestore.GeoPoint(0, 0),
       published: true,
       categories: [],
-      challenges: []
+      missions: []
     }
   };
   return feature;

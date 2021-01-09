@@ -1,20 +1,20 @@
-import React from "react";
+import React, { useContext } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 
 import PageWrapper from "components/PageWrapper";
 import "react-circular-progressbar/dist/styles.css";
 import { useHistory } from "react-router";
-import ChallengeThumbnail from "../ChallengeThumbnail";
-import { Challenge } from "../../../types/Challenges";
 import Button from "@material-ui/core/Button";
-import { likeToManagePendingMembers } from "../../../routes/challenges/links";
 import { useParams } from "react-router-dom";
+import CheckIcon from "@material-ui/icons/Check";
+import CloseIcon from "@material-ui/icons/Close";
 import {
   approveNewMember,
   rejectNewMember
-} from "../../../providers/ChallengesProvider";
-import CheckIcon from "@material-ui/icons/Check";
-import CloseIcon from "@material-ui/icons/Close";
+} from "../../../features/firebase/missions";
+import { useMissions } from "../../../providers/MissionsProvider";
+import { PendingUser } from "../../../types/Missions";
+import { useUser } from "../../../providers/UserProvider";
 
 const useStyles = makeStyles((theme) => ({
   wrapper: {
@@ -49,18 +49,20 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-type Props = {
-  challenges: Challenge[];
-};
+type Props = {};
 
-export default function ManagePendingMembers({ challenges }: Props) {
+export default function ManagePendingMembers({}: Props) {
   const classes = useStyles();
   const history = useHistory();
+  const user = useUser();
 
-  const { challengeId } = useParams();
-  const challenge = challenges.find((ch) => ch.id.toString() === challengeId);
-  if (challenge === undefined) {
-    const errorMessage = `Trying to manage pending challenge members but couldn't find challenge ${challengeId} data in list.`;
+  const missionData = useMissions();
+  const missions = missionData?.missions || [];
+
+  const { missionId } = useParams();
+  const mission = missions.find((ch) => ch.id.toString() === missionId);
+  if (mission === undefined) {
+    const errorMessage = `Trying to manage pending mission members but couldn't find mission ${missionId} data in list.`;
     console.warn(errorMessage);
     return <div>{errorMessage}</div>;
   }
@@ -73,13 +75,12 @@ export default function ManagePendingMembers({ challenges }: Props) {
       navigationHandler={{ handleBack }}
       className={classes.wrapper}
     >
-      {challenge.pendingUserIds.length === 0 ? (
+      {mission.pendingUsers.length === 0 ? (
         <div>
-          There are currently no users who have requested to join this
-          challenge.
+          There are currently no users who have requested to join this mission.
         </div>
       ) : (
-        challenge.pendingUserIds.map((pendingUser) => (
+        mission.pendingUsers.map((pendingUser: PendingUser) => (
           <div className={classes.memberWrapper} key={pendingUser.uid}>
             <div className={classes.memberNameWrapper}>
               <div className={classes.memberName}>
@@ -90,7 +91,10 @@ export default function ManagePendingMembers({ challenges }: Props) {
             <div className={classes.approveButton}>
               <Button
                 className={classes.button}
-                onClick={() => approveNewMember(pendingUser.uid, challenge.id)}
+                onClick={async () => {
+                  await approveNewMember(mission.id, pendingUser);
+                  await missionData?.refresh();
+                }}
                 color="default"
                 size="small"
                 variant="outlined"
@@ -102,7 +106,10 @@ export default function ManagePendingMembers({ challenges }: Props) {
             <div className={classes.rejectButton}>
               <Button
                 className={classes.button}
-                onClick={() => rejectNewMember(pendingUser.uid, challenge.id)}
+                onClick={async () => {
+                  await rejectNewMember(pendingUser.uid, mission.id);
+                  await missionData?.refresh();
+                }}
                 color="default"
                 size="small"
                 variant="outlined"

@@ -6,7 +6,6 @@ import { withStyles } from "@material-ui/core/styles";
 
 import { Routes } from "routes/Routes";
 
-import { authFirebase } from "features/firebase";
 import { linkToNewPhoto } from "routes/photo/routes/new/links";
 import getMapIsVisible from "utils/getMapIsVisible";
 import {
@@ -25,6 +24,7 @@ import { extractPathnameParams } from "./providers/PhotosProvider";
 
 import { gtagEvent } from "./gtag.js";
 import "./App.scss";
+import { signOut } from "./features/firebase/authFirebase";
 
 const styles = (theme) => ({
   rootDialog: {
@@ -138,7 +138,7 @@ class App extends Component {
 
   handleClickLoginLogout = () => {
     if (this.props.user) {
-      authFirebase.signOut();
+      signOut();
     } else {
       this.props.history.push(linkToLogin());
     }
@@ -152,8 +152,7 @@ class App extends Component {
       geojson,
       online,
       sponsorImage,
-      selectedFeature,
-      challenges
+      selectedFeature
     } = this.props;
     const { leftDrawerOpen, mapLocation } = this.state;
     return (
@@ -179,8 +178,8 @@ class App extends Component {
               this.handleMapLocationChange(newMapLocation)
             }
             handleLocationClick={this.handleLocationClick}
-            gpsOffline={!gpsLocation.online}
-            gpsDisabled={!gpsLocation.updated}
+            gpsOffline={!(gpsLocation && gpsLocation.online)}
+            gpsDisabled={!(gpsLocation && gpsLocation.updated)}
           />
           <Routes
             user={user}
@@ -191,7 +190,6 @@ class App extends Component {
             handlePhotoClick={this.handlePhotoClick}
             selectedFeature={selectedFeature}
             sponsorImage={sponsorImage}
-            challenges={challenges}
           />
         </main>
 

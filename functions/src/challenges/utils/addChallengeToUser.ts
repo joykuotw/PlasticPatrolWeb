@@ -2,9 +2,9 @@ import admin from "firebase-admin";
 
 import { firestore } from "../../firestore";
 
-export default async function addChallengeToUser(
+export default async function addMissionToUser(
   userId: string,
-  challengeId: string
+  missionId: string
 ) {
   // try catch is to handle the case where a user doesn't yet have a profile
   // pre Gravatar migration
@@ -13,14 +13,14 @@ export default async function addChallengeToUser(
       .collection("users")
       .doc(userId)
       .update({
-        challengeIds: admin.firestore.FieldValue.arrayUnion(challengeId)
+        missionIds: admin.firestore.FieldValue.arrayUnion(missionId)
       });
   } catch (err) {
     await firestore
       .collection("users")
       .doc(userId)
       .set({
-        challengeIds: [challengeId]
+        missionIds: [missionId]
       });
   }
 }
