@@ -127,6 +127,9 @@ export function isMissionDataValid(
 }
 
 export const userIsInMission = (user: User, missionId: MissionId): boolean => {
+  console.log("userIsInMission");
+  console.log(user);
+  console.log(missionId);
   return user.missions.includes(missionId);
 };
 

@@ -21,17 +21,26 @@ import { useMissions } from "../../../providers/MissionsProvider";
 
 const useStyles = makeStyles((theme) => ({
   wrapper: {
-    padding: "5%"
+    padding: "5%",
+    display: "flex",
+    flexDirection: "column"
+  },
+
+  missionFormWrapper: {
+    flex: "1",
+    clear: "both",
+    overflow: "scroll"
   },
 
   submitButton: {
-    marginTop: "10px",
+    marginTop: 5,
     width: "100%"
   },
 
   formErrorWarning: {
     color: "#f00",
-    margin: "5px 0"
+    margin: "5px 0",
+    flex: 0
   }
 }));
 
@@ -81,20 +90,24 @@ export default function CreateMission({}: Props) {
       navigationHandler={handleBack}
       className={styles.wrapper}
     >
-      <MissionForm
-        initialData={undefined}
-        refreshCounter={0}
-        onMissionDataUpdated={setMissionFormData}
-      />
-      <Button
-        className={styles.submitButton}
-        onClick={createAndViewMission}
-        color="primary"
-        variant="contained"
-        disabled={!missionReady}
-      >
-        Create mission
-      </Button>
+      <div className={styles.missionFormWrapper}>
+        <MissionForm
+          initialData={undefined}
+          refreshCounter={0}
+          onMissionDataUpdated={setMissionFormData}
+        />
+      </div>
+      <div>
+        <Button
+          className={styles.submitButton}
+          onClick={createAndViewMission}
+          color="primary"
+          variant="contained"
+          disabled={!missionReady}
+        >
+          Create mission
+        </Button>
+      </div>
       {duplicatingExistingMissionName && (
         <div className={styles.formErrorWarning}>
           Cannot have the same name as an existing mission

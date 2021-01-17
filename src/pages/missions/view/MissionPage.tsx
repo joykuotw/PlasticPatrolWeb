@@ -179,6 +179,14 @@ export default function MissionPage({}: Props) {
     ? `This missions has finished, it managed to collect ${pieceTotal} pieces of litter!`
     : `${pieceTotal} pieces of litter collected so far!`;
 
+  console.log(mission);
+  console.log(userId);
+
+  console.log("userInMission");
+  console.log(userInMission);
+  console.log("missionHasEnded");
+  console.log(missionHasEnded(mission));
+
   return (
     <PageWrapper
       label={mission.name}

@@ -363,12 +363,9 @@ const addMissionToUser = async (userId: string, missionId: string) => {
       .firestore()
       .collection("users")
       .doc(userId)
-      .set(
-        {
-          missions: [missionId]
-        },
-        { merge: true }
-      );
+      .update({
+        missions: firebase.firestore.FieldValue.arrayUnion(missionId)
+      });
   } catch (err) {
     console.error(`Failed to add mission ID to user data: ${err}`);
   }

@@ -26,8 +26,17 @@ import {
 
 const useStyles = makeStyles((theme) => ({
   wrapper: {
-    padding: "5%"
+    padding: "5%",
+    display: "flex",
+    flexDirection: "column"
   },
+
+  missionFormWrapper: {
+    flex: "1",
+    clear: "both",
+    overflow: "scroll"
+  },
+
   buttons: {
     display: "flex",
     marginTop: `${theme.spacing(1)}px`,
@@ -83,7 +92,7 @@ export default function EditMission({}: Props) {
     }
     await editMission(missionId, missionFormData);
     await missionData?.refresh();
-    await history.push(linkToMission(missionId));
+    await history.goBack();
   };
 
   const discardEdits = () => {
@@ -97,11 +106,13 @@ export default function EditMission({}: Props) {
       navigationHandler={handleBack}
       className={styles.wrapper}
     >
-      <MissionForm
-        initialData={originalMission}
-        refreshCounter={formRefreshCounter}
-        onMissionDataUpdated={setMissionFormData}
-      />
+      <div className={styles.missionFormWrapper}>
+        <MissionForm
+          initialData={originalMission}
+          refreshCounter={formRefreshCounter}
+          onMissionDataUpdated={setMissionFormData}
+        />
+      </div>
       <div className={styles.buttons}>
         <Button
           className={styles.button}
