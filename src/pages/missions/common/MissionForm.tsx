@@ -296,6 +296,8 @@ export default function MissionForm({
     endDate.getTime()
   );
 
+  const isEditingExistingMission = initialData !== undefined;
+
   return (
     <div>
       <input
@@ -414,22 +416,24 @@ export default function MissionForm({
         </div>
       )}
 
-      <div className={classes.privateToggleWrapper}>
-        <input
-          type="radio"
-          checked={isPrivate}
-          value={"Private mission"}
-          onChange={() => {}}
-          onClick={() => setIsPrivate(!isPrivate)}
-        />
-        Private mission{"   "}
-        <span
-          className={classes.privateToggleInfo}
-          onClick={() => setShowPrivateMissionInfo(true)}
-        >
-          What is this?
-        </span>
-      </div>
+      {!isEditingExistingMission && (
+        <div className={classes.privateToggleWrapper}>
+          <input
+            type="radio"
+            checked={isPrivate}
+            value={"Private mission"}
+            onChange={() => {}}
+            onClick={() => setIsPrivate(!isPrivate)}
+          />
+          Private mission{"   "}
+          <span
+            className={classes.privateToggleInfo}
+            onClick={() => setShowPrivateMissionInfo(true)}
+          >
+            What is this?
+          </span>
+        </div>
+      )}
 
       <Dialog open={showPrivateMissionInfo}>
         <DialogContent className={"dialogs__contentProgress"}>
