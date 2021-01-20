@@ -21,7 +21,7 @@ type Args = {
 
 export const onAuthStateChanged = ({ onSignOut, setUser }: Args) => {
   let userRef;
-  const firebaseStatusChange = async (user: firebase.User) => {
+  const firebaseStatusChange = async (user: firebase.User | null) => {
     if (userRef && !user) {
       userRef = undefined;
       onSignOut();
@@ -29,12 +29,18 @@ export const onAuthStateChanged = ({ onSignOut, setUser }: Args) => {
       return;
     }
 
-    gtagSetId(user.uid);
-    gtagEvent("Logged in", "User", user.uid);
+    if (user === null) {
+      setUser(undefined);
+      return;
+    }
 
-    const gravatarURL = "https://www.gravatar.com/" + md5(user.email) + ".json";
+    gtagSetId(user?.uid);
+    gtagEvent("Logged in", "User", user?.uid);
+
+    const gravatarURL =
+      "https://www.gravatar.com/" + md5(user?.email) + ".json";
     const photoURL =
-      user.photoURL || "https://www.gravatar.com/avatar/" + md5(user.email);
+      user.photoURL || "https://www.gravatar.com/avatar/" + md5(user?.email);
     let currentUser = new User(
       user.uid,
       user.displayName || "",

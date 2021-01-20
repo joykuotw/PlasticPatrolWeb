@@ -14,6 +14,7 @@ import User from "../../types/User";
 import _ from "lodash";
 import { ImageMetaData } from "../../pages/photo/state/types";
 import { firestore } from "../../../functions/src/firestore";
+import { user } from "../../../cypress/fixtures/users";
 
 const MISSION_FIRESTORE_COLLECTION = "missions";
 const MISSION_PHOTO_STORAGE = "missions";
@@ -356,18 +357,21 @@ export const deleteMission = async (missionId: MissionId) => {
 const addMissionToUser = async (userId: string, missionId: string) => {
   console.log(`Updating user ${userId} with mission ${missionId}`);
 
-  // try catch is to handle the case where a user doesn't yet have a profile
-  // pre Gravatar migration
-  try {
-    await firebase
-      .firestore()
-      .collection("users")
-      .doc(userId)
-      .update({
+  const userDoc = await firebase.firestore().collection("users").doc(userId);
+  const currentUserDoc = await userDoc.get();
+
+  if (!currentUserDoc.exists) {
+    await userDoc.set({
+      missions: [missionId]
+    });
+  } else {
+    try {
+      await userDoc.update({
         missions: firebase.firestore.FieldValue.arrayUnion(missionId)
       });
-  } catch (err) {
-    console.error(`Failed to add mission ID to user data: ${err}`);
+    } catch (err) {
+      console.error(`Failed to add mission ID to user data: ${err}`);
+    }
   }
 };
 
