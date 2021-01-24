@@ -23,8 +23,13 @@ type Args = {
 export default function loadPhoto(args: Args): void {
   //   https://github.com/blueimp/JavaScript-Load-Image#meta-data-parsing
   //@ts-ignore
+  console.log("loadPhoto loadPhoto loadPhoto loadPhoto");
+  console.log(args);
+
   if (!window.cordova) {
+    console.log("!window.cordova !window.cordova !window.cordova");
     const { fileOrFileName } = args;
+    console.log(fileOrFileName);
     loadImage.parseMetaData(
       fileOrFileName,
       (data) => {
@@ -32,6 +37,9 @@ export default function loadPhoto(args: Args): void {
         const imgExif = data.exif ? data.exif.getAll() : null;
         //@ts-ignore
         const imgIptc = data.iptc ? data.iptc.getAll() : null;
+        console.log(
+          "loadImage.parseMetaData callback loadImage.parseMetaData callback"
+        );
         doLoadPhoto({
           imgExif,
           imgIptc,
@@ -61,11 +69,24 @@ function doLoadPhoto({
   imgIptc?: any;
   cordovaMetadata?: CordovaMetaData;
 }): void {
+  console.log("doLoadPhoto doLoadPhoto doLoadPhoto ");
+  console.log(fileOrFileName);
+  console.log(fromCamera);
+  console.log(gpsLocation);
+  console.log(cordovaMetadata);
+  console.log(imgExif);
+  console.log(imgIptc);
+
   loadImage(
     fileOrFileName,
     (img) => {
+      console.log("loadImage callback loadImage callback");
+      console.log(img);
+
       // @ts-ignore
       const imgSrc = img.toDataURL("image/jpeg");
+      console.log("imgsrc");
+      console.log(imgSrc);
       let imgLocation: any = null;
       if (fromCamera) {
         imgLocation = gpsLocation;

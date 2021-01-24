@@ -202,6 +202,12 @@ export default function MissionForm({
     image: File | CordovaCameraImage,
     fromCamera: boolean
   ) => {
+    console.log("handlePhotoSelect");
+    console.log(
+      isCordovaCameraImage(image)
+        ? "isCordovaCameraImage"
+        : "NOT isCordovaCameraImage"
+    );
     const fileState = isCordovaCameraImage(image)
       ? {
           fileOrFileName: (image as CordovaCameraImage).filename,
@@ -211,6 +217,9 @@ export default function MissionForm({
           fromCamera: fromCamera
         }
       : { fileOrFileName: image, fromCamera: fromCamera };
+
+    console.log("fileState fileState fileState fileState");
+    console.log(fileState);
 
     loadPhoto({
       ...fileState,
