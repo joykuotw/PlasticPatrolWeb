@@ -19,11 +19,6 @@ export const DesktopPhotoFallback = React.forwardRef<HTMLInputElement, Props>(
         ref={ref}
         onChange={(e) => {
           const file = e.target && e.target.files && e.target.files[0];
-          console.log("DesktopPhotoFallback");
-          console.log("EEEEEEEEEEe");
-          console.log(e);
-          console.log("FILEFILEFILEFILE");
-          console.log(file);
           if (file) {
             // there's probably a more direct way to figure out if the image
             // that we loaded is from the camera, but for now just check that

@@ -36,6 +36,7 @@ import {
   userIsInMission,
   PRIVATE_MISSION_ID_SEARCH_LENGTH
 } from "../../../types/Missions";
+import { linkToLogin } from "../../../routes/login/links";
 
 const useStyles = makeStyles((theme) => ({
   wrapper: {
@@ -97,6 +98,12 @@ const useStyles = makeStyles((theme) => ({
     color: `${theme.palette.primary.main}`,
     fontSize: "14px",
     padding: `0 ${theme.spacing(0.5)}px`
+  },
+
+  loginButton: {
+    width: `100%`,
+    color: `white`,
+    backgroundColor: theme.palette.primary.main
   },
 
   missionButton: {
@@ -207,8 +214,15 @@ export default function MissionPage({}: Props) {
         <div className={classes.buttonsWrapper}>
           {!userLoggedIn && !missionHasEnded(mission) && (
             <div className={classes.notLoggedInMessage}>
-              Before you can join a mission, you’ll have to create a Planet
-              Patrol account, or login to an existing account.
+              Before you can join a mission, you need to login or register.
+              <Button
+                color="default"
+                variant="contained"
+                className={classes.loginButton}
+                onClick={() => history.push(linkToLogin())}
+              >
+                Login
+              </Button>
             </div>
           )}
           {userLoggedIn &&

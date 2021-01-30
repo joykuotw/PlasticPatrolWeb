@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 
 import PageWrapper from "components/PageWrapper";
@@ -18,12 +18,19 @@ import { linkToMissionsPage } from "../../../routes/missions/links";
 import { useUser } from "../../../providers/UserProvider";
 import { createMission } from "../../../features/firebase/missions";
 import { useMissions } from "../../../providers/MissionsProvider";
+import { linkToLogin } from "../../../routes/login/links";
 
 const useStyles = makeStyles((theme) => ({
   wrapper: {
     padding: "5%",
     display: "flex",
     flexDirection: "column"
+  },
+
+  loginButton: {
+    margin: `${theme.spacing(1)}px 0px`,
+    color: `white`,
+    backgroundColor: theme.palette.primary.main
   },
 
   missionFormWrapper: {
@@ -48,8 +55,14 @@ type Props = {};
 
 export default function CreateMission({}: Props) {
   const styles = useStyles();
+
   const history = useHistory();
-  const handleBack = { handleBack: () => history.goBack(), confirm: true };
+  const user = useUser();
+
+  const handleBack = {
+    handleBack: () => history.goBack(),
+    confirm: user !== undefined
+  };
 
   const missionData = useMissions();
   const missions = missionData?.missions || [];
@@ -57,8 +70,8 @@ export default function CreateMission({}: Props) {
     missionFormData,
     setMissionFormData
   ] = useState<ConfigurableMissionData>(EmptyMissionData);
+  const [creatingMission, setCreatingMission] = useState(false);
 
-  const user = useUser();
   if (user === undefined) {
     return (
       <PageWrapper
@@ -67,6 +80,14 @@ export default function CreateMission({}: Props) {
         className={styles.wrapper}
       >
         You need to be logged in to create a mission!
+        <Button
+          color="default"
+          variant="contained"
+          className={styles.loginButton}
+          onClick={() => history.push(linkToLogin())}
+        >
+          Login
+        </Button>
       </PageWrapper>
     );
   }
@@ -79,6 +100,7 @@ export default function CreateMission({}: Props) {
     isMissionDataValid(missionFormData) && !duplicatingExistingMissionName;
 
   const createAndViewMission = async () => {
+    setCreatingMission(true);
     await createMission(user, missionFormData);
     await missionData?.refresh();
     history.push(linkToMissionsPage());
@@ -103,7 +125,7 @@ export default function CreateMission({}: Props) {
           onClick={createAndViewMission}
           color="primary"
           variant="contained"
-          disabled={!missionReady}
+          disabled={!missionReady || creatingMission}
         >
           Create mission
         </Button>
