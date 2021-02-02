@@ -32,7 +32,6 @@ export default function loadPhoto(args: Args): void {
         const imgExif = data.exif ? data.exif.getAll() : null;
         //@ts-ignore
         const imgIptc = data.iptc ? data.iptc.getAll() : null;
-
         doLoadPhoto({
           imgExif,
           imgIptc,
@@ -67,7 +66,6 @@ function doLoadPhoto({
     (img) => {
       // @ts-ignore
       const imgSrc = img.toDataURL("image/jpeg");
-
       let imgLocation: any = null;
       if (fromCamera) {
         imgLocation = gpsLocation;

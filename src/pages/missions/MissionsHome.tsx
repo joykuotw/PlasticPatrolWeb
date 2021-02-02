@@ -128,8 +128,6 @@ export default function MissionsHome({}: Props) {
     [searchString, missionData]
   );
 
-  console.log(filteredMissionList);
-
   return (
     <PageWrapper
       label={"Missions"}
