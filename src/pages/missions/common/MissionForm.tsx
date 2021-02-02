@@ -218,7 +218,6 @@ export default function MissionForm({
       gpsLocation,
       callback: (image: ImageMetadata) => {
         setCoverPhoto(image);
-        console.error("calling history.goBack");
         history.goBack();
       }
     });

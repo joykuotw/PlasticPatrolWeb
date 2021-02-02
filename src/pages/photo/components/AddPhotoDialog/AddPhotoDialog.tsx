@@ -72,7 +72,6 @@ function handlePhotoDialogItemClick(
   // this.setState({
   //   srcType: value === "CAMERA" ? "camera" : "filesystem"
   // });
-
   Camera.getPicture(
     //https://cordova.apache.org/docs/en/1.6.0/cordova/camera/camera.getPicture.html
     (imageUri: string) => {
