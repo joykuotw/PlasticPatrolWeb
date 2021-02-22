@@ -115,14 +115,14 @@ export function isMissionDataValid(
   today.setHours(0, 0, 0, 0);
   return (
     missionConfigurableData !== undefined &&
-    // Chehck mission has a name
+    // Check mission has a name
     missionConfigurableData.name !== "" &&
     // Check mission has description
     missionConfigurableData.description !== "" &&
     // Has a valid number of pieces to collect
     missionConfigurableData.targetPieces > 0 &&
     // Has an end date set after the start date
-    missionConfigurableData.endTime > missionConfigurableData.startTime
+    missionConfigurableData.endTime >= missionConfigurableData.startTime
   );
 }
 
