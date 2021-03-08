@@ -7,7 +7,7 @@ on:
 
 
 jobs:
-  web:
+  build_web:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -37,8 +37,8 @@ jobs:
           name: react-build
           path: build
 
-  android:
-    needs: web
+  build_android:
+    needs: build_web
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -82,14 +82,14 @@ jobs:
         run: yarn
       - run: yarn build:android
 
-      # it will contain the android image too
+      # Upload release apk to artifact
       - uses: actions/upload-artifact@v2
         with:
           name: android-build
-          path: cordova-app/platforms/android/app/build
+          path: cordova-app/platforms/android/app/build/outputs/apk/release
 
-  ios:
-    needs: web
+  build_ios:
+    needs: build_web
     runs-on: macos-latest
     # fetch the code
     steps:
@@ -132,30 +132,20 @@ jobs:
       # build ios and sign
       - run: yarn build:ios
 
-      # it will contain the ios image too
+      # Upload ios build to artifact
       - uses: actions/upload-artifact@v2
         with:
           name: ios-build
           path: cordova-app/platforms/ios/build
 
-  ios-testflight:
-    needs: ios
+  deploy_ios_testflight:
+    needs: build_ios
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
         with:
           node-version: '14'
-      - name: Cache node_modules
-        id: cache-modules
-        uses: actions/cache@v2
-        with:
-          path: node_modules
-          key: ${{ runner.OS }}-node_modules-${{ hashFiles('yarn.lock') }}
-
-      - name: yarn
-        if: steps.cache-modules.outputs.cache-hit != 'true'
-        run: yarn
 
       - run: mkdir -p cordova-app/platforms/ios/build/
       - name: Download a cordova build
@@ -176,8 +166,36 @@ jobs:
           FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${{ secrets.FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD }}
           FASTLANE_SESSION: ${{ secrets.FASTLANE_SESSION }}
 
-  web-firebase-test:
-    needs: web
+  deploy_android_beta:
+    needs: build_android
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      - run: mkdir -p cordova-app/platforms/android/app/release/
+      - name: Download a cordova build
+        uses: actions/download-artifact@v2
+        with:
+          name: android-build
+          path: cordova-app/platforms/android/app/release
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 2.7
+          bundler-cache: true
+
+      - run: gem install fastlane -NV
+      - run: yarn beta:android
+        env:
+          FASTLANE_PASSWORD: ${{ secrets.FASTLANE_PASSWORD }}
+          FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${{ secrets.FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD }}
+          FASTLANE_SESSION: ${{ secrets.FASTLANE_SESSION }}
+
+  deploy_web_firebase:
+    needs: build_web
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
