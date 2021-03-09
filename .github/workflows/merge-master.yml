@@ -175,12 +175,12 @@ jobs:
         with:
           node-version: '14'
 
-      - run: mkdir -p cordova-app/platforms/android/app/release/
+      - run: mkdir -p cordova-app/platforms/android/app/build/outputs/apk/release
       - name: Download a cordova build
         uses: actions/download-artifact@v2
         with:
           name: android-build
-          path: cordova-app/platforms/android/app/release
+          path: cordova-app/platforms/android/app/build/outputs/apk/release
 
       - uses: ruby/setup-ruby@v1
         with:
