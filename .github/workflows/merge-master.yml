@@ -182,6 +182,9 @@ jobs:
           name: android-build
           path: cordova-app/platforms/android/app/build/outputs/apk/release
 
+      - run: openssl enc -d -aes-256-cbc -in cordova-app/secrets.tar.encrypted -out cordova-app/secrets.tar -k ${{ secrets.ENC_PASSWORD }} -md sha512
+      - run: pushd cordova-app && tar xvf secrets.tar && popd
+
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: 2.7
