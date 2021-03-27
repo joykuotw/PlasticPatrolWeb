@@ -7,6 +7,11 @@
   "plugins": {
     "SplashScreen": {
       "launchShowDuration": 3000
+    },
+    "CapacitorFirebaseAuth": {
+      "providers": ["facebook.com", "apple.com"],
+      "languageCode": "en",
+      "nativeAuth": false
     }
   },
   "cordova": {
@@ -20,7 +25,5 @@
   "ios": {
     "minVersion": "13.0"
   },
-  "android": {
-    
-  }
+  "android": {}
 }

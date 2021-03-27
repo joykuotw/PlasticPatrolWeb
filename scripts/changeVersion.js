@@ -14,7 +14,7 @@ console.log("android-versionCode:", newAndroidVersionCode);
 console.log("android-versionName:", version);
 const gradleContent = readFileSync(gradleFilePath, 'utf8');
 const regexVersionCode = /versionCode [0-9]+/;
-const regexVersionName = /versionName \".*\"/;
+const regexVersionName = /versionName ".*"/;
 const newGradleContent = gradleContent.replace(regexVersionCode, `versionCode ${newAndroidVersionCode}`);
 const latestGradleContent = newGradleContent.replace(regexVersionName, `versionName "${version}"`);
 writeFileSync(gradleFilePath, latestGradleContent);

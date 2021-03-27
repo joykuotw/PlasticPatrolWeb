@@ -81,10 +81,13 @@ scripts/config.json
 **/*.p12
 **/*.mobileprovision
 **/report.xml
-**/google-services.json
-**/GoogleService-Info.plist
 **/GooglePlayAndroidDeveloper.json
 **/AppStoreConnectAPIKey.json
+
+# We include Firebase config for collaboration, but need to ensure firebase security rules are set up correctly.
+# (https://groups.google.com/g/firebase-talk/c/bamCgTDajkw)
+# **/google-services.json
+# **/GoogleService-Info.plist
 
 functions/config.json
 public/first-input-delay.min.js
