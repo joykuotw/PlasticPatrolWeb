@@ -371,7 +371,7 @@ const wrap = (f) => {
 };
 
 module.exports = {
-  api: functions.https.onRequest(app),
+  api: functions.runWith({ memory: "1GB" }).https.onRequest(app),
   hostMetadata: functions.https.onRequest(hostMetadata),
   generateThumbnail,
   updateStats: functions.pubsub.topic(STATS_TOPIC).onPublish(updateStats),
