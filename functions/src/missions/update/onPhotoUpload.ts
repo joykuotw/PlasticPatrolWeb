@@ -1,8 +1,8 @@
 import * as functions from "firebase-functions";
 import admin from "firebase-admin";
 
-import getMissionIfExists from "../../missions/utils/getMissionIfExists";
-import verifyMissionIsOngoing from "../../missions/utils/verifyMissionIsOngoing";
+import getMissionIfExists from "../utils/getMissionIfExists";
+import verifyMissionIsOngoing from "../utils/verifyMissionIsOngoing";
 import { firestore } from "../../firestore";
 
 export default functions.firestore

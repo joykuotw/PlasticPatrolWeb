@@ -44,8 +44,8 @@ function extractPhoto(data, id): Photo {
     photo.moderated instanceof firebase.default.firestore.Timestamp
       ? photo.moderated.toDate()
       : photo.moderated === null
-      ? undefined
-      : new Date(photo.moderated);
+        ? undefined
+        : new Date(photo.moderated);
 
   // when comming from json, it looses the type
   if (!(photo.location instanceof firebase.default.firestore.GeoPoint)) {

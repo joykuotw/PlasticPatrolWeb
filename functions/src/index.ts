@@ -2,10 +2,11 @@
 "use strict";
 
 import _ from "lodash";
-import json2csv from "json2csv";
+import * as json2csv from "json2csv";
 import * as functions from "firebase-functions";
 import mkdirp from "mkdirp-promise";
 import corsModule from "cors";
+import compression from "compression";
 import { PubSub } from "@google-cloud/pubsub";
 import path from "path";
 import os from "os";
@@ -41,6 +42,7 @@ const WEB_CACHE_AGE_S = 1 * 60 * 60 * 24 * 1; // 1day
 const pubsub = new PubSub();
 const app = express();
 app.use(cors);
+app.use(compression());
 
 async function resize(inFile, outFile, maxSize) {
   return new Promise((resolve, reject) => {
@@ -218,10 +220,18 @@ app.get("/photos.json", async (req, res) => {
     `public, max-age=${WEB_CACHE_AGE_S}, s-maxage=${WEB_CACHE_AGE_S * 2}`
   );
 
-  const querySnapshot = await firestore
-    .collection("photos")
-    .where("published", "==", true)
-    .get();
+  let querySnapshot;
+  try {
+    querySnapshot = await firestore
+      .collection("photos")
+      .where("published", "==", true)
+      .get();
+  } catch (error) {
+    console.error(error);
+    res.status(500).send(error);
+    return false;
+  }
+
   const data = {
     photos: {},
     serverTime: new Date()

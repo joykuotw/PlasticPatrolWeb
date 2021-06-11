@@ -1,7 +1,7 @@
 import * as functions from "firebase-functions";
 import admin from "firebase-admin";
 
-import getMissionIfExists from "../../missions/utils/getMissionIfExists";
+import getMissionIfExists from "../utils/getMissionIfExists";
 import { firestore } from "../../firestore";
 
 async function decrementPendingPieces(

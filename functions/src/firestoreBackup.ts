@@ -1,7 +1,6 @@
 import * as storage from '@google-cloud/storage';
 import * as admin from 'firebase-admin';
 import UserRecord = admin.auth.UserRecord;
-import firebase from "firebase/app";
 
 const client = new admin.firestore.v1.FirestoreAdminClient({});
 
@@ -38,8 +37,7 @@ const backupFirestore = async (projectId: string, bucketName: string, backupFold
 }
 
 const getUsers = async (nextPageToken?: string): Promise<UserRecord[]> => {
-  if (nextPageToken === undefined)
-  {
+  if (nextPageToken === undefined) {
     return [];
   }
   const listUsersResult = await admin.auth().listUsers(USERS_RETRIEVED_PER_API_CALL, nextPageToken);
@@ -69,7 +67,7 @@ const backupUsers = async (bucketName: string, backupFolder: string): Promise<vo
   const file = bucket.file(`${backupFolder}/users.json`);
 
   try {
-    await file.save(Buffer.from(JSON.stringify({users: usersRecords})));
+    await file.save(Buffer.from(JSON.stringify({ users: usersRecords })));
   } catch (err) {
     console.log(`Failed upload users.json. ${err}`);
   }
