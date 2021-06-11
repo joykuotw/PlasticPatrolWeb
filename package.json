@@ -83,7 +83,8 @@
     "capacitor:build:ios": "cross-env ./scripts/runWithVars.sh 'npx cap sync ios && node scripts/changeVersion.js && fastlane ios sign'",
     "capacitor:beta:ios": "fastlane ios beta --verbose",
     "capacitor:beta:android": "fastlane android beta --verbose",
-    "capacitor:resources": "cordova-res --skip-config --copy"
+    "capacitor:resources": "cordova-res --skip-config --copy",
+    "prepare": "npx husky install"
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "^1.2.4",
