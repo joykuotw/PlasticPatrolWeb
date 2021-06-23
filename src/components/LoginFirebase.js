@@ -16,6 +16,12 @@ import appleIcon from "../assets/images/apple.svg";
 import { createButton } from "react-social-login-buttons";
 import { cfaSignIn } from "capacitor-firebase-auth/alternative";
 
+import {
+  SignInWithAppleResponse,
+  SignInWithAppleOptions
+} from "@capacitor-community/apple-sign-in";
+import { Plugins } from "@capacitor/core";
+
 const FacebookLoginButton = createButton({
   text: "Sign in with Facebook",
   icon: () => <img src={facebookIcon} alt="email" />,
@@ -63,19 +69,47 @@ const LoginFirebase = (props) => {
     }
   };
 
-  const signInMobile = (provider) => {
-    cfaSignIn(provider).subscribe(
-      ({
-        userCredential
-      }: {
-        userCredential: firebase.auth.UserCredential
-      }) => {
-        if (userCredential.additionalUserInfo.isNewUser) {
-          sendEmailVerification();
+  const signInMobile = async (provider) => {
+    if (provider === "apple.com") {
+      let options: SignInWithAppleOptions = {
+        clientId: "app.plasticpatrol.co.uk",
+        redirectURI: "/",
+        scopes: "email name"
+      };
+
+      try {
+        const result: SignInWithAppleResponse = await Plugins.SignInWithApple.authorize(options);
+        const { identityToken, givenName, familyName } = result.response;
+        // Apple sign-in only provides full response during the first successful sign in!!!
+        // After that, familyName, givenName and email fields will be null.
+        // We save to local storage for onAuthStateChanged in order to set the correct displayName to user.
+        const displayName = givenName && familyName ? `${givenName} ${familyName}` : givenName ? givenName : familyName;
+        if (displayName) {
+          localStorage.setItem("displayName", displayName);
+        }
+        const credential = await new firebase.auth.OAuthProvider("apple.com").credential(identityToken);
+        const authResult = await firebase.auth().signInWithCredential(credential);
+        if (displayName) {
+          await authResult.user.updateProfile({ displayName: displayName });
         }
         handleClose();
+      } catch (error) {
+        console.log(error);
       }
-    );
+    } else {
+      cfaSignIn(provider).subscribe(
+        ({
+          userCredential
+        }: {
+          userCredential: firebase.auth.UserCredential
+        }) => {
+          if (userCredential.additionalUserInfo.isNewUser) {
+            sendEmailVerification();
+          }
+          handleClose();
+        }
+      );
+    }
   };
 
   return (

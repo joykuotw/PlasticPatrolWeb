@@ -36,9 +36,10 @@ export const onAuthStateChanged = ({ onSignOut, setUser }: Args) => {
     gtagSetId(user?.uid);
     gtagEvent("Logged in", "User", user?.uid);
 
+    const displayName = localStorage.getItem("displayName"); // apple login the first time missing names workaround
     let currentUser = new User(
       user.uid,
-      user.displayName || "",
+      displayName ? displayName : user.displayName || "",
       false,
       false,
       user.email || "",

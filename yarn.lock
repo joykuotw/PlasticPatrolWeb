@@ -1268,6 +1268,13 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
+"@capacitor-community/apple-sign-in@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@capacitor-community/apple-sign-in/-/apple-sign-in-1.0.0.tgz#5166e0190da67bc82c770fee1e2020c029ab274a"
+  integrity sha512-31FGV2F/xI3N8g6YgCFpn/ydMwOVvbQjzbPAMraP55yMV+1/EbTU2RI0i7ixVDkDSU979CCSa2fZRbDBJDzlhw==
+  dependencies:
+    "@capacitor/core" latest
+
 "@capacitor-community/firebase-crashlytics@^0.4.0":
   version "0.4.0"
   resolved "https://registry.yarnpkg.com/@capacitor-community/firebase-crashlytics/-/firebase-crashlytics-0.4.0.tgz#a8486bad10b7f230bc4a73d5199a61c97dfffb5f"
@@ -18183,6 +18190,11 @@ schema-utils@^3.0.0:
     "@types/json-schema" "^7.0.6"
     ajv "^6.12.5"
     ajv-keywords "^3.5.2"
+
+scriptjs@^2.5.9:
+  version "2.5.9"
+  resolved "https://registry.yarnpkg.com/scriptjs/-/scriptjs-2.5.9.tgz#343915cd2ec2ed9bfdde2b9875cd28f59394b35f"
+  integrity sha512-qGVDoreyYiP1pkQnbnFAUIS5AjenNwwQBdl7zeos9etl+hYKWahjRTfzAZZYBv5xNHx7vNKCmaLDQZ6Fr2AEXg==
 
 scss-tokenizer@^0.2.3:
   version "0.2.3"

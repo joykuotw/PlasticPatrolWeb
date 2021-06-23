@@ -5,6 +5,7 @@
   "public": true,
   "homepage": "./",
   "dependencies": {
+    "@capacitor-community/apple-sign-in": "^1.0.0",
     "@capacitor-community/firebase-crashlytics": "^0.4.0",
     "@capacitor/android": "2.4.7",
     "@capacitor/cli": "^2.4.7",
@@ -45,6 +46,7 @@
     "react-virtualized-auto-sizer": "^1.0.2",
     "react-window": "^1.8.5",
     "rxjs": "^6.5.5",
+    "scriptjs": "^2.5.9",
     "ts-loader": "^8.0.17",
     "ts-node": "^9.1.1",
     "web-vitals": "^1.1.0",
