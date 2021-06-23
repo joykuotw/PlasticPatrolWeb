@@ -61,7 +61,7 @@ export const onAuthStateChanged = ({ onSignOut, setUser }: Args) => {
       };
 
       enableOrDisableFeatures(currentUser);
-    } catch {}
+    } catch { }
 
     // creates a new object ref so react updates
     console.log(

@@ -78,17 +78,40 @@ const LoginFirebase = (props) => {
       };
 
       try {
-        const result: SignInWithAppleResponse = await Plugins.SignInWithApple.authorize(options);
+        /**
+         * The displayName from the `capacitor-firebase-auth` plugin's apple sigin-in is always empty.
+         * Here we change to use `@capacitor-community/apple-sign-in` plugin to get the available user info.
+         * However it doesn't trigger onAuthStateChanged so we use signInWithCredential.
+         */
+        const result: SignInWithAppleResponse = await Plugins.SignInWithApple.authorize(
+          options
+        );
         const { identityToken, givenName, familyName } = result.response;
-        // Apple sign-in only provides full response during the first successful sign in!!!
-        // After that, familyName, givenName and email fields will be null.
-        // We save to local storage for onAuthStateChanged in order to set the correct displayName to user.
-        const displayName = givenName && familyName ? `${givenName} ${familyName}` : givenName ? givenName : familyName;
+
+        /**
+         * We also use updateProfile to update the displayName in firebase but it doesn't trigger onAuthStateChanged either.
+         * Thus save displayName to local storage in order to set the correct displayName to currentUser.
+         * Note that Apple sign-in only provides full response during the first successful sign in!!!
+         * After that, familyName, givenName and email fields will be null.
+         */
+        const displayName =
+          givenName && familyName
+            ? `${givenName} ${familyName}`
+            : givenName
+            ? givenName
+            : familyName;
+
         if (displayName) {
           localStorage.setItem("displayName", displayName);
         }
-        const credential = await new firebase.auth.OAuthProvider("apple.com").credential(identityToken);
-        const authResult = await firebase.auth().signInWithCredential(credential);
+
+        const credential = await new firebase.auth.OAuthProvider(
+          "apple.com"
+        ).credential(identityToken);
+        const authResult = await firebase
+          .auth()
+          .signInWithCredential(credential);
+
         if (displayName) {
           await authResult.user.updateProfile({ displayName: displayName });
         }
